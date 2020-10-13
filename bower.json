@@ -1,0 +1,23 @@
+{
+  "name": "OnlineBlackBoard",
+  "authors": [
+    "Christoph Laßmann <christoph.lassmann@bsztw-riesa.lernsax.de>"
+  ],
+  "description": "A Online Black Board",
+  "main": "",
+  "license": "gpl-3.0",
+  "homepage": "",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "^4.5.2",
+    "jquery": "^3.5.1",
+    "font-awesome": "^5.15.1"
+  }
+}
