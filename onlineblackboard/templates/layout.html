@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Online Blackboard</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='components/bootstrap/dist/css/bootstrap.css') }}" >
+
+
+</head>
+<body>
+    <script src="{{ url_for('static', filename='components/jquery/dist/jquery.js') }}"></script>
+    <script src="{{ url_for('static', filename='components/bootstrap/dist/js/bootstrap.js') }}"></script>
+
+    {% block js %}
+    {% endblock %}
+</body>
+</html>

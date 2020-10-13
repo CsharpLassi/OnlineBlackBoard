@@ -1,8 +1,8 @@
-from flask import Blueprint
+from flask import Blueprint, render_template
 
 bp = Blueprint("public", __name__)
 
 
 @bp.route("/", methods=['GET', 'POST'])
 def home():
-    return 'Hello World'
+    return render_template('public/home.html')
