@@ -5,10 +5,13 @@
     <title>Online Blackboard</title>
 
     <link rel="stylesheet" href="{{ url_for('static', filename='components/bootstrap/dist/css/bootstrap.css') }}" >
-
-
 </head>
 <body>
+
+    {% block nav %}
+        {% include 'nav.html' %}
+    {% endblock %}
+
     <script src="{{ url_for('static', filename='components/jquery/dist/jquery.js') }}"></script>
     <script src="{{ url_for('static', filename='components/bootstrap/dist/js/bootstrap.js') }}"></script>
 
