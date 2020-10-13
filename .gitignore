@@ -141,5 +141,5 @@ cython_debug/
 node_modules/
 
 # Static
-src/static/components/
+onlineblackboard/static/components/
 
