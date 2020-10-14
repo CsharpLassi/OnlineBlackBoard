@@ -7,7 +7,7 @@
         </div>
     </div>
     <div class="row justify-content-center">
-        <div id="content" class="col">
+        <div id="content" class="col" style="max-width: 50%">
         </div>
     </div>
 {% endblock %}
@@ -27,6 +27,8 @@
             });
             socket.on('print_content', function (msg) {
                 $('#content').html(marked(msg.markdown));
+                $("#content").scrollTop($("#content")[0].scrollHeight);
+
             });
         });
     </script>

@@ -9,7 +9,10 @@
     </div>
     <div class="row justify-content-center">
         <div class="col">
-            <textarea id="board" class="form-control" style="min-width: 100%;height: 20em"></textarea>
+            <textarea id="board" class="form-control" style="width: 100%;height: 20em"></textarea>
+
+        </div>
+        <div id="content" class="col">
         </div>
 
     </div>
@@ -19,12 +22,16 @@
     <script src="{{ url_for('static', filename='components/marked/marked.min.js') }}"></script>
 
     <script>
+        const room_id = '{{ room_id }}';
         var oldVal = "";
         $(document).ready(function () {
             var socket = io.connect('/blackboard');
             socket.on('connect', function () {
                 $('#status').text('Connected');
-                socket.emit('join', '{{ room_id }}')
+                socket.emit('join', room_id)
+            });
+            socket.on('print_content', function (msg) {
+                $('#content').html(marked(msg.markdown));
             });
 
             $("#board").on("change keyup paste", function () {
@@ -34,7 +41,7 @@
                 }
 
                 oldVal = currentVal;
-                socket.emit('change_markdown', {'text': currentVal})
+                socket.emit('change_markdown', {'text': currentVal, 'room_id': room_id})
             });
 
         });

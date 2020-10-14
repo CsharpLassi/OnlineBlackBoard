@@ -25,18 +25,18 @@ def blackboard_disconnect():
 @socket.on('get_room', namespace=namespace)
 def blackboard_get_room():
     room_id = id_generator()
-    join_room(room_id, namespace=namespace)
+    join_room(room_id)
     emit('change_room', {'room_id': room_id})
 
 
 @socket.on('join', namespace=namespace)
 def blackboard_get_room(room_id):
-    join_room(room_id, namespace=namespace)
-    emit('print_content', {'markdown': '# Connected'}, room=True)
+    join_room(room_id)
+    emit('print_content', {'markdown': '# Connected'}, room=room_id)
     return
 
 
 @socket.on('change_markdown', namespace=namespace)
-def blackboard_get_room(msg):
-    emit('print_content', {'markdown': msg['text']}, room=True)
+def blackboard_change_markdown(msg):
+    emit('print_content', {'markdown': msg['text']}, room=msg['room_id'])
     return
