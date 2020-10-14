@@ -1,0 +1,13 @@
+{% extends 'blackboard/layout.html' %}
+{% from 'form.html' import show_form %}
+
+{% block content %}
+    <div class="card mt-5">
+        <div class="card-header">
+            Connect
+        </div>
+        <div class="card-body">
+            {{ show_form(connect_form) }}
+        </div>
+    </div>
+{% endblock %}
