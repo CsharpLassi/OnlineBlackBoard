@@ -1,0 +1,16 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+    <div id="log"></div>
+{% endblock %}
+
+{% block js %}
+    <script>
+        $(document).ready(function () {
+            var socket = io.connect('/blackboard');
+            socket.on('connect', function () {
+                $('#log').text('Connected')
+            });
+        });
+    </script>
+{% endblock %}

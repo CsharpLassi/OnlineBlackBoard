@@ -20,15 +20,19 @@ def create_app(conf: Optional[C] = Config) -> Flask:
 
 def load_ext(app: Flask):
     from .ext import (
-        db, migrate, login)
+        db, migrate, login, socket)
     db.init_app(app)
     migrate.init_app(app, db)
     login.init_app(app)
+    socket.init_app(app)
 
 
 def load_blueprints(app: Flask):
     from .public.views import bp as bp_public
     app.register_blueprint(bp_public)
+
+    from .blackboard.views import bp as bp_blackboard
+    app.register_blueprint(bp_blackboard)
 
 
 def load_cli(app: Flask):
