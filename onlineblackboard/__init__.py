@@ -24,7 +24,7 @@ def load_ext(app: Flask):
     db.init_app(app)
     migrate.init_app(app, db)
     login.init_app(app)
-    socket.init_app(app, cors_allowed_origins='*')
+    socket.init_app(app, cors_allowed_origins='*', logger=True, engineio_logger=True)
 
 
 def load_blueprints(app: Flask):
