@@ -146,3 +146,8 @@ node_modules/
 # Static
 onlineblackboard/static/components/
 
+# Database
+migrations/
+app.db
+
+

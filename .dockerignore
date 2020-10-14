@@ -1,0 +1,9 @@
+# Database
+migrations/
+app.db
+
+#Node
+node_modules/
+
+# Static
+onlineblackboard/static/components/

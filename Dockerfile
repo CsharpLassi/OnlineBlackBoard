@@ -23,7 +23,7 @@ RUN npm install -g bower
 RUN bower install --allow-root
 
 COPY onlineblackboard onlineblackboard
-COPY autoapp.py .
+COPY wsgi.py .
 
 # ================================= PRODUCTION =================================
 FROM python:${INSTALL_PYTHON_VERSION}-slim-buster as production
@@ -35,17 +35,19 @@ RUN chown -R sid:sid /app
 USER sid
 ENV PATH="/home/sid/.local/bin:${PATH}"
 
-COPY . .
-COPY --from=builder --chown=sid:sid /app/onlineblackboard/static /app/onlineblackboard/static
-
 COPY requirements requirements
 RUN pip install --no-cache --user -r requirements/prod.txt
 
+COPY . .
+COPY --from=builder --chown=sid:sid /app/onlineblackboard/static /app/onlineblackboard/static
+
+RUN ls -la
+
 EXPOSE 5000
 
-ENV FLASK_APP=autoapp.py
+ENV FLASK_APP=wsgi.py
 ENV FLASK_ENV=production
 ENV HOST=0.0.0.0
 
 ENTRYPOINT ["/bin/bash"]
-CMD ["-c","gunicorn --bind $HOST:5000 autoapp:app"]
+CMD ["-c","./run.sh"]
