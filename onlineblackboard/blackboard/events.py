@@ -32,11 +32,11 @@ def blackboard_get_room():
 @socket.on('join', namespace=namespace)
 def blackboard_get_room(room_id):
     join_room(room_id, namespace=namespace)
-    emit('print_content', {'markdown': '# Connected'}, broadcast=True)
+    emit('print_content', {'markdown': '# Connected'}, room=True)
     return
 
 
 @socket.on('change_markdown', namespace=namespace)
 def blackboard_get_room(msg):
-    emit('print_content', {'markdown': msg['text']}, broadcast=True)
+    emit('print_content', {'markdown': msg['text']}, room=True)
     return
