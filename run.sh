@@ -8,4 +8,4 @@ flask db migrate
 flask db upgrade
 
 #Start Service
-gunicorn --bind $HOST:5000 wsgi:app
+gunicorn --bind $HOST:5000 --workers=4 wsgi:app
