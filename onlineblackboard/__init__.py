@@ -12,6 +12,7 @@ def create_app(conf: Optional[C] = Config) -> Flask:
 
     load_ext(app)
     load_blueprints(app)
+    load_cli(app)
     register_shellcontext(app)
 
     return app
@@ -28,6 +29,11 @@ def load_ext(app: Flask):
 def load_blueprints(app: Flask):
     from .public.views import bp as bp_public
     app.register_blueprint(bp_public)
+
+
+def load_cli(app: Flask):
+    from .users.cli import bp_cli as bp_user
+    app.register_blueprint(bp_user)
 
 
 def register_shellcontext(app: Flask):
