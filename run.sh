@@ -8,4 +8,4 @@ flask db migrate
 flask db upgrade
 
 #Start Service
-gunicorn --worker-class eventlet --bind $HOST:5000 --workers=4 wsgi:app
+gunicorn -k geventwebsocket.gunicorn.workers.GeventWebSocketWorker --bind $HOST:5000 --workers=4 wsgi:app
