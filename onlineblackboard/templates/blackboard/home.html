@@ -1,15 +1,21 @@
 {% extends 'layout.html' %}
 
-{% block content %}
-    <div id="log"></div>
+{% block col %}
+    <div class="col">
+        <div id="content"></div>
+    </div>
 {% endblock %}
 
 {% block js %}
+    <script src="{{ url_for('static', filename='components/marked/marked.min.js') }}"></script>
+
     <script>
         $(document).ready(function () {
             var socket = io.connect('/blackboard');
             socket.on('connect', function () {
-                $('#log').text('Connected')
+            });
+            socket.on('print_content', function (msg) {
+                $('#content').html(marked(msg.markdown));
             });
         });
     </script>
