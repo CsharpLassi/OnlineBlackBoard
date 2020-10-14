@@ -41,8 +41,6 @@ RUN pip install --no-cache --user -r requirements/prod.txt
 COPY . .
 COPY --from=builder --chown=sid:sid /app/onlineblackboard/static /app/onlineblackboard/static
 
-RUN ls -la
-
 EXPOSE 5000
 
 ENV FLASK_APP=wsgi.py
