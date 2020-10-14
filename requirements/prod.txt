@@ -14,3 +14,4 @@ flask-migrate==2.5.3
 # Socket IO
 flask-socketio==4.3.1
 gevent-websocket==0.10.1
+eventlet==0.28.0
