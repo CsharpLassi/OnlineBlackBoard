@@ -1,19 +1,31 @@
 {% extends 'blackboard/layout.html' %}
 
+{% block css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='blackboard/main.css') }}">
+{% endblock %}
+
+{% block navbar_right %}
+    <li class="nav-item">
+        <span class="nav-link" id="status">Not Connected</span>
+    </li>
+{% endblock %}
+
 {% block row %}
     <div class="row justify-content-center">
         <div class="col">
-            <h1>Status: <span id="status">Not Connected</span></h1>
         </div>
     </div>
-    <div class="row justify-content-center">
-        <div id="content" class="col" style="max-width: 100%">
+    <div class="row justify-content-center mt-2">
+        <div class="col align-content-center">
+            <div id="content">
+            </div>
         </div>
     </div>
 {% endblock %}
 
 {% block js %}
     <script src="{{ url_for('static', filename='components/marked/marked.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='blackboard/main.js') }}"></script>
 
     <script>
         $(document).ready(function () {

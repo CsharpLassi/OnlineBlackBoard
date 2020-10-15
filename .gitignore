@@ -143,9 +143,6 @@ node_modules/
 # PyCharm
 .idea/
 
-# Static
-onlineblackboard/static/components/
-
 # Database
 migrations/
 app.db
