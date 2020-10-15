@@ -2,10 +2,19 @@
     border: 2px solid lightgrey;
     width: 1024px;
     height: 256px;
-    overflow: scroll;
+    overflow-y: scroll;
 
 }
 
+#content h1 {
+    margin-bottom: 0.25rem;
+}
+
 #content p {
+    font-size: 24px;
+    margin:0px;
+}
+
+#content li {
     font-size: 24px;
 }
