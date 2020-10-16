@@ -1,13 +1,32 @@
 {% extends 'blackboard/layout.html' %}
 {% from 'form.html' import show_form %}
 
-{% block content %}
-    <div class="card mt-5">
-        <div class="card-header">
-            Connect
+{% block col %}
+    <div class="col mt-5">
+        <div class="card">
+            <div class="card-header">Rooms</div>
+            <div class="card-body">
+                <ul class="nav flex-column">
+                    {% for room in rooms %}
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               href="{{ url_for('blackboard.link_to',room_id=room.room_id) }}">{{ room.room_id }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
         </div>
-        <div class="card-body">
-            {{ show_form(connect_form) }}
+    </div>
+    <div class="col">
+        <div class="card mt-5">
+            <div class="card-header">
+                Connect
+            </div>
+            <div class="card-body">
+                {{ show_form(connect_form) }}
+            </div>
         </div>
+    </div>
+    <div class="col">
     </div>
 {% endblock %}

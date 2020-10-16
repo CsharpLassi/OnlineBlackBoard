@@ -1,6 +1,7 @@
 from functools import wraps
 
 from flask import Blueprint, render_template, redirect, url_for, session, request, flash
+from flask_login import current_user, login_required
 
 from .server_models import BlackboardRoom
 from .ext import namespace, id_generator, room_db
@@ -56,16 +57,22 @@ def mode_blackboard():
 
 
 @bp.route('connectTo', methods=['GET', 'POST'])
+@login_required
 def connect_to():
     from .forms import ConnectForm
+
     connect_form = ConnectForm()
     if connect_form.validate_on_submit():
         room_id = connect_form.room_id.data
         return redirect(url_for('blackboard.link_to', room_id=room_id))
-    return render_template('blackboard/connect_to.html', connect_form=connect_form)
+    rooms = [room for room_id, room in room_db.items()]
+    return render_template('blackboard/connect_to.html',
+                           connect_form=connect_form,
+                           rooms=rooms)
 
 
 @bp.route('link', methods=['GET'])
 @check_room('blackboard.connect_to')
+@login_required
 def link_to():
     return render_template('blackboard/mode_user.html')
