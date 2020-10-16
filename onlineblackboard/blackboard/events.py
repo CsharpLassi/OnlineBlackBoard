@@ -1,15 +1,8 @@
-import string
-import random
-
-from flask_socketio import emit, join_room, rooms
+from flask_socketio import emit, join_room
 
 from ..ext import socket
 
-from .config import namespace
-
-
-def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
-    return ''.join(random.choice(chars) for _ in range(size))
+from .ext import namespace, id_generator
 
 
 @socket.on('connect', namespace=namespace)
@@ -30,9 +23,8 @@ def blackboard_get_room():
 
 
 @socket.on('join', namespace=namespace)
-def blackboard_get_room(room_id):
+def blackboard_join(room_id):
     join_room(room_id)
-    emit('print_content', {'markdown': '# Connected'}, room=room_id)
     return
 
 

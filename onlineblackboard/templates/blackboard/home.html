@@ -1,47 +1,13 @@
 {% extends 'blackboard/layout.html' %}
+{% from 'form.html' import show_form %}
 
-{% block css %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='blackboard/main.css') }}">
-{% endblock %}
-
-{% block navbar_right %}
-    <li class="nav-item">
-        <span class="nav-link" id="status">Not Connected</span>
-    </li>
-{% endblock %}
-
-{% block row %}
-    <div class="row justify-content-center">
-        <div class="col">
+{% block content %}
+    <div class="card mt-5">
+        <div class="card-header">
+            Create Session
+        </div>
+        <div class="card-body">
+            {{ show_form(form) }}
         </div>
     </div>
-    <div class="row justify-content-center mt-2">
-        <div class="col align-content-center">
-            <div id="content">
-            </div>
-        </div>
-    </div>
-{% endblock %}
-
-{% block js %}
-    <script src="{{ url_for('static', filename='components/marked/marked.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='blackboard/main.js') }}"></script>
-
-    <script>
-        $(document).ready(function () {
-            var socket = io.connect('/blackboard');
-            socket.on('connect', function () {
-                $('#status').text('Connected');
-                socket.emit('get_room');
-            });
-            socket.on('change_room', function (msg) {
-                $('#status').text(msg.room_id);
-            });
-            socket.on('print_content', function (msg) {
-                $('#content').html(marked(msg.markdown));
-                $("#content").scrollTop($("#content")[0].scrollHeight);
-
-            });
-        });
-    </script>
 {% endblock %}

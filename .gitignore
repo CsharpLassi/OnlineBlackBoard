@@ -143,8 +143,11 @@ node_modules/
 # PyCharm
 .idea/
 
-# Database
+# Flask
 migrations/
+flask_session/
+
 app.db
+
 
 
