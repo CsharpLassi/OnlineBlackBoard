@@ -1,9 +1,26 @@
-from flask import Blueprint, render_template, redirect, url_for, session
-from flask_socketio import rooms
+from functools import wraps
 
-from .ext import namespace, id_generator
+from flask import Blueprint, render_template, redirect, url_for, session, request, flash
+
+from .models import BoardSession
+from .ext import namespace, id_generator, room_db
 
 bp = Blueprint('blackboard', __name__, url_prefix=namespace)
+
+
+def check_room(fallback: str):
+    def check_room_helper(func):
+        @wraps(func)
+        def room_checker(*args, **kwargs):
+            room_id = request.args.get('room_id')
+            if room_id is None or not room_db.exist(room_id):
+                flash(f'room does not exist')
+                return redirect(url_for(fallback))
+            return func(*args, **kwargs)
+
+        return room_checker
+
+    return check_room_helper
 
 
 @bp.route('/', methods=['GET', 'POST'])
@@ -12,6 +29,13 @@ def home():
     form = CreateSessionForm()
 
     if form.validate_on_submit():
+        room_id = form.room_id.data
+
+        room = room_db.get(room_id)
+        if room is None:
+            room = BoardSession(id=room_id)
+            room_db.add(room_id, room)
+
         return redirect(
             url_for('blackboard.mode_blackboard', room_id=form.room_id.data))
 
@@ -26,6 +50,7 @@ def home():
 
 
 @bp.route('/show', methods=['GET', 'POST'])
+@check_room('blackboard.home')
 def mode_blackboard():
     return render_template('blackboard/mode_blackboard.html')
 
@@ -41,5 +66,6 @@ def connect_to():
 
 
 @bp.route('link', methods=['GET'])
+@check_room('blackboard.connect_to')
 def link_to():
     return render_template('blackboard/mode_user.html')

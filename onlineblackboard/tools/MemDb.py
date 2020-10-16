@@ -12,4 +12,7 @@ class MemDb(Generic[P, T]):
         self._db[key] = value
 
     def get(self, key: P) -> Optional[T]:
-        return self.get(key)
+        return self._db.get(key)
+
+    def exist(self, key: P) -> bool:
+        return key in self._db
