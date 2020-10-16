@@ -25,7 +25,6 @@ def blackboard_disconnect():
     user: UserSessions = user_db.pop(sid)
     user.disconnect()
 
-    check_rooms()
     return
 
 

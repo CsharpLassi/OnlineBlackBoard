@@ -72,7 +72,7 @@ def connect_to():
 
 
 @bp.route('link', methods=['GET'])
-@check_room('blackboard.connect_to')
 @login_required
+@check_room('blackboard.connect_to')
 def link_to():
     return render_template('blackboard/mode_user.html')
