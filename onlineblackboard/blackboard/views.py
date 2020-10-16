@@ -2,7 +2,7 @@ from functools import wraps
 
 from flask import Blueprint, render_template, redirect, url_for, session, request, flash
 
-from .models import BoardSession
+from .server_models import BlackboardRoom
 from .ext import namespace, id_generator, room_db
 
 bp = Blueprint('blackboard', __name__, url_prefix=namespace)
@@ -33,7 +33,7 @@ def home():
 
         room = room_db.get(room_id)
         if room is None:
-            room = BoardSession(id=room_id)
+            room = BlackboardRoom(room_id)
             room_db.add(room_id, room)
 
         return redirect(
