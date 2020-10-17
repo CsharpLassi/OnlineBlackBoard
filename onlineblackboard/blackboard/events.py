@@ -29,12 +29,12 @@ def blackboard_disconnect():
     for room_id, room in user.rooms.items():
         room.users.pop(user.sid)
 
-    emit('user_left', user.get_msg_data(), broadcast=True)
+    emit('user:disconnected', user.get_msg_data(), broadcast=True)
 
     return
 
 
-@socket.on('join', namespace=namespace)
+@socket.on('room:join', namespace=namespace)
 def blackboard_join(room_id, msg: dict = None):
     sid = request.sid
     room: Optional[BlackboardRoom] = room_db.get(room_id)
@@ -47,17 +47,17 @@ def blackboard_join(room_id, msg: dict = None):
 
     join_room(room_id)
 
-    emit('user_joined', user.get_msg_data(), room=room_id)
-    emit('joined', user.get_msg_data())
+    emit('room:user:joined', user.get_msg_data(), room=room_id)
+    emit('room:joined', user.get_msg_data())
 
 
-@socket.on('change_markdown', namespace=namespace)
+@socket.on('room:update:content', namespace=namespace)
 def blackboard_change_markdown(msg):
-    emit('print_content', {'markdown': msg['text']}, room=msg['room_id'])
+    emit('room:print', {'markdown': msg['text']}, room=msg['room_id'])
     return
 
 
-@socket.on('change_user_data', namespace=namespace)
+@socket.on('user:data:change', namespace=namespace)
 def blackboard_change_user_data(data: dict):
     sid = request.sid
     user: UserSessions = user_db.get(sid)
@@ -67,4 +67,4 @@ def blackboard_change_user_data(data: dict):
         user.username = data['username']
         change_counter += 1
 
-    emit('user_changed_data', user.get_msg_data(), broadcast=True)
+    emit('user:data:changed', user.get_msg_data(), broadcast=True)

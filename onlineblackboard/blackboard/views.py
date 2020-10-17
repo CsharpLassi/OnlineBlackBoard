@@ -45,7 +45,7 @@ def home():
                 'room_url': url_for('blackboard.link_to', room_id=room_id)
             }
 
-            socket.emit('room_created', msg_data,
+            socket.emit('room:created', msg_data,
                         namespace=namespace,
                         broadcast=True)
 

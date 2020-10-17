@@ -54,7 +54,7 @@
                 let room_id = $.urlParam('room_id');
 
                 oldVal = currentVal;
-                $.socket.emit('change_markdown', {'text': currentVal, 'room_id': room_id})
+                $.socket.emit('room:update:content', {'text': currentVal, 'room_id': room_id})
             });
 
         });

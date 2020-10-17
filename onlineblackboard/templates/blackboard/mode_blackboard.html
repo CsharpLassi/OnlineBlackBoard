@@ -21,9 +21,9 @@
 
 {% block blackboard_js %}
     <script>
-        $(document).ready(function () {
-            $.socket.on('joined', function (msg) {
-                $.socket.emit('change_user_data', {'username': 'Blackboard'})
+        $(document).on('socket:ready',function () {
+            $.socket.on('room:joined', function (msg) {
+                $.socket.emit('user:data:change', {'username': 'Blackboard'})
             });
         });
     </script>
