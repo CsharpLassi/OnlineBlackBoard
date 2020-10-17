@@ -53,9 +53,18 @@ def blackboard_join(room_id, msg: dict = None):
 
 @socket.on('room:update:content', namespace=namespace)
 def blackboard_change_markdown(msg):
+    sid = request.sid
+    user: UserSessions = user_db.get(sid)
+
     text = escape(msg['text'])
-    emit('room:print', {'markdown': text}, room=msg['room_id'])
-    return
+
+    data = {
+        'raw_markdown': msg['text'],
+        'markdown': text,
+        'creator': user.get_msg_data()
+    }
+
+    emit('room:print', data, room=msg['room_id'])
 
 
 @socket.on('user:data:change', namespace=namespace)

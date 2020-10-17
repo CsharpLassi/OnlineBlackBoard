@@ -12,6 +12,10 @@ $(document).ready(function () {
         $('#status').text('Disconnected');
     });
 
+    socket.on('room:joined', function (msg) {
+        $.user=msg
+    });
+
 
     socket.on('room:created', function (msg) {
         $('#roomList').append(`<li class="nav-item"><a class="nav-link" href="${msg.room_url}">${msg.room_id}</a></li>`)
@@ -32,6 +36,9 @@ $(document).ready(function () {
     socket.on('user:data:changed', function (msg) {
         let user_div_id = `user-${msg.user_id}`
         $('#' + user_div_id).text(msg.username);
+
+        if (msg.user_id !== $.user.user_id)
+            $.user = msg.user_id
 
     })
 
