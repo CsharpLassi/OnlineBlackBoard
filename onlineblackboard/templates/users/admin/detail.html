@@ -1,1 +1,13 @@
 {% extends 'layout.html' %}
+{% from 'form.html' import show_form %}
+
+{% block col %}
+    <div class="col-auto">
+        <div class="card mt-3">
+            <div class="card-header">User: {{ user.username }}</div>
+            <div class="card-body">
+                {{ show_form(edit_form) }}
+            </div>
+        </div>
+    </div>
+{% endblock %}

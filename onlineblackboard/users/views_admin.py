@@ -16,9 +16,15 @@ def home():
 @bp.route('/<int:user_id>', methods=['GET', "POST"])
 @admin_required
 def detail(user_id: int):
+    from .forms_admin import EditForm
+
     user = User.query.get(user_id)
     if not user:
         flash('User not found')
         return redirect(url_for('users.admin.home'))
 
-    return render_template('users/admin/detail.html', user=user)
+    edit_form = EditForm()
+    if edit_form.validate_on_submit():
+        pass
+
+    return render_template('users/admin/detail.html', user=user, edit_form=edit_form)
