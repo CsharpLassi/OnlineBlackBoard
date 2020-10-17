@@ -15,6 +15,7 @@ def create_admin(name, email, password):
     admin = User(username=name,
                  email=email)
     admin.set_password(password)
+    admin.is_admin = True
 
     db.session.add(admin)
     db.session.commit()
