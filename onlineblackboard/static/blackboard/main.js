@@ -1,12 +1,19 @@
 $.urlParam = function (name) {
     let results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
-    return results[1] || 0;
+    if (results === null)
+        return null
+    return results[1] || null;
 }
 
 $(document).ready(function () {
-    let parent = $('#content').parent()
-    let content_width = $('#content').width();
-    let content_height = $('#content').height();
+    let div_content = $('#content');
+
+    if(!div_content.length)
+        return
+
+    let parent = div_content.parent();
+    let content_width = div_content.width();
+    let content_height = div_content.height();
 
     let factor_x = parent.width() / content_width;
     let factor_y = (screen.height - parent.position().top) / content_height;
@@ -16,7 +23,7 @@ $(document).ready(function () {
     let translate_x = content_width * (factor_min - 1) / 2;
     let translate_y = content_height * (factor_min - 1) / 2;
 
-    $('#content').css('transform',
+    div_content.css('transform',
         'translateX(' + translate_x + 'px) ' +
         'translateY(' + translate_y + 'px) ' +
         'scale(' + factor_min + ') ');

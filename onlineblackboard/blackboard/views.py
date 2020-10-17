@@ -27,6 +27,7 @@ def check_room(fallback: str):
 @bp.route('/', methods=['GET', 'POST'])
 def home():
     from .forms import CreateSessionForm
+    from ..ext import socket
     form = CreateSessionForm()
 
     if form.validate_on_submit():
@@ -36,6 +37,17 @@ def home():
         if room is None:
             room = BlackboardRoom(room_id)
             room_db.add(room_id, room)
+
+            msg_data = {
+                'room_id': room_id,
+                'room_url': url_for('blackboard.link_to', room_id=room_id)
+            }
+
+            socket.emit('room_created', msg_data,
+                        namespace=namespace,
+                        broadcast=True)
+
+            session['room_id'] = room_id
 
         return redirect(
             url_for('blackboard.mode_blackboard', room_id=form.room_id.data))
