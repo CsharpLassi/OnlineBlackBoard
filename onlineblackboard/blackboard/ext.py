@@ -1,8 +1,12 @@
+import flask
+from werkzeug.local import LocalProxy
+
 from .server_models import BlackboardRoom, UserSessions
 from ..tools.MemDb import MemDb
 
 namespace = '/blackboard'
 room_db = MemDb[str, BlackboardRoom]()
+
 user_db = MemDb[str, UserSessions]()
 
 

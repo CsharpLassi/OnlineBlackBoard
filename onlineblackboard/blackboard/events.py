@@ -1,6 +1,6 @@
 from typing import Optional
 
-from flask import request
+from flask import request, current_app
 from flask_login import current_user
 from flask_socketio import emit, join_room
 
@@ -12,22 +12,24 @@ from ..ext import socket
 @socket.on('connect', namespace=namespace)
 def blackboard_connect():
     sid = request.sid
-    user: UserSessions = user_db.get(sid)
-    if user is None:
-        user = UserSessions(sid)
-        user_db.add(sid, user)
+    current_app.logger.debug(f'Connect Socket: {sid}')
 
-        if current_user and current_user.is_authenticated:
-            user.username = current_user.username
+    user: UserSessions = user_db.get(sid, UserSessions(sid))
+
+    if current_user and current_user.is_authenticated:
+        user.username = current_user.username
 
 
 @socket.on('disconnect', namespace=namespace)
 def blackboard_disconnect():
     sid = request.sid
+    current_app.logger.debug(f'Disconnect Socket: {sid}')
+
     user: UserSessions = user_db.pop(sid)
     for room_id, room in user.rooms.items():
         room.users.pop(user.sid)
-        emit('user_left', user.get_msg_data(), room=room_id)
+
+    emit('user_left', user.get_msg_data(), broadcast=True)
 
     return
 
@@ -58,7 +60,7 @@ def blackboard_change_markdown(msg):
 @socket.on('change_user_data', namespace=namespace)
 def blackboard_change_user_data(data: dict):
     sid = request.sid
-    user: UserSessions = user_db.pop(sid)
+    user: UserSessions = user_db.get(sid)
 
     change_counter = 0
     if 'username' in data:

@@ -25,13 +25,12 @@ def load_ext(app: Flask):
     db.init_app(app)
     migrate.init_app(app, db)
     login.init_app(app)
-    socket.init_app(app, cors_allowed_origins='*', manage_session=False)
+    socket.init_app(app, manage_session=False)
 
 
 def load_blueprints(app: Flask):
     from .public.views import bp as bp_public
     app.register_blueprint(bp_public)
-
 
     from .blackboard.views import bp as bp_blackboard
     app.register_blueprint(bp_blackboard)
