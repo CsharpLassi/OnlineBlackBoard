@@ -46,6 +46,8 @@ EXPOSE 5000
 ENV FLASK_APP=wsgi.py
 ENV FLASK_ENV=production
 ENV HOST=0.0.0.0
+ENV PREFERRED_URL_SCHEME=http
+ENV SECRET_KEY=you-will-never-guess
 
 ENTRYPOINT ["/bin/bash"]
 CMD ["-c","./run.sh"]
