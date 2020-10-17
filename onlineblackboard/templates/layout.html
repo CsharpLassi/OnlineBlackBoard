@@ -47,7 +47,7 @@
                                 Admin
                             </a>
                             <div class="dropdown-menu" aria-labelledby="adminNavbarDropdown">
-                                <a class="dropdown-item" href="#">Users</a>
+                                <a class="dropdown-item" href="{{ url_for('users.admin.home') }}">Users</a>
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="#">Something else here</a>
                             </div>
@@ -108,7 +108,7 @@
         {% block row %}
             <div class="row justify-content-center">
                 {% block col %}
-                    <div class="col-auto">
+                    <div class="col">
                         {% block content %}
                         {% endblock %}
                     </div>

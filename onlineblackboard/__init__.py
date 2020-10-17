@@ -35,6 +35,11 @@ def load_blueprints(app: Flask):
     from .blackboard.views import bp as bp_blackboard
     app.register_blueprint(bp_blackboard)
 
+    from .users.views import bp as bp_users
+    from .users.views_admin import bp as bp_users_admin
+    app.register_blueprint(bp_users)
+    app.register_blueprint(bp_users_admin)
+
 
 def load_cli(app: Flask):
     from .users.cli import bp_cli as bp_user
