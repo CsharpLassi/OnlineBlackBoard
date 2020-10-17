@@ -18,3 +18,13 @@
         </div>
     </div>
 {% endblock %}
+
+{% block blackboard_js %}
+    <script>
+        $(document).ready(function () {
+            $.socket.on('joined', function (msg) {
+                $.socket.emit('change_user_data', {'username': 'Blackboard'})
+            });
+        });
+    </script>
+{% endblock %}

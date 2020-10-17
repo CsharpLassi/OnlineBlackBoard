@@ -1,16 +1,9 @@
-import random
-import string
-
 from .server_models import BlackboardRoom, UserSessions
 from ..tools.MemDb import MemDb
 
 namespace = '/blackboard'
 room_db = MemDb[str, BlackboardRoom]()
 user_db = MemDb[str, UserSessions]()
-
-
-def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
-    return ''.join(random.choice(chars) for _ in range(size))
 
 
 def check_rooms():

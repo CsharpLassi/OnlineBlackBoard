@@ -1,4 +1,5 @@
 from typing import Dict
+from .functions import id_generator
 
 
 class BlackboardRoom:
@@ -8,14 +9,14 @@ class BlackboardRoom:
 
 
 class UserSessions:
-    def __init__(self, sid: str):
-        self.sid = sid
+    def __init__(self, sid: str, username: str = "Generic User"):
+        self.user_id = id_generator(size=12)
+        self.sid: str = sid
+        self.username: str = username
         self.rooms: Dict[str, BlackboardRoom] = dict()
 
-    def connect(self):
-        return
-
-    def disconnect(self, disconnect_rooms: bool = True):
-        if disconnect_rooms:
-            for room_id, room in self.rooms.items():
-                room.users.pop(self.sid)
+    def get_msg_data(self) -> dict:
+        return {
+            'user_id': self.user_id,
+            'username': self.username,
+        }
