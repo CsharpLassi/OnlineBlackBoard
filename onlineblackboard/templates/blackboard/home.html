@@ -1,13 +1,15 @@
 {% extends 'blackboard/layout.html' %}
 {% from 'form.html' import show_form %}
 
-{% block content %}
-    <div class="card mt-5">
-        <div class="card-header">
-            Create Session
-        </div>
-        <div class="card-body">
-            {{ show_form(form) }}
+{% block col %}
+    <div class="col-auto">
+        <div class="card mt-5">
+            <div class="card-header">
+                Create Session
+            </div>
+            <div class="card-body">
+                {{ show_form(form) }}
+            </div>
         </div>
     </div>
 {% endblock %}

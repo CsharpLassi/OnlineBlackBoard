@@ -1,0 +1,28 @@
+{% extends 'layout.html' %}
+{% from 'form.html' import show_form %}
+
+{% block col %}
+    <div class="col-6">
+        <div id="Edit" class="card mt-3">
+            <div class="card-header">User: {{ user.username }}</div>
+            <div class="card-body">
+                {{ show_form(edit_form,action='?edit=user') }}
+            </div>
+        </div>
+
+        <div id="Password" class="card mt-3">
+            <div class="card-header">Change Password</div>
+            <div class="card-body">
+                {{ show_form(change_password_form,action='?edit=password') }}
+            </div>
+        </div>
+
+        <div id="Delete" class="card mt-3">
+            <div class="card-header alert-danger">Change Password</div>
+            <div class="card-body">
+                {{ show_form(delete_form,action='?edit=delete') }}
+            </div>
+        </div>
+
+    </div>
+{% endblock %}

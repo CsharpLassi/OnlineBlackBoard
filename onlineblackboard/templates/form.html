@@ -1,5 +1,5 @@
-{% macro show_form(form,method='POST',class='') %}
-    <form class="{{ class }}" method="{{ method }}">
+{% macro show_form(form,method='POST',class='',action='') %}
+    <form class="{{ class }}" method="{{ method }}" action="{{ action }}">
         {% for field in form %}
             {{ show_field(field) }}
         {% endfor %}

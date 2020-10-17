@@ -2,7 +2,7 @@ import random
 import string
 
 from .server_models import BlackboardRoom, UserSessions
-from ..tools import MemDb
+from ..tools.MemDb import MemDb
 
 namespace = '/blackboard'
 room_db = MemDb[str, BlackboardRoom]()
