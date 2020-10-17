@@ -1,6 +1,6 @@
 from typing import Optional
 
-from flask import request, current_app
+from flask import request, current_app, escape
 from flask_login import current_user
 from flask_socketio import emit, join_room
 
@@ -53,7 +53,8 @@ def blackboard_join(room_id, msg: dict = None):
 
 @socket.on('room:update:content', namespace=namespace)
 def blackboard_change_markdown(msg):
-    emit('room:print', {'markdown': msg['text']}, room=msg['room_id'])
+    text = escape(msg['text'])
+    emit('room:print', {'markdown': text}, room=msg['room_id'])
     return
 
 
