@@ -1,4 +1,4 @@
-from typing import TypeVar, Generic, Dict, Optional, ItemsView
+from typing import TypeVar, Generic, Dict, Optional, Tuple, List
 
 from gevent.thread import allocate_lock
 
@@ -22,7 +22,7 @@ class MemDb(Generic[P, T]):
     def release(self):
         self._db_lock.release()
 
-    def items(self) -> ItemsView[P, T]:
+    def items(self) -> List[Tuple[P, T]]:
         self.lock()
         items = list(self._db.items())
         self.release()
