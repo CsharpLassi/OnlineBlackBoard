@@ -32,6 +32,7 @@ def load_blueprints(app: Flask):
     from .public.views import bp as bp_public
     app.register_blueprint(bp_public)
 
+
     from .blackboard.views import bp as bp_blackboard
     app.register_blueprint(bp_blackboard)
 
