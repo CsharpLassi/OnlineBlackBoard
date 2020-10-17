@@ -40,6 +40,19 @@
                         <a class="nav-link" href="{{ url_for('blackboard.connect_to') }}">Connect to
                         </a>
                     </li>
+                    {% if current_user.is_admin %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="adminNavbarDropdown" role="button"
+                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Admin
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="adminNavbarDropdown">
+                                <a class="dropdown-item" href="#">Users</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="#">Something else here</a>
+                            </div>
+                        </li>
+                    {% endif %}
                 {% endif %}
                 <li class="nav-item">
                     <a class="nav-link" href="#">About</a>
@@ -78,19 +91,19 @@
 
 {% block container %}
     <div class="container-fluid">
-    <div class="row justify-content-center">
-        <div class="col">
-            {% with messages = get_flashed_messages() %}
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="alert alert-danger mt-3" role="alert">
-                            {{ message }}
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
+        <div class="row justify-content-center">
+            <div class="col">
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-danger mt-3" role="alert">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
         </div>
-    </div>
 
         {% block row %}
             <div class="row justify-content-center">
