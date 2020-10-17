@@ -16,7 +16,11 @@
                 <th scope="row">{{ user.id }}</th>
                 <td><a href="{{ url_for('users.admin.detail',user_id=user.id) }}">{{ user.username }}</a></td>
                 <td>{{ user.email }}</td>
-                <td></td>
+                <td>
+                    <a href="{{url_for('users.admin.detail',user_id=user.id,_anchor='Delete') }}">
+                        <i class="fas fa-trash"></i></a>
+
+                </td>
             </tr>
         {% endfor %}
         </tbody>

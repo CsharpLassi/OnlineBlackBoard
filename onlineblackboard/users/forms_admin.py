@@ -15,3 +15,8 @@ class ChangePasswordForm(FlaskForm):
     password2 = PasswordField(
         'Repeat New Password', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Change Password')
+
+
+class DeleteForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired()])
+    submit = SubmitField('Delete')
