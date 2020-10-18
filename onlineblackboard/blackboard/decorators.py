@@ -29,15 +29,14 @@ def check_room(fallback: str, create_room_from_db: bool = False):
         @wraps(func)
         def room_checker(*args, **kwargs):
             room_id = request.args.get('room_id')
-            if not room_id:
+            db_room = BlackboardRoom.get(room_id)
+            if not db_room:
                 flash(f'room does not exist')
                 return redirect(url_for(fallback))
 
-            db_room = BlackboardRoom.get_active_room_by_room_id(room_id)
-
-            room: BlackboardRoomSession = room_db.get(room_id)
+            room: BlackboardRoomSession = room_db.get(db_room.id)
             if not room and create_room_from_db:
-                room = room_db.add(room_id, BlackboardRoomSession(db_room.name))
+                room = room_db.add(db_room.id, BlackboardRoomSession(db_room))
 
             if not room:
                 flash(f'room does not exist')

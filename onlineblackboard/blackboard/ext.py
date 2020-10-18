@@ -5,7 +5,7 @@ from .server_models import BlackboardRoomSession, UserSessions
 from ..tools.MemDb import MemDb
 
 namespace = '/blackboard'
-room_db = MemDb[str, BlackboardRoomSession]()
+room_db = MemDb[int, BlackboardRoomSession]()
 
 user_db = MemDb[str, UserSessions]()
 

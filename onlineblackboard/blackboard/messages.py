@@ -21,7 +21,7 @@ class UserDataChangeData(BaseMessageData):
 
 @dataclass
 class RoomData(BaseMessageData):
-    room_id: str
+    room_id: int
     room_name: str
 
 

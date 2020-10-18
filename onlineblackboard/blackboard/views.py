@@ -19,17 +19,17 @@ def home():
 
     if form.validate_on_submit():
         room_name = form.room_name.data
-        room_id = BlackboardRoomSession.get_hash(room_name)
+        db_room = BlackboardRoom.get_active_room(room_name)
 
         session['room_name'] = room_name
 
-        room = room_db.get(room_id)
+        room = room_db.get(db_room.id)
         if room is None:
             flash('room does not exist')
             return redirect(url_for('blackboard.home'))
 
         return redirect(
-            url_for('blackboard.mode_blackboard', room_id=room_id))
+            url_for('blackboard.mode_blackboard', room_id=db_room.id))
 
     room_name = session.get('room_name')
 
@@ -55,20 +55,19 @@ def connect_to():
     create_form = CreateRoomForm()
     if create_form.validate_on_submit():
         room_name = create_form.room_name.data
-        room_id = BlackboardRoomSession.get_hash(room_name)
 
-        room = room_db.get(room_id, BlackboardRoomSession(room_name))
         db_room = BlackboardRoom.get_active_room(room_name)
         if db_room is None:
             db_room = BlackboardRoom()
-            db_room.room_id = room_id
             db_room.name = room_name
             db_room.creator = current_user
 
             db.session.add(db_room)
             db.session.commit()
 
-        return redirect(url_for('blackboard.link_to', room_id=room_id))
+        room = room_db.get(db_room.id, BlackboardRoomSession(db_room))
+
+        return redirect(url_for('blackboard.link_to', room_id=room.room_id))
 
     rooms = BlackboardRoom.get_active_rooms()
     return render_template('blackboard/connect_to.html',

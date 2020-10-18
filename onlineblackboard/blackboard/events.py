@@ -37,6 +37,7 @@ def blackboard_disconnect():
 
 @socket.on('room:join', namespace=namespace)
 def blackboard_join(room_id: str):
+    room_id = int(room_id)
     sid = request.sid
     room: Optional[BlackboardRoomSession] = room_db.get(room_id)
     if room is None:
