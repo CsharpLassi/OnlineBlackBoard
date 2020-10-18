@@ -31,8 +31,6 @@ def blackboard_disconnect():
     for room_id, room in user.rooms.items():
         room.users.pop(user.sid)
         emit('user:disconnected', user.to_dict(), room=room_id)
-        if room.closed:
-            emit('room:closed', room.to_dict(), namespace=namespace, broadcast=True)
 
 
 @socket.on('room:join', namespace=namespace)

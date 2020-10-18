@@ -2,7 +2,18 @@
 {% from 'form.html' import show_form %}
 
 {% block col %}
-    <div class="col mt-5">
+    <div class="col mt-3">
+        <div class="card">
+            <div class="card-header">
+                Create
+            </div>
+            <div class="card-body">
+                {{ show_form(create_form) }}
+            </div>
+        </div>
+
+    </div>
+    <div class="col mt-3">
         <div class="card">
             <div class="card-header">Rooms</div>
             <div class="card-body">
@@ -14,16 +25,6 @@
                         </li>
                     {% endfor %}
                 </ul>
-            </div>
-        </div>
-    </div>
-    <div class="col">
-        <div class="card mt-5">
-            <div class="card-header">
-                Connect
-            </div>
-            <div class="card-body">
-                {{ show_form(create_form) }}
             </div>
         </div>
     </div>
