@@ -7,6 +7,22 @@ class BlackboardRoom:
         self.room_id: str = room_id
         self.users: Dict[str, UserSessions] = dict()
 
+    def has_users(self) -> bool:
+        return len(self.users) > 0
+
+    def to_dict(self):
+        return {
+            'room_id': self.room_id
+        }
+
+    def _get_closed(self):
+        if self.has_users():
+            return False
+
+        return True
+
+    closed: bool = property(_get_closed)
+
 
 class UserSessions:
     def __init__(self, sid: str, username: str = "Generic User"):
@@ -15,7 +31,7 @@ class UserSessions:
         self.username: str = username
         self.rooms: Dict[str, BlackboardRoom] = dict()
 
-    def get_msg_data(self) -> dict:
+    def to_dict(self) -> dict:
         return {
             'user_id': self.user_id,
             'username': self.username,

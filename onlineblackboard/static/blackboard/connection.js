@@ -13,12 +13,17 @@ $(document).ready(function () {
     });
 
     socket.on('room:joined', function (msg) {
-        $.user=msg
+        $.user = msg
     });
 
 
     socket.on('room:created', function (msg) {
-        $('#roomList').append(`<li class="nav-item"><a class="nav-link" href="${msg.room_url}">${msg.room_id}</a></li>`)
+        $('#roomList').append(`<li id="room-${msg.room_id}" class="nav-item"><a class="nav-link" href="${msg.room_url}">${msg.room_id}</a></li>`)
+    });
+
+    socket.on('room:closed', function (msg) {
+        let room_div_id = `room-${msg.room_id}`
+        $('#' + room_div_id).remove()
     });
 
     socket.on('room:user:joined', function (msg) {

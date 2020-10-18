@@ -6,11 +6,12 @@ from flask_login import login_required
 from .ext import namespace, room_db
 from .functions import id_generator
 from .server_models import BlackboardRoom
+from .messages import RoomCreatedData
 
 bp = Blueprint('blackboard', __name__, url_prefix=namespace)
 
 
-def check_room(fallback: str):
+def check_room(fallback: str, allow_closed_rooms: bool = False):
     def check_room_helper(func):
         @wraps(func)
         def room_checker(*args, **kwargs):
@@ -18,7 +19,13 @@ def check_room(fallback: str):
             if room_id is None or not room_db.exist(room_id):
                 flash(f'room does not exist')
                 return redirect(url_for(fallback))
-            kwargs['room'] = room_db.get(room_id)
+            room: BlackboardRoom = room_db.get(room_id)
+
+            if not allow_closed_rooms and room.closed:
+                flash(f'Room is closed')
+                return redirect(url_for(fallback))
+
+            kwargs['room'] = room
             return func(*args, **kwargs)
 
         return room_checker
@@ -40,15 +47,6 @@ def home():
             room = BlackboardRoom(room_id)
             room_db.add(room_id, room)
 
-            msg_data = {
-                'room_id': room_id,
-                'room_url': url_for('blackboard.link_to', room_id=room_id)
-            }
-
-            socket.emit('room:created', msg_data,
-                        namespace=namespace,
-                        broadcast=True)
-
             session['room_id'] = room_id
 
         return redirect(
@@ -65,7 +63,7 @@ def home():
 
 
 @bp.route('/show', methods=['GET', 'POST'])
-@check_room('blackboard.home')
+@check_room('blackboard.home', allow_closed_rooms=True)
 def mode_blackboard(room: BlackboardRoom = None):
     return render_template('blackboard/mode_blackboard.html')
 

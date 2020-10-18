@@ -8,10 +8,12 @@
             <div class="card-body">
                 <ul id="roomList" class="nav flex-column">
                     {% for room in rooms %}
-                        <li class="nav-item">
-                            <a class="nav-link"
-                               href="{{ url_for('blackboard.link_to',room_id=room.room_id) }}">{{ room.room_id }}</a>
-                        </li>
+                        {% if room.has_users() %}
+                            <li id="room-{{ room.room_id }}" class="nav-item">
+                                <a class="nav-link"
+                                   href="{{ url_for('blackboard.link_to',room_id=room.room_id) }}">{{ room.room_id }}</a>
+                            </li>
+                        {% endif %}
                     {% endfor %}
                 </ul>
             </div>
