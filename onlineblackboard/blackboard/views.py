@@ -1,29 +1,32 @@
-from flask import Blueprint, render_template, redirect, url_for, session
-from flask_login import login_required
+from flask import Blueprint, render_template, redirect, url_for, session, flash
+from flask_login import login_required, current_user
+
+from ..ext import db
 
 from .ext import namespace, room_db
 from .functions import id_generator
-from .server_models import BlackboardRoom
+from .server_models import BlackboardRoomSession
 from .decorators import check_room
+from .models import BlackboardRoom
 
 bp = Blueprint('blackboard', __name__, url_prefix=namespace)
 
 
 @bp.route('/', methods=['GET', 'POST'])
 def home():
-    from .forms import CreateSessionForm
-    form = CreateSessionForm()
+    from .forms import ConnectToRoom
+    form = ConnectToRoom()
 
     if form.validate_on_submit():
         room_name = form.room_name.data
-        room_id = BlackboardRoom.get_hash(room_name)
+        room_id = BlackboardRoomSession.get_hash(room_name)
+
+        session['room_name'] = room_name
 
         room = room_db.get(room_id)
         if room is None:
-            room = BlackboardRoom(room_name)
-            room_db.add(room_id, room)
-
-            session['room_name'] = room_name
+            flash('room does not exist')
+            return redirect(url_for('blackboard.home'))
 
         return redirect(
             url_for('blackboard.mode_blackboard', room_id=room_id))
@@ -39,28 +42,42 @@ def home():
 
 
 @bp.route('/show', methods=['GET', 'POST'])
-@check_room('blackboard.home', allow_closed_rooms=True)
-def mode_blackboard(room: BlackboardRoom = None):
+@check_room('blackboard.home')
+def mode_blackboard(room: BlackboardRoomSession = None):
     return render_template('blackboard/mode_blackboard.html')
 
 
 @bp.route('connectTo', methods=['GET', 'POST'])
 @login_required
 def connect_to():
-    from .forms import ConnectForm
+    from .forms import CreateRoomForm
 
-    connect_form = ConnectForm()
-    if connect_form.validate_on_submit():
-        room_id = connect_form.room_name.data
+    create_form = CreateRoomForm()
+    if create_form.validate_on_submit():
+        room_name = create_form.room_name.data
+        room_id = BlackboardRoomSession.get_hash(room_name)
+
+        room = room_db.get(room_id, BlackboardRoomSession(room_name))
+        db_room = BlackboardRoom.get_active_room(room_name)
+        if db_room is None:
+            db_room = BlackboardRoom()
+            db_room.room_id = room_id
+            db_room.name = room_name
+            db_room.creator = current_user
+
+            db.session.add(db_room)
+            db.session.commit()
+
         return redirect(url_for('blackboard.link_to', room_id=room_id))
-    rooms = [room for room_id, room in room_db.items()]
+
+    rooms = BlackboardRoom.get_active_rooms()
     return render_template('blackboard/connect_to.html',
-                           connect_form=connect_form,
+                           create_form=create_form,
                            rooms=rooms)
 
 
 @bp.route('link', methods=['GET'])
 @login_required
-@check_room('blackboard.connect_to')
-def link_to(room: BlackboardRoom = None):
+@check_room('blackboard.connect_to', create_room_from_db=True)
+def link_to(room: BlackboardRoomSession = None):
     return render_template('blackboard/mode_user.html', room=room)

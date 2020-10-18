@@ -4,8 +4,6 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='blackboard/main.css') }}">
 {% endblock %}
 
-
-
 {% block row %}
     <div class="row justify-content-center">
         <div class="col">
@@ -17,14 +15,4 @@
             </div>
         </div>
     </div>
-{% endblock %}
-
-{% block blackboard_js %}
-    <script>
-        $(document).on('socket:ready',function () {
-            $.socket.on('room:joined', function (msg) {
-                $.socket.emit('user:data:change', {'username': 'Blackboard'})
-            });
-        });
-    </script>
 {% endblock %}

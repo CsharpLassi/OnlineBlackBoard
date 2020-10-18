@@ -1,13 +1,13 @@
 from typing import Optional
 
-from flask import request, current_app, escape, url_for
+from flask import request, current_app, escape
 from flask_login import current_user
 from flask_socketio import emit, join_room
 
-from .ext import namespace, room_db, user_db
-from .server_models import UserSessions, BlackboardRoom
 from .decorators import convert
+from .ext import namespace, room_db, user_db
 from .messages import *
+from .server_models import UserSessions, BlackboardRoomSession
 from ..ext import socket
 
 
@@ -38,26 +38,15 @@ def blackboard_disconnect():
 @socket.on('room:join', namespace=namespace)
 def blackboard_join(room_id: str):
     sid = request.sid
-    room: Optional[BlackboardRoom] = room_db.get(room_id)
+    room: Optional[BlackboardRoomSession] = room_db.get(room_id)
     if room is None:
         return
-
-    was_closed = room.closed
 
     user: UserSessions = user_db.get(sid)
     user.rooms[room_id] = room
     room.users[sid] = user
 
     join_room(room_id)
-
-    if was_closed:
-        msg_data = RoomCreatedData(
-            room=room.to_data(),
-            room_url=url_for('blackboard.link_to', room_id=room_id))
-
-        socket.emit('room:created', msg_data.to_dict(),
-                    namespace=namespace,
-                    broadcast=True)
 
     join_data = RoomJoinedData(user=user.to_data(), room=room.to_data())
     join_data_dict = join_data.to_dict()
@@ -75,7 +64,7 @@ def blackboard_change_markdown(msg: RoomUpdateContentData):
     sid = request.sid
     user: UserSessions = user_db.get(sid)
 
-    room: BlackboardRoom = room_db.get(msg.room_id)
+    room: BlackboardRoomSession = room_db.get(msg.room_id)
     if not room:
         return
 
@@ -88,18 +77,3 @@ def blackboard_change_markdown(msg: RoomUpdateContentData):
     room.last_data = data
 
     emit('room:print', data.to_dict(), room=msg.room_id)
-
-
-@socket.on('user:data:change', namespace=namespace)
-@convert(UserDataChangeData)
-def blackboard_change_user_data(data: UserDataChangeData):
-    sid = request.sid
-    user: UserSessions = user_db.get(sid)
-
-    change_counter = 0
-    if data.username:
-        user.username = data.username
-        change_counter += 1
-
-    for room_id, room in user.rooms.items():
-        emit('user:data:changed', user.to_dict(), room=room_id)

@@ -39,15 +39,6 @@ $(document).ready(function () {
 
     })
 
-    socket.on('user:data:changed', function (msg) {
-        let user_div_id = `user-${msg.user_id}`
-        $('#' + user_div_id).text(msg.username);
-
-        if (msg.user_id !== $.user.user_id)
-            $.user = msg.user_id
-
-    })
-
     if (room_id !== null) {
         socket.on('room:updated', function (msg) {
             $('#status').text(msg.room_name);
