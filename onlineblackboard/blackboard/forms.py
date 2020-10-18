@@ -4,10 +4,10 @@ from wtforms.validators import DataRequired, Length
 
 
 class CreateSessionForm(FlaskForm):
-    room_id = StringField('ID', validators=[DataRequired(), Length(min=6, max=10)])
-    submit = SubmitField('Create Session')
+    room_name = StringField('Room', validators=[DataRequired(), Length(max=16)])
+    submit = SubmitField('Create Room')
 
 
 class ConnectForm(FlaskForm):
-    room_id = StringField('ID', validators=[DataRequired(), Length(min=6, max=10)])
-    submit = SubmitField('Connect')
+    room_name = StringField('Room', validators=[DataRequired(), Length(max=16)])
+    submit = SubmitField('Connect to')

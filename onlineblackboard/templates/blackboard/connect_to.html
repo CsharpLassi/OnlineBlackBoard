@@ -11,7 +11,7 @@
                         {% if room.has_users() %}
                             <li id="room-{{ room.room_id }}" class="nav-item">
                                 <a class="nav-link"
-                                   href="{{ url_for('blackboard.link_to',room_id=room.room_id) }}">{{ room.room_id }}</a>
+                                   href="{{ url_for('blackboard.link_to',room_id=room.room_id) }}">{{ room.room_name }}</a>
                             </li>
                         {% endif %}
                     {% endfor %}

@@ -13,12 +13,13 @@ $(document).ready(function () {
     });
 
     socket.on('room:joined', function (msg) {
-        $.user = msg
+        $.user = msg.user
+        $('#status').text(msg.room.room_name);
     });
 
 
     socket.on('room:created', function (msg) {
-        $('#roomList').append(`<li id="room-${msg.room_id}" class="nav-item"><a class="nav-link" href="${msg.room_url}">${msg.room_id}</a></li>`)
+        $('#roomList').append(`<li id="room-${msg.room.room_id}" class="nav-item"><a class="nav-link" href="${msg.room_url}">${msg.room.room_name}</a></li>`)
     });
 
     socket.on('room:closed', function (msg) {
@@ -27,9 +28,9 @@ $(document).ready(function () {
     });
 
     socket.on('room:user:joined', function (msg) {
-        let user_div_id = `user-${msg.user_id}`
+        let user_div_id = `user-${msg.user.user_id}`
         if (!$('#' + user_div_id).length)
-            $('#userList').append(`<div id="${user_div_id}">${msg.username}</div>`)
+            $('#userList').append(`<div id="${user_div_id}">${msg.user.username}</div>`)
     })
 
     socket.on('user:disconnected', function (msg) {
@@ -49,10 +50,9 @@ $(document).ready(function () {
 
     if (room_id !== null) {
         socket.on('room:updated', function (msg) {
-            $('#status').text(msg.room_id);
+            $('#status').text(msg.room_name);
         });
         socket.on('connect', function () {
-            $('#status').text(room_id);
             socket.emit('room:join', room_id);
         });
 
