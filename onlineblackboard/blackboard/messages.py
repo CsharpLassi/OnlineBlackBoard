@@ -15,6 +15,11 @@ class UserData(BaseMessageData):
 
 
 @dataclass
+class UserDataChangeData(BaseMessageData):
+    username: str
+
+
+@dataclass
 class RoomData(BaseMessageData):
     room_id: str
     room_name: str
@@ -36,3 +41,10 @@ class RoomJoinedData(BaseMessageData):
 class RoomUpdateContentData(BaseMessageData):
     room_id: str
     text: str
+
+
+@dataclass
+class RoomPrintData(BaseMessageData):
+    text: str
+    markdown: str
+    creator: UserData

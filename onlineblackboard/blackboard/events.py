@@ -36,7 +36,7 @@ def blackboard_disconnect():
 
 
 @socket.on('room:join', namespace=namespace)
-def blackboard_join(room_id, msg: dict = None):
+def blackboard_join(room_id: str):
     sid = request.sid
     room: Optional[BlackboardRoom] = room_db.get(room_id)
     if room is None:
@@ -72,23 +72,25 @@ def blackboard_change_markdown(msg: RoomUpdateContentData):
     sid = request.sid
     user: UserSessions = user_db.get(sid)
 
-    data = {
-        'raw_markdown': msg.text,
-        'markdown': escape(msg.text),
-        'creator': user.to_dict()
-    }
+    data = RoomPrintData(
+        text=msg.text,
+        markdown=escape(msg.text),
+        creator=user.to_data(),
+    )
 
-    emit('room:print', data, room=msg.room_id)
+    emit('room:print', data.to_dict(), room=msg.room_id)
 
 
 @socket.on('user:data:change', namespace=namespace)
-def blackboard_change_user_data(data: dict):
+@convert(UserDataChangeData)
+def blackboard_change_user_data(data: UserDataChangeData):
     sid = request.sid
     user: UserSessions = user_db.get(sid)
 
     change_counter = 0
-    if 'username' in data:
-        user.username = data['username']
+    if data.username:
+        user.username = data.username
         change_counter += 1
 
-    emit('user:data:changed', user.to_dict(), broadcast=True)
+    for room_id, room in user.rooms.items():
+        emit('user:data:changed', user.to_dict(), room=room_id)
