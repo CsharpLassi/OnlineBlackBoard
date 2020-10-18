@@ -1,7 +1,7 @@
 from hashlib import md5
 from typing import Dict
 from .functions import id_generator
-from .messages import RoomData, UserData
+from .messages import RoomData, UserData, RoomUpdateContentData
 
 
 class BlackboardRoom:
@@ -9,6 +9,8 @@ class BlackboardRoom:
         self.room_name: str = room_name
         self.room_id: str = self.get_hash(room_name)
         self.users: Dict[str, UserSessions] = dict()
+
+        self.last_data: RoomUpdateContentData = None
 
     @staticmethod
     def get_hash(value: str) -> str:

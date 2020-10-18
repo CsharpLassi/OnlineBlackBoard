@@ -47,4 +47,4 @@ class RoomUpdateContentData(BaseMessageData):
 class RoomPrintData(BaseMessageData):
     text: str
     markdown: str
-    creator: UserData
+    creator: UserData = None
