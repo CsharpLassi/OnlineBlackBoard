@@ -22,16 +22,15 @@ function drawContent() {
         'scale(' + factor_min + ') ');
     // Todo: Vielleicht etwas schöner später
 
-    let new_width = content_width*factor_min;
-    let new_height = content_height*factor_min;
+    let new_width = content_width * factor_min;
+    let new_height = content_height * factor_min;
 
     $('#content').width(new_width).height(new_height);
-    $('#contentSketchpad').attr({'width':new_width,'height':new_height});
-    $.sketchpad.width = content_width*factor_min
-    $.sketchpad.height = content_height*factor_min
-
+    $('#contentSketchpad').attr({'width': new_width, 'height': new_height});
 
     $('.content-translateY').css('transform', `translateY(${translate_y}px)`);
+
+    $(document).trigger('content:change')
 }
 
 $.urlParam = function (name) {

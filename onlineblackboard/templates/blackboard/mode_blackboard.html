@@ -17,18 +17,5 @@
 {% endblock %}
 
 {% block blackboard_js %}
-    <script>
-        const canvas = document.querySelector('#contentSketchpad');
-        $.sketchpad = new Atrament(canvas);
-        $.sketchpad.recordStrokes = true;
-
-        $.sketchpad.addEventListener('strokerecorded', ({stroke}) => {
-            let room_id = $.urlParam('room_id');
-            for (var i = 0; i < stroke.points.length; i++) {
-                stroke.points[i].x /= $.sketchpad.width
-                stroke.points[i].y /= $.sketchpad.height
-            }
-            $.socket.emit('room:update:draw', {room_id: room_id, stroke: stroke});
-        });
-    </script>
+    <script src="{{ url_for('static', filename='blackboard/draw.js') }}"></script>
 {% endblock %}
