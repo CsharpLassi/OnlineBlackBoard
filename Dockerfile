@@ -44,7 +44,7 @@ COPY --from=builder --chown=sid:sid /app/src/obb/static /app/src/obb/static
 
 EXPOSE 5000
 
-ENV FLASK_APP=wsgi.py
+ENV FLASK_APP=src/wsgi.py
 ENV FLASK_ENV=production
 ENV HOST=0.0.0.0
 ENV PREFERRED_URL_SCHEME=http
