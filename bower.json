@@ -20,6 +20,7 @@
     "jquery": "^3.5.1",
     "font-awesome": "^5.15.1",
     "socket.io-client": "^2.3.1",
-    "marked": "^1.1.1"
+    "marked": "^1.1.1",
+    "atrament": "^1.2.0"
   }
 }

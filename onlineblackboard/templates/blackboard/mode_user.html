@@ -12,8 +12,7 @@
 
         </div>
         <div class="col-6">
-            <div id="content" style="{{ room.get_style() }}">
-            </div>
+            {% include 'blackboard/content/contentElement.html' %}
         </div>
 
     </div>
@@ -42,6 +41,7 @@
 {% endblock %}
 
 {% block blackboard_js %}
+    <script src="{{ url_for('static', filename='blackboard/draw.js') }}"></script>
     <script src="{{ url_for('static', filename='blackboard/user.js') }}"></script>
 {% endblock %}
 

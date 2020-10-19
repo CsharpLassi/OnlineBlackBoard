@@ -96,3 +96,21 @@ def blackboard_change_markdown(msg: RoomUpdateContentData):
     room.last_data = data
 
     emit('room:print', data.to_dict(), room=msg.room_id)
+
+
+@socket.on('room:update:draw', namespace=namespace)
+@convert(RoomUpdateDrawData)
+def room_update_draw(msg: RoomUpdateDrawData):
+    sid = request.sid
+    user: UserSessions = user_db.get(sid)
+
+    room: BlackboardRoomSession = room_db.get(msg.room_id)
+    if not room:
+        return
+
+    data = RoomStrokeData(
+        stroke=msg.stroke,
+        creator=user.to_data(),
+    )
+
+    emit('room:draw:stroke', data.to_dict(), room=msg.room_id)
