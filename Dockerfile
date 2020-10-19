@@ -50,7 +50,7 @@ ENV FLASK_ENV=production
 ENV HOST=0.0.0.0
 ENV PREFERRED_URL_SCHEME=http
 ENV SECRET_KEY=you-will-never-guess
-ENV SQLALCHEMY_DATABASE_URI=/app/app.db
+ENV DATABASE_URL="sqlite:////app/app.db"
 
 ENTRYPOINT ["/bin/bash"]
 CMD ["-c","./run.sh"]
