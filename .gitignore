@@ -147,7 +147,7 @@ node_modules/
 migrations/
 flask_session/
 
-app.db
+**/app.db
 new_db.sh
 
 

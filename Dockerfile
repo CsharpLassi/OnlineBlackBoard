@@ -23,7 +23,7 @@ RUN npm install -g bower
 RUN bower install --allow-root
 
 COPY onlineblackboard onlineblackboard
-COPY wsgi.py .
+COPY src/wsgi.py .
 
 # ================================= PRODUCTION =================================
 FROM python:${INSTALL_PYTHON_VERSION}-slim-buster as production

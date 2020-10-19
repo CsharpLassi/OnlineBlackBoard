@@ -1,0 +1,82 @@
+{% macro show_form(form,method='POST',class='',action='',id='') %}
+    <form id="{{ id }}" class="{{ class }}" method="{{ method }}" action="{{ action }}">
+        {% for field in form %}
+            {{ show_field(field) }}
+        {% endfor %}
+    </form>
+{% endmacro %}
+
+{% macro show_field(field) %}
+    {% if field.type == 'StringField' %}
+        {{ print_input(field) }}
+    {% elif field.type == 'PasswordField' %}
+        {{ print_input(field,type='password') }}
+    {% elif field.type == 'IntegerField' %}
+        {{ print_integer_field(field) }}
+    {% elif field.type == 'BooleanField' %}
+        {{ print_boolean_field(field) }}
+    {% elif field.type == 'SelectField' %}
+        {{ print_select_field(field) }}
+    {% elif field.type == 'SubmitField' %}
+        {{ print_submit(field) }}
+    {% elif field.type == 'CSRFTokenField' %}
+        {{ print_token(field) }}
+    {% else %}
+        <span>No Element for {{ field.type }}</span><br/>
+    {% endif %}
+{% endmacro %}
+
+{% macro print_input(field,type='text') %}
+    <div class="form-group">
+        <label for="{{ field.id }}">{{ field.label.text }}</label>
+        <input type="{{ type }}" class="form-control" name="{{ field.name }}" id="{{ field.id }}"
+               value="{{ field.data if field.data else '' }}">
+        {{ print_errors(field) }}
+    </div>
+{% endmacro %}
+
+{% macro print_integer_field(field) %}
+    <div class="form-group">
+        <label for="{{ field.id }}">{{ field.label.text }}</label>
+        <input type="number" class="form-control" name="{{ field.name }}" id="{{ field.id }}"
+               value="{{ field.data if field.data else '' }}">
+        {{ print_errors(field) }}
+    </div>
+{% endmacro %}
+
+{% macro print_boolean_field(field) %}
+    <div class="form-check">
+        <input type="checkbox" class="form-check-input" name="{{ field.name }}" id="{{ field.id }}">
+        <label class="form-check-label" for="{{ field.id }}">{{ field.label.text }}</label>
+    </div>
+{% endmacro %}
+
+{% macro print_select_field(field) %}
+    <div class="form-group">
+        <label for="{{ field.id }}">{{ field.label.text }}</label>
+        <select class="form-control" id="{{ field.id }}" name="{{ field.name }}">
+            {% for choice in field.choices %}
+                <option {% if choice== field.data %}selected{% endif %}>{{ choice }}</option>
+            {% endfor %}
+        </select>
+    </div>
+{% endmacro %}
+
+{% macro print_submit(field) %}
+    <button type="submit" name="{{ field.name }}" id="{{ field.id }}" class="btn btn-primary mt-2">
+        {{ field.label.text }}</button>
+{% endmacro %}
+
+{% macro print_token(field) %}
+    {{ field }}
+{% endmacro %}
+
+
+
+{% macro print_errors(field) %}
+    {% for error in field.errors %}
+        <small class="form-text text-danger">
+            {{ error }}
+        </small>
+    {% endfor %}
+{% endmacro %}
