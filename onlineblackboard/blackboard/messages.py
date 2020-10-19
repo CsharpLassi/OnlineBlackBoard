@@ -1,5 +1,6 @@
 import dataclasses
 from dataclasses import dataclass
+from typing import List
 
 
 @dataclass
@@ -53,4 +54,31 @@ class RoomUpdateContentData(BaseMessageData):
 class RoomPrintData(BaseMessageData):
     text: str
     markdown: str
+    creator: UserData = None
+
+
+@dataclass
+class StrokeData(BaseMessageData):
+    @dataclass
+    class StrokePoints(BaseMessageData):
+        x: float
+        y: float
+
+    adaptiveStroke: bool
+    color: str
+    mode: str
+    smoothing: float
+    weight: int
+    points: List[StrokePoints]
+
+
+@dataclass
+class RoomUpdateDrawData(BaseMessageData):
+    room_id: int
+    stroke: StrokeData
+
+
+@dataclass
+class RoomStrokeData(BaseMessageData):
+    stroke: StrokeData
     creator: UserData = None

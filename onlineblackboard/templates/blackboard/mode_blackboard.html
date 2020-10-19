@@ -11,8 +11,24 @@
     </div>
     <div class="row justify-content-center mt-2">
         <div class="col align-content-center">
-            <div id="content" style="{{ room.get_style() }}">
-            </div>
+            {% include 'blackboard/content/contentElement.html' %}
         </div>
     </div>
+{% endblock %}
+
+{% block blackboard_js %}
+    <script>
+        const canvas = document.querySelector('#contentSketchpad');
+        $.sketchpad = new Atrament(canvas);
+        $.sketchpad.recordStrokes = true;
+
+        $.sketchpad.addEventListener('strokerecorded', ({stroke}) => {
+            let room_id = $.urlParam('room_id');
+            for (var i = 0; i < stroke.points.length; i++) {
+                stroke.points[i].x /= $.sketchpad.width
+                stroke.points[i].y /= $.sketchpad.height
+            }
+            $.socket.emit('room:update:draw', {room_id: room_id, stroke: stroke});
+        });
+    </script>
 {% endblock %}
