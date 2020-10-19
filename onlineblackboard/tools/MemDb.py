@@ -28,10 +28,11 @@ class MemDb(Generic[P, T]):
         self.release()
         return items
 
-    def add(self, key: P, value: T):
+    def add(self, key: P, value: T) -> T:
         self.lock()
         self._db[key] = value
         self.release()
+        return value
 
     def get(self, key: P, add_item: Optional[T] = None) -> Optional[T]:
         self.lock()

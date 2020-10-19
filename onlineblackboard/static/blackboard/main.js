@@ -1,14 +1,7 @@
-$.urlParam = function (name) {
-    let results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
-    if (results === null)
-        return null
-    return results[1] || null;
-}
-
-$(document).ready(function () {
+function drawContent() {
     let div_content = $('#content');
 
-    if(!div_content.length)
+    if (!div_content.length)
         return
 
     let parent = div_content.parent();
@@ -27,5 +20,26 @@ $(document).ready(function () {
         'translateX(' + translate_x + 'px) ' +
         'translateY(' + translate_y + 'px) ' +
         'scale(' + factor_min + ') ');
+    // Todo: Vielleicht etwas schöner später
 
+    $('.content-translateY').css('transform', `translateY(${translate_y}px)`);
+}
+
+$.urlParam = function (name) {
+    let results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+    if (results === null)
+        return null
+    return results[1] || null;
+}
+
+$(document).on('socket:ready', function (socket) {
+    $.socket.on('room:updated:settings', function (data) {
+        $('#content').css('height', `${data.draw_height}px`)
+        drawContent();
+    });
+});
+
+
+$(document).ready(function () {
+    drawContent();
 });

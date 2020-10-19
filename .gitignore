@@ -148,6 +148,7 @@ migrations/
 flask_session/
 
 app.db
+new_db.sh
 
 
 
