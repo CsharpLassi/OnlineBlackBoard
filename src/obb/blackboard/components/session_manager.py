@@ -25,7 +25,7 @@ class BlackBoardSessionToken:
 
     def encode(self) -> str:
         session_dict = dataclasses.asdict(self)
-        return jwt.encode(session_dict, current_app.secret_key, 'HS256')
+        return jwt.encode(session_dict, current_app.secret_key, 'HS256').decode('UTF-8')
 
     @staticmethod
     def decode(token: str) -> BlackBoardSessionToken:
@@ -54,14 +54,14 @@ class BlackBoardSessionManager:
         self.__sid_to_session_db = MemDb[str, str]()
 
     def create_session(self, room_id: str, user: User = None) -> BlackBoardSession:
-        if user is None:
+        if user is None and current_user.is_authenticated:
             user = current_user
 
         room = BlackboardRoom.get(room_id)
 
         user_data = UserData(
             user_id=id_generator(),
-            username=user.username
+            username='Guest' if not user else user.username
         )
 
         room_data = RoomData(
@@ -72,7 +72,7 @@ class BlackBoardSessionManager:
         session = BlackBoardSession(
             session_id=id_generator(),
             room_id=room_id,
-            user_id=user.id,
+            user_id=0 if not user else user.id,
             session_user_data=user_data,
             session_room_data=room_data,
         )

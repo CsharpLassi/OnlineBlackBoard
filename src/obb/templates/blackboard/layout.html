@@ -1,5 +1,11 @@
 {% extends 'layout.html' %}
 
+{% block meta %}
+    {% if bb_session %}
+        <meta content="{{ bb_session.to_token_string() }}" name="session-token"/>
+    {% endif %}
+{% endblock %}
+
 {% block navbar_right %}
     <li class="nav-item">
         <span class="nav-link" id="status">Not Connected</span>

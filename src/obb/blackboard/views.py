@@ -4,7 +4,6 @@ from flask_login import login_required, current_user
 from ..ext import db
 
 from .ext import namespace, bb_session_manager
-from .decorators import check_room
 from .models import BlackboardRoom
 
 bp = Blueprint('blackboard', __name__, url_prefix=namespace)
@@ -24,24 +23,67 @@ def home():
 
         session['room_name'] = room_name
 
-        bb_session = bb_session_manager.create_session(room_id=room.id)
-
         return redirect(
-            url_for('blackboard.mode_blackboard', session=bb_session.to_token_string()))
+            url_for('blackboard.link'))
 
+    rooms = BlackboardRoom.get_rooms(public=True)
     form.room_name.data = session.get('room_name')
-    return render_template('blackboard/home.html', form=form)
+    return render_template('blackboard/home.html', form=form, rooms=rooms)
 
 
-@bp.route('/show', methods=['GET', 'POST'])
-@check_room('blackboard.home')
-def mode_blackboard(room: BlackboardRoom = None):
-    return render_template('blackboard/mode_blackboard.html', room=room)
+@bp.route('/link/<room_id>', methods=['GET', 'POST'])
+def link(room_id: str):
+    room = BlackboardRoom.get(room_id)
+    if not room:
+        flash('room does not exist')
+        return redirect('blackboard.home')
+
+    if not room.can_join():
+        flash('not allowed')
+        return redirect('blackboard.home')
+
+    bb_session = bb_session_manager.create_session(room_id=room.id)
+
+    if current_user and current_user.is_authenticated:
+        if current_user.id == room.creator_id:
+            return redirect(url_for('blackboard.link_user', room_id=room.id))
+
+    return render_template('blackboard/mode_blackboard.html',
+                           room=room,
+                           bb_session=bb_session)
 
 
-@bp.route('/connectTo', methods=['GET', 'POST'])
+@bp.route('/linkUser/<room_id>', methods=['GET', 'POST'])
 @login_required
-def connect_to():
+def link_user(room_id: str):
+    from .forms import RoomSettings
+
+    room = BlackboardRoom.get(room_id)
+
+    if room.creator_id != current_user.id:
+        flash('you have no access to the page')
+        return redirect('blackboard.home')
+
+    edit_form = RoomSettings()
+    if edit_form.validate_on_submit():
+        room.draw_height = int(edit_form.height.data)
+        room.visibility = edit_form.visibility.data
+        db.session.commit()
+        return redirect(url_for('blackboard.link_user', room_id=room.id))
+    else:
+        edit_form.height.data = room.draw_height
+        edit_form.visibility.data = room.visibility
+
+    bb_session = bb_session_manager.create_session(room_id=room.id)
+    return render_template('blackboard/mode_user.html',
+                           room=room,
+                           bb_session=bb_session,
+                           edit_form=edit_form)
+
+
+@bp.route('/rooms', methods=['GET', 'POST'])
+@login_required
+def list_rooms():
     from .forms import CreateRoomForm
 
     create_form = CreateRoomForm()
@@ -63,42 +105,9 @@ def connect_to():
         db.session.add(room)
         db.session.commit()
 
-        return redirect(url_for('blackboard.connect_to_room', room_id=room.id))
+        return redirect(url_for('blackboard.link', room_id=room.id))
 
     rooms = BlackboardRoom.get_rooms()
-    return render_template('blackboard/connect_to.html',
+    return render_template('blackboard/rooms.html',
                            create_form=create_form,
                            rooms=rooms)
-
-
-@bp.route('/connectTo/<room_id>', methods=['GET', 'POST'])
-@login_required
-def connect_to_room(room_id: str):
-    room = BlackboardRoom.get(room_id)
-    if not room or not room.can_join():
-        flash('room does not exist')
-        return redirect(url_for('blackboard.connect_to'))
-
-    bb_session = bb_session_manager.create_session(room_id=room.id)
-
-    return redirect(
-        url_for('blackboard.mode_user', session=bb_session.to_token_string()))
-
-
-@bp.route('/link', methods=['GET', 'POST'])
-@login_required
-@check_room('blackboard.connect_to')
-def mode_user(room: BlackboardRoom):
-    from .forms import RoomSettings
-
-    edit_form = RoomSettings()
-    if edit_form.validate_on_submit():
-        room.draw_height = int(edit_form.height.data)
-        room.visibility = edit_form.visibility.data
-        db.session.commit()
-        return redirect(url_for('blackboard.link_to', room_id=room.id))
-    else:
-        edit_form.height.data = room.draw_height
-        edit_form.visibility.data = room.visibility
-
-    return render_template('blackboard/mode_user.html', room=room, edit_form=edit_form)

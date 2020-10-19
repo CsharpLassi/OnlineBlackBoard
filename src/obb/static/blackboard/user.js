@@ -1,17 +1,18 @@
 var oldVal = "";
 $(document).ready(function () {
+
+    let token = $('meta[name=session-token]').attr("content");
+
     $("#board").on("change keyup paste", function () {
         var currentVal = $(this).val();
         if (currentVal === oldVal)
             return
-        let token = $.urlParam('session');
 
         oldVal = currentVal;
         $.socket.emit('room:update:content', {'token': token, 'raw_text': currentVal})
     });
 
     $('form#roomEdit').submit(function (event) {
-        let token = $.urlParam('session');
         $.socket.emit('room:update:settings',
             {
                 'token': token,

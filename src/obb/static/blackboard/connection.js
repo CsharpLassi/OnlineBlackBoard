@@ -1,15 +1,15 @@
 $(document).ready(function () {
 
     let socket = io.connect('/blackboard');
+    let token = $('meta[name=session-token]').attr("content");
     $.socket = socket;
     $(document).trigger('socket:ready', socket)
 
     socket.on('connect', function () {
         $('#status').text('Connected');
 
-        let session_token = $.urlParam('session');
-        if (session_token)
-            socket.emit('room:join', {token: session_token});
+        if (token)
+            socket.emit('room:join', {token: token});
     });
 
     socket.on('disconnect', function () {

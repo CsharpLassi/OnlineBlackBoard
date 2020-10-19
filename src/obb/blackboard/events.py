@@ -10,7 +10,6 @@ from .decorators import convert, to_form_dict, event_login_required
 from .ext import namespace, bb_session_manager
 
 from .models import BlackboardRoom
-from .msg import *
 
 from ..ext import socket, db
 

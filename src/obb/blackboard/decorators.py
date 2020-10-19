@@ -1,7 +1,7 @@
 from functools import wraps
 from typing import Type, Optional
 
-from flask import request, flash, redirect, url_for
+from flask import request, flash, redirect, url_for, current_app
 from werkzeug.datastructures import ImmutableMultiDict
 
 from .models import BlackboardRoom
@@ -12,14 +12,17 @@ from .messages.base_messages import BaseRequestMessage
 from ..tools.dataclasses import dataclass_from_dict
 
 
-def convert(cls: Type):
+def convert(cls):
     def helper(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
             args = list(args)
-            args[0] = dataclass_from_dict(cls, args[0])
+            try:
+                args[0] = dataclass_from_dict(cls, args[0])
 
-            return func(*args, **kwargs)
+                return func(*args, **kwargs)
+            except Exception as ex:
+                current_app.logger.exception(ex)
 
         return wrapper
 
@@ -51,36 +54,6 @@ def to_form_dict(item: str = None):
     return helper
 
 
-def check_room(fallback: str):
-    def check_room_helper(func):
-        @wraps(func)
-        def room_checker(*args, **kwargs):
-            session_token = request.args.get('session')
-            if not session_token:
-                flash(f'session token is invalid')
-                return redirect(url_for(fallback))
-
-            token = BlackBoardSessionToken.decode(session_token)
-
-            session: BlackBoardSession = bb_session_manager.get(token.session_id)
-
-            if not session:
-                flash(f'session does not exist')
-                return redirect(url_for(fallback))
-
-            room = BlackboardRoom.get(session.room_id)
-            if not room:
-                flash(f'room does not exist')
-                return redirect(url_for(fallback))
-
-            kwargs['room'] = room
-            return func(*args, **kwargs)
-
-        return room_checker
-
-    return check_room_helper
-
-
 def event_login_required(func):
     @wraps(func)
     def helper(*args, **kwargs):
@@ -88,6 +61,9 @@ def event_login_required(func):
 
         room: Optional[BlackboardRoom] = None
         if isinstance(msg, BaseRequestMessage):
+            if msg.session is None:
+                return
+
             session: BlackBoardSession = bb_session_manager.get(msg.session.session_id)
             if session is None:
                 return

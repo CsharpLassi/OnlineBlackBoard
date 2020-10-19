@@ -45,10 +45,12 @@ class BlackboardRoom(db.Model):
         if isinstance(user, int):
             user = User.get(user)
 
-        if not user:
+        if not user and current_user.is_authenticated:
             user = current_user
 
-        if user.id == self.creator_id:
+        user_id = 0 if not user else user.id
+
+        if user_id == self.creator_id:
             return True
 
         if self.visibility == 'public':
@@ -76,14 +78,24 @@ class BlackboardRoom(db.Model):
         return query_fullname.first()
 
     @staticmethod
-    def get_rooms(user=None) -> Iterator[BlackboardRoom]:
+    def get_rooms(user=None, public=False) -> Iterator[BlackboardRoom]:
         from flask_login import current_user
         from ..users.models import User
 
         if isinstance(user, int):
             user = User.get(user)
 
-        if not user:
+        if not user and current_user and current_user.is_authenticated:
             user = current_user
 
-        return BlackboardRoom.query.filter_by(creator_id=user.id).all()
+        user_id = 0 if not user else user.id
+
+        f_query = BlackboardRoom.query
+
+        if not public:
+            f_query = f_query.filter(BlackboardRoom.creator_id == user_id)
+        else:
+            f_query = f_query.filter(or_(BlackboardRoom.creator_id == user_id,
+                                         BlackboardRoom.visibility == 'public'))
+
+        return f_query.all()

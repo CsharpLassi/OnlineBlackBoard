@@ -2,14 +2,32 @@
 {% from 'form.html' import show_form %}
 
 {% block col %}
-    <div class="col-auto">
-        <div class="card mt-5">
+    <div class="col-3 mt-3">
+        <div class="card">
+            <div class="card-header">Rooms</div>
+            <div class="card-body">
+                <ul id="roomList" class="nav flex-column">
+                    {% for room in rooms %}
+                        <li id="room-{{ room.room_id }}" class="nav-item">
+                            <a class="nav-link"
+                               href="{{ url_for('blackboard.link',room_id=room.id) }}">{{ room.full_name }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-3">
+        <div class="card mt-3">
             <div class="card-header">
-                Create Session
+                Join Session
             </div>
             <div class="card-body">
                 {{ show_form(form) }}
             </div>
         </div>
+    </div>
+    <div class="col">
+
     </div>
 {% endblock %}

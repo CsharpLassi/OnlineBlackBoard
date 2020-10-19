@@ -1,4 +1,6 @@
 $(document).ready(function () {
+    let token = $('meta[name=session-token]').attr("content");
+
     const canvas = document.querySelector('#contentSketchpad');
     $.sketchpad = new Atrament(canvas);
     $.sketchpad.recordStrokes = true;
@@ -17,12 +19,11 @@ $(document).ready(function () {
     });
 
     $.sketchpad.addEventListener('strokerecorded', ({stroke}) => {
-        let session = $.urlParam('session');
         for (var i = 0; i < stroke.points.length; i++) {
             stroke.points[i].x /= $.sketchpad.width
             stroke.points[i].y /= $.sketchpad.height
         }
-        $.socket.emit('room:update:draw', {token: session, stroke: stroke});
+        $.socket.emit('room:update:draw', {token: token, stroke: stroke});
     });
 
 

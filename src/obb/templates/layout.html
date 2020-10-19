@@ -2,6 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+
+    {% block meta %}
+    {% endblock %}
+
     <title>Online Blackboard</title>
 
     <link rel="stylesheet" href="{{ url_for('static', filename='components/bootstrap/dist/css/bootstrap.css') }}">
@@ -37,7 +41,7 @@
                 </li>
                 {% if current_user and current_user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('blackboard.connect_to') }}">Connect to
+                        <a class="nav-link" href="{{ url_for('blackboard.list_rooms') }}">Connect to
                         </a>
                     </li>
                     {% if current_user.is_admin %}
