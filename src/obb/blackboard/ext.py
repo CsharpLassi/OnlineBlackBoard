@@ -9,5 +9,5 @@ namespace = '/blackboard'
 
 bb_manager = BlackBoardSessionHandler()
 
-room_db = MemDb[int, BlackboardRoomSession]()
-user_db = MemDb[str, UserSessions]()
+# room_db = MemDb[int, BlackboardRoomSession]()
+# user_db = MemDb[str, UserSessions]()

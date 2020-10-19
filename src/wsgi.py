@@ -1,5 +1,5 @@
 #!/usr/bin/python
-from onlineblackboard import create_app
+from obb import create_app
 
 
 class ReverseProxied(object):

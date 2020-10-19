@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 
 from ..ext import db
 
-from .ext import namespace, room_db
+from .ext import namespace, bb_manager
 from .functions import id_generator
 from .server_models import BlackboardRoomSession
 from .decorators import check_room
