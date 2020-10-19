@@ -38,9 +38,10 @@ ENV PATH="/home/sid/.local/bin:${PATH}"
 COPY requirements requirements
 RUN pip install --no-cache --user -r requirements/prod.txt
 
-COPY src/ .
+COPY src/obb obb
+COPY src/wsgi.py wsgi.py
 COPY run.sh .
-COPY --from=builder --chown=sid:sid /app/src/obb/static /app/src/obb/static
+COPY --from=builder --chown=sid:sid /app/src/obb/static /app/obb/static
 
 EXPOSE 5000
 
