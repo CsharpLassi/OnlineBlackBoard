@@ -68,6 +68,7 @@ def blackboard_room_update_settings(msg: RoomUpdateSettingsData, form_data):
         room: BlackboardRoomSession = room_db.get(msg.room_id)
         db_room = room.db_room
         db_room.draw_height = room_settings.height.data
+        db_room.visibility = room_settings.visibility.data
 
         db.session.commit()
 

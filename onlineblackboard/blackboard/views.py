@@ -64,6 +64,7 @@ def connect_to():
             db_room = BlackboardRoom()
             db_room.name = room_name
             db_room.creator = current_user
+            db_room.visibility = create_form.visibility.data
 
             db.session.add(db_room)
             db.session.commit()
@@ -89,6 +90,7 @@ def link_to(room: BlackboardRoomSession = None):
     edit_form = RoomSettings()
     if edit_form.validate_on_submit():
         db_room.draw_height = int(edit_form.height.data)
+        db_room.visibility = edit_form.visibility.data
         db.session.commit()
         return redirect(url_for('blackboard.link_to', room_id=room.room_id))
     else:

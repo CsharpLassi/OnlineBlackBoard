@@ -6,6 +6,9 @@ from typing import Optional, Iterator
 from ..ext import db
 
 default_draw_height = 256
+default_visibility = 'creator_only'
+
+blackboardRoom_visibilities = ('creator_only',)
 
 
 class BlackboardRoom(db.Model):
@@ -18,8 +21,8 @@ class BlackboardRoom(db.Model):
                             server_default=str(default_draw_height))
 
     visibility = db.Column(db.String, nullable=False,
-                           server_default='creator_only',
-                           default='creator_only')
+                           server_default=default_visibility,
+                           default=default_visibility)
 
     creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     creator = db.relationship('User')
