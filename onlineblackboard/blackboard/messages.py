@@ -39,7 +39,7 @@ class RoomJoinedData(BaseMessageData):
 
 @dataclass
 class RoomUpdateContentData(BaseMessageData):
-    room_id: str
+    room_id: int
     text: str
 
 

@@ -2,18 +2,23 @@ from typing import Dict, Optional
 
 from .functions import id_generator
 from .messages import RoomData, UserData, RoomUpdateContentData
-from .models import BlackboardRoom
+from .models import BlackboardRoom, default_draw_height
 
 
 class BlackboardRoomSession:
     def __init__(self, db_room: BlackboardRoom):
         self.room_id = db_room.id
         self.room_name: str = db_room.name
-        self.__db_room = db_room
 
         self.users: Dict[str, UserSessions] = dict()
 
         self.last_data: Optional[RoomUpdateContentData] = None
+
+    def get_style(self) -> str:
+        style: str = ""
+        if self.db_room.draw_height != default_draw_height:
+            style += f"height:{self.db_room.draw_height}px;"
+        return style
 
     def has_users(self) -> bool:
         return len(self.users) > 0
@@ -24,6 +29,12 @@ class BlackboardRoomSession:
 
     def to_dict(self) -> dict:
         return self.to_data().to_dict()
+
+    def _get_db_room(self):
+        from .models import BlackboardRoom
+        return BlackboardRoom.get(self.room_id)
+
+    db_room = property(_get_db_room)
 
 
 class UserSessions:

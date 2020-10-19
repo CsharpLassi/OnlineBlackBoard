@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, session, flash
+from flask import Blueprint, render_template, redirect, url_for, session, flash, request
 from flask_login import login_required, current_user
 
 from ..ext import db
@@ -20,6 +20,9 @@ def home():
     if form.validate_on_submit():
         room_name = form.room_name.data
         db_room = BlackboardRoom.get_active_room(room_name)
+        if db_room is None:
+            flash('room does not exist')
+            return redirect(url_for('blackboard.home'))
 
         session['room_name'] = room_name
 
@@ -44,7 +47,7 @@ def home():
 @bp.route('/show', methods=['GET', 'POST'])
 @check_room('blackboard.home')
 def mode_blackboard(room: BlackboardRoomSession = None):
-    return render_template('blackboard/mode_blackboard.html')
+    return render_template('blackboard/mode_blackboard.html', room=room)
 
 
 @bp.route('connectTo', methods=['GET', 'POST'])
@@ -75,8 +78,20 @@ def connect_to():
                            rooms=rooms)
 
 
-@bp.route('link', methods=['GET'])
+@bp.route('link', methods=['GET', 'POST'])
 @login_required
 @check_room('blackboard.connect_to', create_room_from_db=True)
 def link_to(room: BlackboardRoomSession = None):
-    return render_template('blackboard/mode_user.html', room=room)
+    from .forms import RoomSettings
+
+    db_room = room.db_room
+
+    edit_form = RoomSettings()
+    if edit_form.validate_on_submit():
+        db_room.draw_height = int(edit_form.height.data)
+        db.session.commit()
+        return redirect(url_for('blackboard.link_to', room_id=room.room_id))
+    else:
+        edit_form.height.data = db_room.draw_height
+
+    return render_template('blackboard/mode_user.html', room=room, edit_form=edit_form)

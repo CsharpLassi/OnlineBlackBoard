@@ -5,10 +5,17 @@ from typing import Optional, Iterator
 
 from ..ext import db
 
+default_draw_height = 256
+
 
 class BlackboardRoom(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False, index=True)
+
+    draw_height = db.Column(db.Integer,
+                            nullable=False,
+                            default=default_draw_height,
+                            server_default=str(default_draw_height))
 
     visibility = db.Column(db.String, nullable=False,
                            server_default='creator_only',

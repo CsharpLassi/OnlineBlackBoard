@@ -12,7 +12,7 @@
 
         </div>
         <div class="col-6">
-            <div id="content">
+            <div id="content" style="{{ room.get_style() }}">
             </div>
         </div>
 
@@ -34,7 +34,7 @@
             <div class="card">
                 <div class="card-header">Room Settings</div>
                 <div class="card-body">
-
+                    {{ show_form(edit_form) }}
                 </div>
             </div>
         </div>

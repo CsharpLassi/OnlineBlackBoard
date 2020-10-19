@@ -45,7 +45,7 @@ def blackboard_join(room_id: str):
     user.rooms[room_id] = room
     room.users[sid] = user
 
-    join_room(str(room_id))
+    join_room(room_id)
 
     join_data = RoomJoinedData(user=user.to_data(), room=room.to_data())
     join_data_dict = join_data.to_dict()
@@ -63,7 +63,7 @@ def blackboard_change_markdown(msg: RoomUpdateContentData):
     sid = request.sid
     user: UserSessions = user_db.get(sid)
 
-    room: BlackboardRoomSession = room_db.get(int(msg.room_id))
+    room: BlackboardRoomSession = room_db.get(msg.room_id)
     if not room:
         return
 
