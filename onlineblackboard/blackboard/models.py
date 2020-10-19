@@ -8,7 +8,7 @@ from ..ext import db
 default_draw_height = 256
 default_visibility = 'creator_only'
 
-blackboardRoom_visibilities = ('creator_only',)
+blackboardRoom_visibilities = ('creator_only', 'public')
 
 
 class BlackboardRoom(db.Model):
