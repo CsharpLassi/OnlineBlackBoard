@@ -22,7 +22,7 @@ COPY ./bower.json ./package.json package-lock.json ./.bowerrc ./
 RUN npm install -g bower
 RUN bower install --allow-root
 
-COPY onlineblackboard onlineblackboard
+COPY src/obb obb
 COPY src/wsgi.py .
 
 # ================================= PRODUCTION =================================
@@ -38,8 +38,10 @@ ENV PATH="/home/sid/.local/bin:${PATH}"
 COPY requirements requirements
 RUN pip install --no-cache --user -r requirements/prod.txt
 
-COPY . .
-COPY --from=builder --chown=sid:sid /app/onlineblackboard/static /app/onlineblackboard/static
+COPY src/obb obb
+COPY src/wsgi.py .
+COPY run.sh .
+COPY --from=builder --chown=sid:sid /app/src/obb/static /app/src/obb/static
 
 EXPOSE 5000
 
