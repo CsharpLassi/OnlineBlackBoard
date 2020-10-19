@@ -1,14 +1,17 @@
-from typing import Optional
-
 from flask import request, current_app, escape
-from flask_login import current_user
 from flask_socketio import emit, join_room
 
-from .decorators import convert, to_form_dict
-from .ext import namespace, room_db, user_db
-from .messages import *
+from .components.session_manager import BlackBoardSession
+
+from .messages.request_messages import *
+from .messages.response_messages import *
+
+from .decorators import convert, to_form_dict, event_login_required
+from .ext import namespace, bb_session_manager
+
 from .models import BlackboardRoom
-from .server_models import UserSessions, BlackboardRoomSession
+from .msg import *
+
 from ..ext import socket, db
 
 
@@ -17,100 +20,86 @@ def blackboard_connect():
     sid = request.sid
     current_app.logger.debug(f'Connect Socket: {sid}')
 
-    user: UserSessions = user_db.get(sid, UserSessions(sid))
-
-    if current_user and current_user.is_authenticated:
-        user.username = current_user.username
-
 
 @socket.on('disconnect', namespace=namespace)
 def blackboard_disconnect():
     sid = request.sid
     current_app.logger.debug(f'Disconnect Socket: {sid}')
 
-    user: UserSessions = user_db.pop(sid)
-    for room_id, room in user.rooms.items():
-        room.users.pop(user.sid)
-        emit('user:disconnected', user.to_dict(), room=room_id)
+    session = bb_session_manager.leave(sid)
+    if session:
+        leave_data = UserLeaveResponse(
+            user=session.session_user_data,
+            room=session.session_room_data
+        )
+
+        emit('room:user:leave', leave_data.to_dict(), room=session.room_id)
 
 
 @socket.on('room:join', namespace=namespace)
-def blackboard_join(room_id: str):
-    room_id = int(room_id)
+@convert(JoinRequestMessage)
+@event_login_required
+def blackboard_join(msg: JoinRequestMessage, room: BlackboardRoom = None):
     sid = request.sid
-    room: Optional[BlackboardRoomSession] = room_db.get(room_id)
-    if room is None:
-        return
+    session: BlackBoardSession = bb_session_manager.get(msg.session.session_id)
 
-    user: UserSessions = user_db.get(sid)
-    user.rooms[room_id] = room
-    room.users[sid] = user
+    join_room(room.id)
+    bb_session_manager.join(sid, msg.session.session_id)
 
-    join_room(room_id)
+    response_data = UserJoinedResponse(
+        user=session.session_user_data,
+        room=session.session_room_data)
+    response_data_dict = response_data.to_dict()
 
-    join_data = RoomJoinedData(user=user.to_data(), room=room.to_data())
-    join_data_dict = join_data.to_dict()
+    emit('room:user:joined', response_data_dict, room=room.id)
+    emit('room:joined', response_data_dict)
 
-    emit('room:user:joined', join_data_dict, room=room_id)
-    emit('room:joined', join_data_dict)
 
-    if room.last_data:
-        emit('room:print', room.last_data.to_dict(), )
+@socket.on('room:update:content', namespace=namespace)
+@convert(RoomUpdateContentRequestMessage)
+@event_login_required
+def blackboard_room_update_content(msg: RoomUpdateContentRequestMessage,
+                                   room: BlackboardRoom = None):
+    session = bb_session_manager.get(msg.session.session_id)
+    data = RoomPrintResponse(
+        raw_text=msg.raw_text,
+        markdown=escape(msg.raw_text),
+        creator=session.session_user_data,
+    )
+
+    emit('room:print', data.to_dict(), room=room.id)
+
+
+@socket.on('room:update:draw', namespace=namespace)
+@convert(RoomDrawRequestMessage)
+@event_login_required
+def room_update_draw(msg: RoomDrawRequestMessage, room: BlackboardRoom = None):
+    session = bb_session_manager.get(msg.session.session_id)
+
+    data = RoomDrawResponseMessage(
+        stroke=msg.stroke,
+        creator=session.session_user_data,
+    )
+
+    emit('room:draw:stroke', data.to_dict(), room=room.id)
 
 
 @socket.on('room:update:settings', namespace=namespace)
 @to_form_dict(item='from_data')
-@convert(RoomUpdateSettingsData)
-def blackboard_room_update_settings(msg: RoomUpdateSettingsData, form_data):
+@convert(RoomUpdateSettingsRequestMessage)
+@event_login_required
+def blackboard_room_update_settings(msg: RoomUpdateSettingsRequestMessage, form_data,
+                                    room: BlackboardRoom = None):
     from .forms import RoomSettings
     room_settings = RoomSettings(form_data)
     if room_settings.validate():
-        room: BlackboardRoomSession = room_db.get(msg.room_id)
-        db_room = room.db_room
-        db_room.draw_height = room_settings.height.data
-        db_room.visibility = room_settings.visibility.data
+        room.draw_height = room_settings.height.data
+        room.visibility = room_settings.visibility.data
 
         db.session.commit()
 
-        emit('room:updated:settings', room.to_dict(), room=room.room_id)
+        data = RoomUpdateSettingsResponseMessage(
+            content_draw_height=room.draw_height
+        )
 
-        return
-
-
-@socket.on('room:update:content', namespace=namespace)
-@convert(RoomUpdateContentData)
-def blackboard_change_markdown(msg: RoomUpdateContentData):
-    sid = request.sid
-    user: UserSessions = user_db.get(sid)
-
-    room: BlackboardRoomSession = room_db.get(msg.room_id)
-    if not room:
-        return
-
-    data = RoomPrintData(
-        text=msg.text,
-        markdown=escape(msg.text),
-        creator=user.to_data(),
-    )
-
-    room.last_data = data
-
-    emit('room:print', data.to_dict(), room=msg.room_id)
-
-
-@socket.on('room:update:draw', namespace=namespace)
-@convert(RoomUpdateDrawData)
-def room_update_draw(msg: RoomUpdateDrawData):
-    sid = request.sid
-    user: UserSessions = user_db.get(sid)
-
-    room: BlackboardRoomSession = room_db.get(msg.room_id)
-    if not room:
-        return
-
-    data = RoomStrokeData(
-        stroke=msg.stroke,
-        creator=user.to_data(),
-    )
-
-    emit('room:draw:stroke', data.to_dict(), room=msg.room_id)
+        emit('room:updated:settings', data.to_dict(), room=room.id)

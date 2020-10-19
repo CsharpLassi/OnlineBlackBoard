@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 
 from flask_login import UserMixin
@@ -19,6 +21,10 @@ class User(UserMixin, db.Model):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+    @staticmethod
+    def get(id) -> Optional[User]:
+        return User.query.get(id)
 
     def __repr__(self):
         return '<User {}>'.format(self.username)

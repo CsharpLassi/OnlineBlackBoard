@@ -7,12 +7,7 @@ T = TypeVar('T')
 
 
 class MemDb(Generic[P, T]):
-    __g_mem_id: int = 0
-
     def __init__(self):
-        self.__g_mem_id += 1
-        self.__mem_id = self.__g_mem_id
-
         self._db_lock = allocate_lock()
         self._db: Dict[P, T] = dict()
 

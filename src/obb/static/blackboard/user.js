@@ -2,20 +2,19 @@ var oldVal = "";
 $(document).ready(function () {
     $("#board").on("change keyup paste", function () {
         var currentVal = $(this).val();
-        if (currentVal === oldVal) {
-            return; //check to prevent multiple simultaneous triggers
-        }
-        let room_id = $.urlParam('room_id');
+        if (currentVal === oldVal)
+            return
+        let token = $.urlParam('session');
 
         oldVal = currentVal;
-        $.socket.emit('room:update:content', {'text': currentVal, 'room_id': room_id})
+        $.socket.emit('room:update:content', {'token': token, 'raw_text': currentVal})
     });
 
     $('form#roomEdit').submit(function (event) {
-        let room_id = $.urlParam('room_id');
+        let token = $.urlParam('session');
         $.socket.emit('room:update:settings',
             {
-                'room_id': room_id,
+                'token': token,
                 'from_data': $(this).serializeArray()
             });
         return false;

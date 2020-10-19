@@ -17,12 +17,12 @@ $(document).ready(function () {
     });
 
     $.sketchpad.addEventListener('strokerecorded', ({stroke}) => {
-        let room_id = $.urlParam('room_id');
+        let session = $.urlParam('session');
         for (var i = 0; i < stroke.points.length; i++) {
             stroke.points[i].x /= $.sketchpad.width
             stroke.points[i].y /= $.sketchpad.height
         }
-        $.socket.emit('room:update:draw', {room_id: room_id, stroke: stroke});
+        $.socket.emit('room:update:draw', {token: session, stroke: stroke});
     });
 
 

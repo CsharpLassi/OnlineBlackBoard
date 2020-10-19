@@ -42,7 +42,7 @@ $.urlParam = function (name) {
 
 $(document).on('socket:ready', function (socket) {
     $.socket.on('room:updated:settings', function (data) {
-        $('#content').css('height', `${data.draw_height}px`)
+        $('#contentText').css('height', `${data.content_draw_height}px`)
         drawContent();
     });
 });

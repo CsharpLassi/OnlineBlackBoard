@@ -1,12 +1,13 @@
 from functools import wraps
-from typing import Type
+from typing import Type, Optional
 
 from flask import request, flash, redirect, url_for
 from werkzeug.datastructures import ImmutableMultiDict
 
-from .ext import room_db
-from .server_models import BlackboardRoomSession
 from .models import BlackboardRoom
+from .components.session_manager import BlackBoardSession, BlackBoardSessionToken
+from .ext import bb_session_manager
+from .messages.base_messages import BaseRequestMessage
 
 from ..tools.dataclasses import dataclass_from_dict
 
@@ -50,20 +51,24 @@ def to_form_dict(item: str = None):
     return helper
 
 
-def check_room(fallback: str, create_room_from_db: bool = False):
+def check_room(fallback: str):
     def check_room_helper(func):
         @wraps(func)
         def room_checker(*args, **kwargs):
-            room_id = request.args.get('room_id')
-            db_room = BlackboardRoom.get(room_id)
-            if not db_room:
-                flash(f'room does not exist')
+            session_token = request.args.get('session')
+            if not session_token:
+                flash(f'session token is invalid')
                 return redirect(url_for(fallback))
 
-            room: BlackboardRoomSession = room_db.get(db_room.id)
-            if not room and create_room_from_db:
-                room = room_db.add(db_room.id, BlackboardRoomSession(db_room))
+            token = BlackBoardSessionToken.decode(session_token)
 
+            session: BlackBoardSession = bb_session_manager.get(token.session_id)
+
+            if not session:
+                flash(f'session does not exist')
+                return redirect(url_for(fallback))
+
+            room = BlackboardRoom.get(session.room_id)
             if not room:
                 flash(f'room does not exist')
                 return redirect(url_for(fallback))
@@ -74,3 +79,24 @@ def check_room(fallback: str, create_room_from_db: bool = False):
         return room_checker
 
     return check_room_helper
+
+
+def event_login_required(func):
+    @wraps(func)
+    def helper(*args, **kwargs):
+        msg = args[0]
+
+        room: Optional[BlackboardRoom] = None
+        if isinstance(msg, BaseRequestMessage):
+            session: BlackBoardSession = bb_session_manager.get(msg.session.session_id)
+            if session is None:
+                return
+
+            room = BlackboardRoom.get(session.room_id)
+            if room is None or not room.can_join(session.user_id):
+                return
+
+        kwargs['room'] = room
+        return func(*args, **kwargs)
+
+    return helper

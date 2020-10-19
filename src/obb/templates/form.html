@@ -54,7 +54,7 @@
 {% macro print_select_field(field) %}
     <div class="form-group">
         <label for="{{ field.id }}">{{ field.label.text }}</label>
-        <select class="form-control" id="{{ field.id }}">
+        <select class="form-control" id="{{ field.id }}" name="{{ field.name }}">
             {% for choice in field.choices %}
                 <option {% if choice== field.data %}selected{% endif %}>{{ choice }}</option>
             {% endfor %}

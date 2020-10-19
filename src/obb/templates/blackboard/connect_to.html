@@ -21,7 +21,7 @@
                     {% for room in rooms %}
                         <li id="room-{{ room.room_id }}" class="nav-item">
                             <a class="nav-link"
-                               href="{{ url_for('blackboard.link_to',room_id=room.id) }}">{{ room.name }}</a>
+                               href="{{ url_for('blackboard.connect_to_room',room_id=room.id) }}">{{ room.name }}</a>
                         </li>
                     {% endfor %}
                 </ul>
