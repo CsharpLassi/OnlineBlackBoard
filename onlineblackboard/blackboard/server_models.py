@@ -24,17 +24,18 @@ class BlackboardRoomSession:
         return len(self.users) > 0
 
     def to_data(self) -> RoomData:
+        tmp_room_db = self._get_db_room()
         return RoomData(room_id=self.room_id,
-                        room_name=self.room_name)
+                        room_name=self.room_name,
+                        draw_height=tmp_room_db.draw_height)
 
     def to_dict(self) -> dict:
         return self.to_data().to_dict()
 
-    def _get_db_room(self):
-        from .models import BlackboardRoom
+    def _get_db_room(self) -> BlackboardRoom:
         return BlackboardRoom.get(self.room_id)
 
-    db_room = property(_get_db_room)
+    db_room: BlackboardRoom = property(_get_db_room)
 
 
 class UserSessions:

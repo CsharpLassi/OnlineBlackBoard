@@ -4,11 +4,12 @@ from flask import request, current_app, escape
 from flask_login import current_user
 from flask_socketio import emit, join_room
 
-from .decorators import convert
+from .decorators import convert, to_form_dict
 from .ext import namespace, room_db, user_db
 from .messages import *
+from .models import BlackboardRoom
 from .server_models import UserSessions, BlackboardRoomSession
-from ..ext import socket
+from ..ext import socket, db
 
 
 @socket.on('connect', namespace=namespace)
@@ -55,6 +56,24 @@ def blackboard_join(room_id: str):
 
     if room.last_data:
         emit('room:print', room.last_data.to_dict(), )
+
+
+@socket.on('room:update:settings', namespace=namespace)
+@to_form_dict(item='from_data')
+@convert(RoomUpdateSettingsData)
+def blackboard_room_update_settings(msg: RoomUpdateSettingsData, form_data):
+    from .forms import RoomSettings
+    room_settings = RoomSettings(form_data)
+    if room_settings.validate():
+        room: BlackboardRoomSession = room_db.get(msg.room_id)
+        db_room = room.db_room
+        db_room.draw_height = room_settings.height.data
+
+        db.session.commit()
+
+        emit('room:updated:settings', room.to_dict(), room=room.room_id)
+
+        return
 
 
 @socket.on('room:update:content', namespace=namespace)

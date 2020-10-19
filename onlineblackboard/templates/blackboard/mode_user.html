@@ -17,7 +17,7 @@
         </div>
 
     </div>
-    <div class="row justify-content-center mt-3 content-translateY">
+    <div class="row justify-content-center mt-3">
         <div class="col-4">
             <div class="card">
                 <div class="card-header">Clients</div>
@@ -34,7 +34,7 @@
             <div class="card">
                 <div class="card-header">Room Settings</div>
                 <div class="card-body">
-                    {{ show_form(edit_form) }}
+                    {{ show_form(edit_form,id='roomEdit') }}
                 </div>
             </div>
         </div>
@@ -42,28 +42,6 @@
 {% endblock %}
 
 {% block blackboard_js %}
-    <script>
-        var oldVal = "";
-        $(document).ready(function () {
-
-            $("#board").on("change keyup paste", function () {
-                var currentVal = $(this).val();
-                if (currentVal === oldVal) {
-                    return; //check to prevent multiple simultaneous triggers
-                }
-                let room_id = $.urlParam('room_id');
-
-                oldVal = currentVal;
-                $.socket.emit('room:update:content', {'text': currentVal, 'room_id': room_id})
-            });
-
-        });
-        $(document).on('socket:ready', function () {
-            $.socket.on('room:print', function (msg) {
-                if (msg.creator.user_id !== $.user.user_id)
-                    $("#board").val(msg.text)
-            });
-        });
-    </script>
+    <script src="{{ url_for('static', filename='blackboard/user.js') }}"></script>
 {% endblock %}
 

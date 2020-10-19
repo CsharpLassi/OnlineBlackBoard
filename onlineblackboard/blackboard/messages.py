@@ -23,6 +23,7 @@ class UserDataChangeData(BaseMessageData):
 class RoomData(BaseMessageData):
     room_id: int
     room_name: str
+    draw_height: int
 
 
 @dataclass
@@ -35,6 +36,11 @@ class RoomCreatedData(BaseMessageData):
 class RoomJoinedData(BaseMessageData):
     user: UserData
     room: RoomData
+
+
+@dataclass()
+class RoomUpdateSettingsData(BaseMessageData):
+    room_id: int
 
 
 @dataclass

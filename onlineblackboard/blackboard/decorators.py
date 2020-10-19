@@ -2,6 +2,7 @@ from functools import wraps
 from typing import Type
 
 from flask import request, flash, redirect, url_for
+from werkzeug.datastructures import ImmutableMultiDict
 
 from .ext import room_db
 from .server_models import BlackboardRoomSession
@@ -16,6 +17,31 @@ def convert(cls: Type):
         def wrapper(*args, **kwargs):
             args = list(args)
             args[0] = dataclass_from_dict(cls, args[0])
+
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    return helper
+
+
+def to_form_dict(item: str = None):
+    def helper(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            args = list(args)
+            msg = args[0]
+            if item:
+                msg = msg[item]
+
+            dict_values = dict()
+
+            for value_item in msg:
+                name = value_item['name']
+                value = value_item['value']
+                dict_values[name] = value
+            if item:
+                args.append(ImmutableMultiDict(dict_values))
 
             return func(*args, **kwargs)
 

@@ -2,7 +2,7 @@ $(document).ready(function () {
     let room_id = $.urlParam('room_id');
     let socket = io.connect('/blackboard');
     $.socket = socket;
-    $(document).trigger('socket:ready')
+    $(document).trigger('socket:ready', socket)
 
     socket.on('connect', function () {
         $('#status').text('Connected');
