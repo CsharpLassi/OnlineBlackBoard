@@ -8,7 +8,7 @@ $.urlParam = function (name) {
 $(document).ready(function () {
     let div_content = $('#content');
 
-    if(!div_content.length)
+    if (!div_content.length)
         return
 
     let parent = div_content.parent();
@@ -27,5 +27,7 @@ $(document).ready(function () {
         'translateX(' + translate_x + 'px) ' +
         'translateY(' + translate_y + 'px) ' +
         'scale(' + factor_min + ') ');
+    // Todo: Vielleicht etwas schöner später
 
+    $('.content-translateY').css('transform', `translateY(${translate_y}px)`);
 });
