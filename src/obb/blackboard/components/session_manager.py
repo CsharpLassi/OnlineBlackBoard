@@ -86,7 +86,7 @@ class BlackBoardSessionManager:
         user_data = UserData(
             user_id=id_generator(),
             username='Guest' if not user else user.username,
-            creator=room.creator_id == user.id,
+            creator=(room.creator_id == user.id if user else 0),
             mode=mode,
         )
         self.__users.add(user_data.user_id, user_data)
