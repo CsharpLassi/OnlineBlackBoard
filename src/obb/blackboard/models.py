@@ -3,6 +3,10 @@ from __future__ import annotations
 from operator import or_
 from typing import Optional, Iterator
 
+from datetime import datetime
+
+from sqlalchemy.sql import func
+
 from ..ext import db
 
 default_draw_height = 256
@@ -119,3 +123,9 @@ class LectureSession(db.Model):
 
     room_id = db.Column(db.String, db.ForeignKey('blackboard_room.id'), nullable=False)
     room = db.relationship('BlackboardRoom')
+
+    start_time = db.Column(db.DATETIME, nullable=False,
+                           default=datetime.utcnow,
+                           server_default=func.utcnow())
+
+    duration = db.Column(db.Integer, nullable=False, default=120, server_default='120')
