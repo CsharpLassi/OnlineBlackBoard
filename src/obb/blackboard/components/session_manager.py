@@ -52,7 +52,7 @@ class BlackBoardSessionManager:
     def __init__(self):
         self.__db = MemDb[str, BlackBoardSession]()
         self.__sid_to_session_db = MemDb[str, str]()
-        self.__rooms = MemDb[str, MemDb[str, str]]()
+        self.__rooms = MemDb[str, RoomData]()
 
     def create_session(self, room_id: str, user: User = None) -> BlackBoardSession:
         if user is None and current_user.is_authenticated:
@@ -65,10 +65,10 @@ class BlackBoardSessionManager:
             username='Guest' if not user else user.username
         )
 
-        room_data = RoomData(
+        room_data = self.__rooms.get(room_id, RoomData(
             room_id=room_id,
             room_name=room.name
-        )
+        ))
 
         session = BlackBoardSession(
             session_id=id_generator(),
@@ -88,8 +88,8 @@ class BlackBoardSessionManager:
             return
         self.__sid_to_session_db.add(sid, session_id)
 
-        room_dict = self.__rooms.get(session.room_id, MemDb[str, str]())
-        room_dict.add(sid, session_id)
+        room_data: Optional[RoomData] = self.__rooms.get(session.room_id)
+        room_data.users[session.session_user_data.user_id] = session.session_user_data
 
         return
 
@@ -99,9 +99,9 @@ class BlackBoardSessionManager:
             return
 
         session: Optional[BlackBoardSession] = self.__db.get(session_id)
-        room: Optional[MemDb[str, str]]
+        room: Optional[RoomData]
         if session and (room := self.__rooms.get(session.room_id)):
-            sip_room_session = room.pop(sid)
+            user_data = room.users.pop(session.session_user_data.user_id)
             pass
         return session
 

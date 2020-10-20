@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List
 
 from .base_data_class import BaseDataClass
@@ -15,8 +15,7 @@ class RoomData(BaseDataClass):
     room_id: str
     room_name: str
 
-
-
+    users: dict = field(default_factory=dict)
 
 
 @dataclass
@@ -32,6 +31,3 @@ class StrokeData(BaseDataClass):
     smoothing: float
     weight: int
     points: List[StrokePoints]
-
-
-
