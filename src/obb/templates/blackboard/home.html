@@ -10,7 +10,7 @@
                     {% for room in rooms %}
                         <li id="room-{{ room.room_id }}" class="nav-item">
                             <a class="nav-link"
-                               href="{{ url_for('blackboard.link',room_id=room.id) }}">{{ room.full_name }}</a>
+                               href="{{ url_for('blackboard.link',room_id=room.id,mode='Blackboard') }}">{{ room.full_name }}</a>
                         </li>
                     {% endfor %}
                 </ul>
@@ -23,7 +23,7 @@
                 Join Session
             </div>
             <div class="card-body">
-                {{ show_form(form) }}
+                {{ show_form(form,action='?mode=Blackboard') }}
             </div>
         </div>
     </div>

@@ -70,7 +70,8 @@ class BlackBoardSessionManager:
         self.__sid_to_session_db = MemDb[str, str]()
         self.__rooms = MemDb[str, RoomData]()
 
-    def create_session(self, room_id: str, user: User = None) -> BlackBoardSession:
+    def create_session(self, room_id: str, user: User = None,
+                       mode: str = 'default') -> BlackBoardSession:
         if user is None and current_user.is_authenticated:
             user = current_user
 
@@ -78,7 +79,8 @@ class BlackBoardSessionManager:
 
         user_data = UserData(
             user_id=id_generator(),
-            username='Guest' if not user else user.username
+            username='Guest' if not user else user.username,
+            mode=mode,
         )
 
         room_data = self.__rooms.get(room_id, RoomData(

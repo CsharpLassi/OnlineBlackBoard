@@ -6,9 +6,14 @@ function addUser(user) {
             id: user_div_id
         });
 
-        //name
+        // Name
         $('<td />', {
             text: user.username,
+        }).appendTo(user_element)
+
+         // Mode
+        $('<td />', {
+            text: user.mode,
         }).appendTo(user_element)
 
         user_element.appendTo('#userList')

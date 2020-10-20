@@ -14,6 +14,8 @@ def home():
     from .forms import ConnectToRoom
     form = ConnectToRoom()
 
+    mode = request.args.get('mode')
+
     if form.validate_on_submit():
         room_name = form.room_name.data
         room = BlackboardRoom.get_by_name(room_name)
@@ -24,7 +26,7 @@ def home():
         session['room_name'] = room_name
 
         return redirect(
-            url_for('blackboard.link', room_id=room.id))
+            url_for('blackboard.link', room_id=room.id, mode=mode))
 
     rooms = BlackboardRoom.get_rooms(public=True)
     form.room_name.data = session.get('room_name')
@@ -33,6 +35,8 @@ def home():
 
 @bp.route('/link/<room_id>', methods=['GET', 'POST'])
 def link(room_id: str):
+    mode = request.args.get('mode')
+
     room = BlackboardRoom.get(room_id)
     if not room:
         flash('room does not exist')
@@ -44,10 +48,12 @@ def link(room_id: str):
 
     bb_session = bb_session_manager.create_session(room_id=room.id)
 
-    if current_user and current_user.is_authenticated:
-        if current_user.id == room.creator_id:
-            return redirect(url_for('blackboard.link_user', room_id=room.id))
+    if mode is None:
+        if current_user and current_user.is_authenticated:
+            if current_user.id == room.creator_id:
+                return redirect(url_for('blackboard.link_user', room_id=room.id))
 
+    bb_session.session_user_data.mode = 'blackboard'
     return render_template('blackboard/mode_blackboard.html',
                            room=room,
                            bb_session=bb_session)
@@ -78,6 +84,7 @@ def link_user(room_id: str):
     edit_form.read_data(room)
 
     bb_session = bb_session_manager.create_session(room_id=room.id)
+    bb_session.session_user_data.mode = 'user'
     return render_template('blackboard/mode_user.html',
                            room=room,
                            bb_session=bb_session,

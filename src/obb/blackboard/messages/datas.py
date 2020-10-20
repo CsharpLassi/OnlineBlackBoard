@@ -8,6 +8,7 @@ from .base_data_class import BaseDataClass
 class UserData(BaseDataClass):
     user_id: str
     username: str
+    mode: str
 
 
 @dataclass
