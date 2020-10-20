@@ -26,7 +26,7 @@ function drawContent() {
     let new_height = content_height * factor_min;
 
     $('#content').width(new_width).height(new_height);
-    $('#contentSketchpad').attr({'width': new_width, 'height': new_height});
+    $('.contentSketchpad').attr({'width': new_width, 'height': new_height});
 
     $('.content-translateY').css('transform', `translateY(${translate_y}px)`);
 
