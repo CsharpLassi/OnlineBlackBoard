@@ -1,4 +1,5 @@
 from dataclasses import fields
+from datetime import datetime
 from typing import TypeVar, Type, List, get_args
 
 T = TypeVar('T')
@@ -20,6 +21,8 @@ def dataclass_from_dict(cls: Type[T], value_dict: dict) -> T:
             convert_dict[field_name] = float(value)
         elif field_type is bool or field_type == 'bool':
             convert_dict[field_name] = bool(value)
+        elif field_type is datetime or field_type == 'datetime.datetime':
+            convert_dict[field_name] = datetime.utcfromtimestamp(value)
         elif getattr(field_type, '_name', None) == 'List':
             list_value = list()
             list_type = get_args(field_type)[0]

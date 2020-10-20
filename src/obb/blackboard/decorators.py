@@ -61,16 +61,19 @@ def event_login_required(func):
 
         room: Optional[BlackboardRoom] = None
         if isinstance(msg, BaseRequestMessage):
-            if msg.session is None:
+            if msg.session is None or msg.session.is_expired():
+                # Todo: Error message
                 return
 
             session: BlackBoardSession = bb_session_manager.get(msg.session.session_id)
-            if session is None:
+            if session is None or session.is_expired():
                 return
 
             room = BlackboardRoom.get(session.room_id)
             if room is None or not room.can_join(session.user_id):
                 return
+
+            session.refresh()
 
         kwargs['room'] = room
         return func(*args, **kwargs)

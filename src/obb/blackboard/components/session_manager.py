@@ -1,27 +1,35 @@
 from __future__ import annotations
 
 import dataclasses
-from typing import Optional, List
+from dataclasses import dataclass
+import datetime
+from typing import Optional
 
 import jwt
-from dataclasses import dataclass
-
 from flask import current_app
 from flask_login import current_user
-
-from ..models import BlackboardRoom
-
-from ..messages.datas import UserData, RoomData
 
 from obb.tools import id_generator
 from obb.tools.MemDb import MemDb
 from obb.tools.dataclasses import dataclass_from_dict
 from obb.users.models import User
+from ..messages.datas import UserData, RoomData
+from ..models import BlackboardRoom
+
+
+def calc_exp(minutes: float = 0) -> datetime.datetime:
+    date = datetime.datetime.utcnow() + datetime.timedelta(minutes=minutes)
+    return date
 
 
 @dataclass
 class BlackBoardSessionToken:
     session_id: str
+    exp: datetime.datetime = dataclasses.field(
+        default_factory=lambda: calc_exp(minutes=120))
+
+    def is_expired(self) -> bool:
+        return datetime.datetime.utcnow() > self.exp
 
     def encode(self) -> str:
         session_dict = dataclasses.asdict(self)
@@ -40,6 +48,14 @@ class BlackBoardSession:
     user_id: int
     session_user_data: UserData
     session_room_data: RoomData
+    exp: datetime.datetime = dataclasses.field(
+        default_factory=lambda: calc_exp(minutes=120))
+
+    def refresh(self):
+        self.exp = calc_exp(minutes=120)
+
+    def is_expired(self) -> bool:
+        return datetime.datetime.utcnow() > self.exp
 
     def get_token(self) -> BlackBoardSessionToken:
         return BlackBoardSessionToken(session_id=self.session_id)
