@@ -18,7 +18,7 @@ $(document).ready(function () {
 
     socket.on('room:joined', function (msg) {
         $.user = msg.user
-        $('#status').text(msg.room.room_name);
+        $('#status').text(msg.room.room_name + ':' + msg.user.user_id);
     });
 
 
