@@ -1,9 +1,10 @@
 $(document).ready(function () {
     let token = $('meta[name=session-token]').attr("content");
+    let recordStrokes = true
 
     let sketchpad_global_canvas = $('#contentSketchpadGlobal')
     $.sketchpadGlobal = new Atrament(document.querySelector('#contentSketchpadGlobal'));
-    $.sketchpadGlobal.recordStrokes = true;
+    $.sketchpadGlobal.recordStrokes = recordStrokes;
 
     $.sketchpadGlobal.width = sketchpad_global_canvas.attr('width')
     $.sketchpadGlobal.height = sketchpad_global_canvas.attr('height')
@@ -25,7 +26,7 @@ $(document).ready(function () {
 
     let sketchpad_user_canvas = $('#contentSketchpadUser')
     $.sketchpad_user_canvas = new Atrament(document.querySelector('#contentSketchpadUser'));
-    $.sketchpad_user_canvas.recordStrokes = true;
+    $.sketchpad_user_canvas.recordStrokes = recordStrokes;
 
     $.sketchpad_user_canvas.width = sketchpad_user_canvas.attr('width')
     $.sketchpad_user_canvas.height = sketchpad_user_canvas.attr('height')
@@ -33,14 +34,28 @@ $(document).ready(function () {
     $(document).on('content:change', function () {
         let sketchpad_canvas = $('#contentSketchpadUser')
 
-        $.sketchpad_user_canvas.width = sketchpad_canvas.attr('width')
-        $.sketchpad_user_canvas.height = sketchpad_canvas.attr('height')
+        $.sketchpad_user_canvas.width = sketchpad_canvas.attr('width');
+        $.sketchpad_user_canvas.height = sketchpad_canvas.attr('height');
+    });
+
+    $('#cmdEnableDraw').click(function () {
+        if (recordStrokes) {
+            $(this).children().removeClass('fa-check-square').addClass('fa-square');
+            $('#contentBlocker').css('z-index', 5)
+            recordStrokes = false;
+        } else {
+            $(this).children().removeClass('fa-square').addClass('fa-check-square');
+            $('#contentBlocker').css('z-index', 0)
+            recordStrokes = true;
+        }
+
+        $.sketchpad_user_canvas.recordStrokes = recordStrokes;
+        $.sketchpadGlobal.recordStrokes = recordStrokes;
     });
 
 })
 
 $(document).on('socket:ready', function () {
-
     $.socket.on('room:joined', function (msg) {
         let user = msg.user
         if (user.allow_draw) {
@@ -62,7 +77,7 @@ $(document).on('socket:ready', function () {
     $.socket.on('room:draw:stroke', function (msg) {
         if (msg.creator.user_id === $.user.user_id)
             return
-
+        let old_record = $.sketchpadGlobal.recordStrokes
         $.sketchpadGlobal.recordStrokes = false;
 
         let stroke = msg.stroke
@@ -101,6 +116,6 @@ $(document).on('socket:ready', function () {
         // endStroke closes the path
         $.sketchpadGlobal.endStroke(prevPoint.x, prevPoint.y);
 
-        $.sketchpadGlobal.recordStrokes = true;
+        $.sketchpadGlobal.recordStrokes =  old_record;
     });
 });
