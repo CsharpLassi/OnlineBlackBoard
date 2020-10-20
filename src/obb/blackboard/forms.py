@@ -3,13 +3,15 @@ from wtforms import StringField, SubmitField, IntegerField, SelectField
 from wtforms.validators import DataRequired, Length
 from .models import default_visibility, blackboardRoom_visibilities
 
+from obb.tools.forms import BaseDataForm
 
-class ConnectToRoom(FlaskForm):
+
+class ConnectToRoom(FlaskForm, BaseDataForm):
     room_name = StringField('Room', validators=[DataRequired(), Length(max=16)])
     submit = SubmitField('Join')
 
 
-class CreateRoomForm(FlaskForm):
+class CreateRoomForm(FlaskForm, BaseDataForm):
     room_name = StringField('Room', validators=[DataRequired(), Length(max=16)])  #
     visibility = SelectField('Visibility',
                              default=default_visibility,
@@ -18,8 +20,8 @@ class CreateRoomForm(FlaskForm):
     submit = SubmitField('Create')
 
 
-class RoomSettings(FlaskForm):
-    height = IntegerField('Board-Height')
+class RoomSettings(FlaskForm, BaseDataForm):
+    draw_height = IntegerField('Board-Height')
     visibility = SelectField('Visibility',
                              default=default_visibility,
                              choices=blackboardRoom_visibilities,

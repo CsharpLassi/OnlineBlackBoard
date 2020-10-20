@@ -65,14 +65,13 @@ def link_user(room_id: str):
         return redirect('blackboard.home')
 
     edit_form = RoomSettings()
+
     if edit_form.validate_on_submit():
-        room.draw_height = int(edit_form.height.data)
-        room.visibility = edit_form.visibility.data
+        edit_form.write_data(room)
         db.session.commit()
         return redirect(url_for('blackboard.link_user', room_id=room.id))
-    else:
-        edit_form.height.data = room.draw_height
-        edit_form.visibility.data = room.visibility
+
+    edit_form.read_data(room)
 
     bb_session = bb_session_manager.create_session(room_id=room.id)
     return render_template('blackboard/mode_user.html',
