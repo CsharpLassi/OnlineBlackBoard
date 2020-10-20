@@ -40,6 +40,10 @@ def load_blueprints(app: Flask):
     app.register_blueprint(bp_users)
     app.register_blueprint(bp_users_admin)
 
+    # Filters
+    from .filters import bp as bp_filters
+    app.register_blueprint(bp_filters)
+
 
 def load_cli(app: Flask):
     from .users.cli import bp_cli as bp_user

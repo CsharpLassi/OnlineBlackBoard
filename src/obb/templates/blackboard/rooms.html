@@ -67,9 +67,9 @@
                     <tr>
                         <th scope="row">{{ loop.index }}</th>
                         <td>{{ lecture.name }}</td>
-                        <td>{{ lecture.start_time }}</td>
-                        <td>{{ lecture.end_time }}</td>
-                        <td>{{ lecture.duration }}</td>
+                        <td>{{ lecture.start_time | df }} </td>
+                        <td>{{ lecture.end_time | df }} </td>
+                        <td>{{ lecture.duration }} min</td>
                     </tr>
                 {% endfor %}
                 </tbody>
