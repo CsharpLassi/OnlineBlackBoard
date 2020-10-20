@@ -95,6 +95,25 @@ class BlackboardRoom(db.Model):
 
         return None
 
+    def intersect_lecture(self, start_time: datetime.datetime, duration: int) -> bool:
+        end_time: datetime.datetime = start_time + datetime.timedelta(minutes=duration)
+        lecture: LectureSession
+
+        for lecture in self.lecture_sessions:
+            if lecture.start_time < start_time < lecture.end_time:
+                return True
+
+            if lecture.start_time < end_time < lecture.end_time:
+                return True
+
+            if start_time < lecture.start_time < end_time:
+                return True
+
+            if start_time < lecture.end_time < end_time:
+                return True
+
+        return False
+
     @staticmethod
     def get(id) -> Optional[BlackboardRoom]:
         return BlackboardRoom.query.get(id)

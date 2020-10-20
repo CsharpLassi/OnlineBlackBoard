@@ -113,10 +113,13 @@ def create_session(room_id: str):
         lecture_session.maintainer = current_user
         form.write_data(lecture_session)
 
-        room.lecture_sessions.append(lecture_session)
-        db.session.commit()
+        if room.intersect_lecture(lecture_session.start_time, lecture_session.duration):
+            flash('Session intersects')
+        else:
+            room.lecture_sessions.append(lecture_session)
+            db.session.commit()
 
-        return redirect(url_for('blackboard.list_rooms'))
+            return redirect(url_for('blackboard.list_rooms'))
 
     return render_template('blackboard/create_session.html', form=form)
 
