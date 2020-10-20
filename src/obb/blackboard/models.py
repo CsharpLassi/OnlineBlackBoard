@@ -44,6 +44,8 @@ class BlackboardRoom(db.Model):
     creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     creator = db.relationship('User')
 
+    lecture_sessions = db.relationship('LectureSession', lazy=True)
+
     def can_join(self, user=None) -> bool:
         from flask_login import current_user
         from ..users.models import User
@@ -107,3 +109,13 @@ class BlackboardRoom(db.Model):
                                          BlackboardRoom.visibility == 'public'))
 
         return f_query.all()
+
+
+class LectureSession(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    maintainer_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    maintainer = db.relationship('User')
+
+    room_id = db.Column(db.String, db.ForeignKey('blackboard_room.id'), nullable=False)
+    room = db.relationship('BlackboardRoom')
