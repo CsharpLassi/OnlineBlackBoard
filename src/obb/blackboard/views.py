@@ -4,7 +4,7 @@ from flask_login import login_required, current_user
 from ..ext import db
 
 from .ext import namespace, bb_session_manager
-from .models import BlackboardRoom
+from .models import BlackboardRoom, LectureSession
 
 bp = Blueprint('blackboard', __name__, url_prefix=namespace)
 
@@ -97,6 +97,30 @@ def link_user(room_id: str):
                            edit_form=edit_form)
 
 
+@bp.route('/create/<room_id>', methods=['GET', 'POST'])
+@login_required
+def create_session(room_id: str):
+    from .forms import CreateSession
+
+    room = BlackboardRoom.get(room_id)
+    if room is None:
+        flash('room does not exist')
+        return redirect(url_for('blackboard.list_rooms'))
+
+    form = CreateSession()
+    if form.validate_on_submit():
+        lecture_session = LectureSession()
+        lecture_session.maintainer = current_user
+        form.write_data(lecture_session)
+
+        room.lecture_sessions.append(lecture_session)
+        db.session.commit()
+
+        return redirect(url_for('blackboard.list_rooms'))
+
+    return render_template('blackboard/create_session.html', form=form)
+
+
 @bp.route('/rooms', methods=['GET', 'POST'])
 @login_required
 def list_rooms():
@@ -110,7 +134,7 @@ def list_rooms():
         room = BlackboardRoom.get_by_name(room_full_name)
         if room:
             flash('Room already exist')
-            return redirect(url_for('blackboard.connect_to'))
+            return redirect(url_for('blackboard.list_rooms'))
 
         room = BlackboardRoom()
         room.name = room_name
@@ -121,7 +145,7 @@ def list_rooms():
         db.session.add(room)
         db.session.commit()
 
-        return redirect(url_for('blackboard.link', room_id=room.id))
+        return redirect(url_for('blackboard.rooms'))
 
     rooms = BlackboardRoom.get_rooms()
     return render_template('blackboard/rooms.html',

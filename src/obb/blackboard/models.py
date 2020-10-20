@@ -133,7 +133,7 @@ class LectureSession(db.Model):
     room_id = db.Column(db.String, db.ForeignKey('blackboard_room.id'), nullable=False)
     room = db.relationship('BlackboardRoom')
 
-    start_time = db.Column(db.DATETIME, nullable=False,
+    start_time = db.Column(db.TIMESTAMP, nullable=False,
                            default=datetime.datetime.utcnow,
                            server_default=func.utcnow())
 
@@ -144,5 +144,5 @@ class LectureSession(db.Model):
 
     def is_open(self) -> bool:
         current_time = datetime.datetime.utcnow()
-
-        return current_time > self.start_time and current_time < self.end_time
+        result = current_time > self.start_time and current_time < self.end_time
+        return result
