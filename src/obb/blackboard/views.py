@@ -44,7 +44,7 @@ def link(room_id: str):
 
     if not room.can_join():
         flash('not allowed')
-        return redirect('blackboard.home')
+        return redirect(url_for('blackboard.home'))
 
     bb_session = bb_session_manager.create_session(room_id=room.id)
 
@@ -68,11 +68,15 @@ def link_user(room_id: str):
 
     if room is None:
         flash('Room does not exist')
-        return redirect(url_for('blackboard.home'))
+        return redirect(url_for('blackboard.list_rooms'))
+
+    if not room.can_join():
+        flash('room is closed')
+        return redirect(url_for('blackboard.list_rooms'))
 
     if room.creator_id != current_user.id:
         flash('you have no access to the page')
-        return redirect(url_for('blackboard.home'))
+        return redirect(url_for('blackboard.list_rooms'))
 
     edit_form = RoomSettings()
 

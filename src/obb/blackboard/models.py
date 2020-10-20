@@ -3,7 +3,7 @@ from __future__ import annotations
 from operator import or_
 from typing import Optional, Iterator
 
-from datetime import datetime
+import datetime
 
 from sqlalchemy.sql import func
 
@@ -53,6 +53,15 @@ class BlackboardRoom(db.Model):
     def can_join(self, user=None) -> bool:
         from flask_login import current_user
         from ..users.models import User
+
+        is_open = False
+        for session in self.lecture_sessions:
+            if session.is_open():
+                is_open = True
+                break
+
+        if not is_open:
+            return False
 
         if isinstance(user, int):
             user = User.get(user)
@@ -125,7 +134,15 @@ class LectureSession(db.Model):
     room = db.relationship('BlackboardRoom')
 
     start_time = db.Column(db.DATETIME, nullable=False,
-                           default=datetime.utcnow,
+                           default=datetime.datetime.utcnow,
                            server_default=func.utcnow())
 
     duration = db.Column(db.Integer, nullable=False, default=120, server_default='120')
+
+    end_time: datetime.datetime = property(
+        lambda self: self.start_time + datetime.timedelta(self.duration))
+
+    def is_open(self) -> bool:
+        current_time = datetime.datetime.utcnow()
+
+        return current_time > self.start_time and current_time < self.end_time

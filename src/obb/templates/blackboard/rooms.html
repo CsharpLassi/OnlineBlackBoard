@@ -15,19 +15,36 @@
     </div>
     <div class="col mt-3">
         <div class="card">
-            <div class="card-header">Rooms</div>
+            <div class="card-header">Closed Rooms</div>
             <div class="card-body">
                 <ul id="roomList" class="nav flex-column">
                     {% for room in rooms %}
-                        <li id="room-{{ room.room_id }}" class="nav-item">
-                            <a class="nav-link"
-                               href="{{ url_for('blackboard.link_user',room_id=room.id) }}">{{ room.name }}</a>
-                        </li>
+                        {% if not room.can_join() %}
+                            <li id="room-{{ room.room_id }}" class="nav-item">
+                                <a class="nav-link"
+                                   href="{{ url_for('blackboard.link_user',room_id=room.id) }}">{{ room.name }}</a>
+                            </li>
+                        {% endif %}
                     {% endfor %}
                 </ul>
             </div>
         </div>
     </div>
-    <div class="col">
+    <div class="col mt-3">
+        <div class="card">
+            <div class="card-header">Opened Rooms</div>
+            <div class="card-body">
+                <ul id="roomList" class="nav flex-column">
+                    {% for room in rooms %}
+                        {% if room.can_join() %}
+                            <li id="room-{{ room.room_id }}" class="nav-item">
+                                <a class="nav-link"
+                                   href="{{ url_for('blackboard.link_user',room_id=room.id) }}">{{ room.name }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
     </div>
 {% endblock %}
