@@ -85,6 +85,8 @@ def link_user(room_id: str):
 
     bb_session = bb_session_manager.create_session(room_id=room.id)
     bb_session.session_user_data.mode = 'user'
+    bb_session.session_user_data.allow_draw = True
+
     return render_template('blackboard/mode_user.html',
                            room=room,
                            bb_session=bb_session,

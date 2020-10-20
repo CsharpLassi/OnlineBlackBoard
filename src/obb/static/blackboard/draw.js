@@ -30,6 +30,7 @@ $(document).ready(function () {
 })
 
 $(document).on('socket:ready', function () {
+
     $.socket.on('room:draw:stroke', function (msg) {
         if (msg.creator.user_id === $.user.user_id)
             return

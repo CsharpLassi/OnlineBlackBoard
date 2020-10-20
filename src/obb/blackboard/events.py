@@ -75,6 +75,10 @@ def blackboard_room_update_content(msg: RoomUpdateContentRequestMessage,
 def room_update_draw(msg: RoomDrawRequestMessage, room: BlackboardRoom = None):
     session = bb_session_manager.get(msg.session.session_id)
 
+    if not session.session_user_data.allow_draw:
+        # Todo: Msg
+        return
+
     data = RoomDrawResponseMessage(
         stroke=msg.stroke,
         creator=session.session_user_data,
