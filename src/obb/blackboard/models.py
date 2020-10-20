@@ -6,6 +6,7 @@ from typing import Optional, Iterator
 from ..ext import db
 
 default_draw_height = 256
+default_draw_width = 1024
 default_visibility = 'creator_only'
 
 blackboardRoom_visibilities = ('creator_only', 'public')
@@ -30,6 +31,11 @@ class BlackboardRoom(db.Model):
                             nullable=False,
                             default=default_draw_height,
                             server_default=str(default_draw_height))
+
+    draw_width = db.Column(db.Integer,
+                           nullable=False,
+                           default=default_draw_width,
+                           server_default=str(default_draw_width))
 
     visibility = db.Column(db.String, nullable=False,
                            server_default=default_visibility,
@@ -62,6 +68,8 @@ class BlackboardRoom(db.Model):
         style = ''
         if self.draw_height > 0:
             style += f'height:{self.draw_height}px;'
+        if self.draw_width > 0:
+            style += f'width:{self.draw_width}px;'
         return style
 
     @staticmethod

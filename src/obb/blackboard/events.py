@@ -92,8 +92,7 @@ def blackboard_room_update_settings(msg: RoomUpdateSettingsRequestMessage, form_
     from .forms import RoomSettings
     room_settings = RoomSettings(form_data)
     if room_settings.validate():
-        room.draw_height = room_settings.height.data
-        room.visibility = room_settings.visibility.data
+        room_settings.write_data(room)
 
         db.session.commit()
 

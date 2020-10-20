@@ -60,9 +60,13 @@ def link_user(room_id: str):
 
     room = BlackboardRoom.get(room_id)
 
+    if room is None:
+        flash('Room does not exist')
+        return redirect(url_for('blackboard.home'))
+
     if room.creator_id != current_user.id:
         flash('you have no access to the page')
-        return redirect('blackboard.home')
+        return redirect(url_for('blackboard.home'))
 
     edit_form = RoomSettings()
 

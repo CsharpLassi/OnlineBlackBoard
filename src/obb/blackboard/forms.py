@@ -22,6 +22,7 @@ class CreateRoomForm(FlaskForm, BaseDataForm):
 
 class RoomSettings(FlaskForm, BaseDataForm):
     draw_height = IntegerField('Board-Height')
+    draw_width = IntegerField('Board-Width')
     visibility = SelectField('Visibility',
                              default=default_visibility,
                              choices=blackboardRoom_visibilities,
