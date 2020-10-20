@@ -1,6 +1,8 @@
 from flask import request, current_app, escape
 from flask_socketio import emit, join_room
 
+from obb.users.models import User
+
 from .components.session_manager import BlackBoardSession
 
 from .messages.request_messages import *
@@ -41,6 +43,10 @@ def blackboard_disconnect():
 def blackboard_join(msg: JoinRequestMessage, room: BlackboardRoom = None):
     sid = request.sid
     session: BlackBoardSession = bb_session_manager.get(msg.session.session_id)
+
+    user: User = session.get_user()
+    if not user and room.can_join(session, user=user):
+        return
 
     join_room(room.id)
     bb_session_manager.join(sid, msg.session.session_id)

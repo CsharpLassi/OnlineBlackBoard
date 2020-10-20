@@ -17,6 +17,8 @@
         {{ print_boolean_field(field) }}
     {% elif field.type == 'SelectField' %}
         {{ print_select_field(field) }}
+    {% elif field.type == 'DateTimeField' %}
+        {{ print_datatime(field) }}
     {% elif field.type == 'SubmitField' %}
         {{ print_submit(field) }}
     {% elif field.type == 'CSRFTokenField' %}
@@ -69,6 +71,15 @@
 
 {% macro print_token(field) %}
     {{ field }}
+{% endmacro %}
+
+{% macro print_datatime(field) %}
+    <div class="form-group">
+        <label for="{{ field.id }}">{{ field.label.text }}</label>
+        <input type="{{ type }}" class="form-control" name="{{ field.name }}" id="{{ field.id }}"
+               value="{{ field.data.strftime(field.format) if field.data else '' }}">
+        {{ print_errors(field) }}
+    </div>
 {% endmacro %}
 
 

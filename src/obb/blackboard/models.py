@@ -3,6 +3,10 @@ from __future__ import annotations
 from operator import or_
 from typing import Optional, Iterator
 
+import datetime
+
+from sqlalchemy.sql import func
+
 from ..ext import db
 
 default_draw_height = 256
@@ -44,9 +48,20 @@ class BlackboardRoom(db.Model):
     creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     creator = db.relationship('User')
 
+    lecture_sessions = db.relationship('LectureSession', lazy=True)
+
     def can_join(self, user=None) -> bool:
         from flask_login import current_user
         from ..users.models import User
+
+        is_open = False
+        for session in self.lecture_sessions:
+            if session.is_open():
+                is_open = True
+                break
+
+        if not is_open:
+            return False
 
         if isinstance(user, int):
             user = User.get(user)
@@ -71,6 +86,33 @@ class BlackboardRoom(db.Model):
         if self.draw_width > 0:
             style += f'width:{self.draw_width}px;'
         return style
+
+    def get_current_lecture(self) -> Optional[LectureSession]:
+        lecture: LectureSession
+        for lecture in self.lecture_sessions:
+            if lecture.is_open():
+                return lecture
+
+        return None
+
+    def intersect_lecture(self, start_time: datetime.datetime, duration: int) -> bool:
+        end_time: datetime.datetime = start_time + datetime.timedelta(minutes=duration)
+        lecture: LectureSession
+
+        for lecture in self.lecture_sessions:
+            if lecture.start_time < start_time < lecture.end_time:
+                return True
+
+            if lecture.start_time < end_time < lecture.end_time:
+                return True
+
+            if start_time < lecture.start_time < end_time:
+                return True
+
+            if start_time < lecture.end_time < end_time:
+                return True
+
+        return False
 
     @staticmethod
     def get(id) -> Optional[BlackboardRoom]:
@@ -107,3 +149,35 @@ class BlackboardRoom(db.Model):
                                          BlackboardRoom.visibility == 'public'))
 
         return f_query.all()
+
+
+class LectureSession(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Integer, nullable=False)
+
+    maintainer_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    maintainer = db.relationship('User')
+
+    room_id = db.Column(db.String, db.ForeignKey('blackboard_room.id'), nullable=False)
+    room = db.relationship('BlackboardRoom')
+
+    start_time = db.Column(db.TIMESTAMP, nullable=False,
+                           default=datetime.datetime.utcnow,
+                           server_default=func.utcnow())
+
+    duration = db.Column(db.Integer, nullable=False, default=120, server_default='120')
+
+    end_time: datetime.datetime = property(
+        lambda self: self.start_time + datetime.timedelta(minutes=self.duration))
+
+    def is_open(self) -> bool:
+        current_time = datetime.datetime.utcnow()
+        result = current_time > self.start_time and current_time < self.end_time
+        return result
+
+    @staticmethod
+    def get_lectures_by_maintainer(maintainer_id: int) \
+            -> Iterator[LectureSession]:
+        query = LectureSession.query.filter_by(maintainer_id=maintainer_id)
+
+        return query.all()

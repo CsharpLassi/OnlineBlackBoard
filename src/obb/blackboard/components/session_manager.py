@@ -63,6 +63,9 @@ class BlackBoardSession:
     def to_token_string(self) -> str:
         return self.get_token().encode()
 
+    def get_user(self) -> Optional[User]:
+        return User.get(self.user_id)
+
 
 class BlackBoardSessionManager:
     def __init__(self):
