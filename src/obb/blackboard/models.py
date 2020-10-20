@@ -87,6 +87,14 @@ class BlackboardRoom(db.Model):
             style += f'width:{self.draw_width}px;'
         return style
 
+    def get_current_lecture(self) -> Optional[LectureSession]:
+        lecture: LectureSession
+        for lecture in self.lecture_sessions:
+            if lecture.is_open():
+                return lecture
+
+        return None
+
     @staticmethod
     def get(id) -> Optional[BlackboardRoom]:
         return BlackboardRoom.query.get(id)
@@ -126,6 +134,7 @@ class BlackboardRoom(db.Model):
 
 class LectureSession(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Integer, nullable=False)
 
     maintainer_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     maintainer = db.relationship('User')

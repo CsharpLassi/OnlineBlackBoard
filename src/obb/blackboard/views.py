@@ -145,7 +145,7 @@ def list_rooms():
         db.session.add(room)
         db.session.commit()
 
-        return redirect(url_for('blackboard.rooms'))
+        return redirect(url_for('blackboard.list_rooms'))
 
     rooms = BlackboardRoom.get_rooms()
     return render_template('blackboard/rooms.html',

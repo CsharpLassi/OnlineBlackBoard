@@ -32,6 +32,7 @@ class RoomSettings(FlaskForm, BaseDataForm):
 
 
 class CreateSession(FlaskForm, BaseDataForm):
+    name = StringField('Name', validators=[DataRequired()])
     start_time = DateTimeField('Start DateTime',
                                default=datetime.datetime.now,
                                validators=[DataRequired()])
