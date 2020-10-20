@@ -32,3 +32,8 @@ class RoomDrawResponseMessage(BaseResponseMessage):
 @dataclass()
 class RoomUpdateSettingsResponseMessage(BaseResponseMessage):
     content_draw_height: int
+
+
+@dataclass()
+class RoomUpdateUserResponseMessage(BaseResponseMessage):
+    user: UserData

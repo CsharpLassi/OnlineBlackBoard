@@ -105,3 +105,25 @@ def blackboard_room_update_settings(msg: RoomUpdateSettingsRequestMessage, form_
         )
 
         emit('room:updated:settings', data.to_dict(), room=room.id)
+
+
+@socket.on('room:update:user', namespace=namespace)
+@convert(RoomUpdateUserRequestMessage)
+@event_login_required
+def blackboard_room_update_user(msg: RoomUpdateUserRequestMessage,
+                                room: BlackboardRoom = None):
+    session = bb_session_manager.get(msg.session.session_id)
+    updated_user = bb_session_manager.get_user(msg.user_id)
+
+    update_counter = 0
+    if False and updated_user and msg.allow_draw is not None:
+        updated_user.allow_draw = msg.allow_draw
+        update_counter += 1
+
+    response_data = RoomUpdateUserResponseMessage(
+        user=updated_user,
+    )
+    if update_counter > 0:
+        emit('room:updated:user', response_data.to_dict(), room=room.id)
+    else:
+        emit('room:updated:user', response_data.to_dict())

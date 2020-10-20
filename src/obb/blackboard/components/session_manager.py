@@ -67,6 +67,7 @@ class BlackBoardSession:
 class BlackBoardSessionManager:
     def __init__(self):
         self.__db = MemDb[str, BlackBoardSession]()
+        self.__users = MemDb[str, UserData]()
         self.__sid_to_session_db = MemDb[str, str]()
         self.__rooms = MemDb[str, RoomData]()
 
@@ -82,6 +83,7 @@ class BlackBoardSessionManager:
             username='Guest' if not user else user.username,
             mode=mode,
         )
+        self.__users.add(user_data.user_id, user_data)
 
         room_data = self.__rooms.get(room_id, RoomData(
             room_id=room_id,
@@ -125,3 +127,6 @@ class BlackBoardSessionManager:
 
     def get(self, session_id: str) -> Optional[BlackBoardSession]:
         return self.__db.get(session_id)
+
+    def get_user(self, user_id: str) -> Optional[UserData]:
+        return self.__users.get(user_id)

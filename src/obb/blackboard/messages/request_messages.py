@@ -20,3 +20,9 @@ class RoomDrawRequestMessage(BaseRequestMessage):
 @dataclass()
 class RoomUpdateSettingsRequestMessage(BaseRequestMessage):
     pass
+
+
+@dataclass()
+class RoomUpdateUserRequestMessage(BaseRequestMessage):
+    user_id: str
+    allow_draw: bool = None

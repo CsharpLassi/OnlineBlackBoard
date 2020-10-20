@@ -9,12 +9,29 @@ function addUser(user) {
         // Name
         $('<td />', {
             text: user.username,
-        }).appendTo(user_element)
+        }).appendTo(user_element);
 
-         // Mode
+        // Mode
         $('<td />', {
             text: user.mode,
-        }).appendTo(user_element)
+        }).appendTo(user_element);
+
+        //Draw
+        let draw_checkbox = $('<input />', {
+            id: 'user-' + user.user_id + '-allow-draw',
+            type: 'checkbox'
+        });
+        draw_checkbox.prop('checked', user.allow_draw);
+        draw_checkbox.click(function () {
+            let token = $('meta[name=session-token]').attr("content");
+            $.socket.emit('room:update:user', {
+                token: token,
+                user_id: user.user_id,
+                allow_draw: this.checked,
+            })
+        });
+
+        $('<td />').append(draw_checkbox).appendTo(user_element);
 
         user_element.appendTo('#userList')
     }
@@ -54,6 +71,11 @@ $(document).on('socket:ready', function () {
         $.each(msg.room.users, function (key, item) {
             addUser(item);
         });
+    });
+
+    $.socket.on('room:updated:user', function (msg) {
+        let user = msg.user
+        $('#user-' + user.user_id + '-allow-draw').prop('checked', user.allow_draw)
     });
 
     $.socket.on('room:user:joined', function (msg) {

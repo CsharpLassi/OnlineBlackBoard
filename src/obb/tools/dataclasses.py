@@ -9,7 +9,7 @@ def dataclass_from_dict(cls: Type[T], value_dict: dict) -> T:
     field_types = {f.name: f.type for f in fields(cls)}
     convert_dict = dict()
     for field_name, field_type in field_types.items():
-        value = value_dict[field_name]
+        value = value_dict.get(field_name)
 
         if value is None:
             convert_dict[field_name] = None
