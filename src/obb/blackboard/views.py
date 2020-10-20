@@ -24,7 +24,7 @@ def home():
         session['room_name'] = room_name
 
         return redirect(
-            url_for('blackboard.link'))
+            url_for('blackboard.link', room_id=room.id))
 
     rooms = BlackboardRoom.get_rooms(public=True)
     form.room_name.data = session.get('room_name')

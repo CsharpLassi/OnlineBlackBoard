@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
-from typing import Optional
+from typing import Optional, List
 
 import jwt
 from dataclasses import dataclass
@@ -52,6 +52,7 @@ class BlackBoardSessionManager:
     def __init__(self):
         self.__db = MemDb[str, BlackBoardSession]()
         self.__sid_to_session_db = MemDb[str, str]()
+        self.__rooms = MemDb[str, MemDb[str, str]]()
 
     def create_session(self, room_id: str, user: User = None) -> BlackBoardSession:
         if user is None and current_user.is_authenticated:
@@ -82,15 +83,26 @@ class BlackBoardSessionManager:
         return session
 
     def join(self, sid: str, session_id: str):
-        if not self.__db.exist(session_id):
+        session = self.get(session_id)
+        if not session:
             return
         self.__sid_to_session_db.add(sid, session_id)
+
+        room_dict = self.__rooms.get(session.room_id, MemDb[str, str]())
+        room_dict.add(sid, session_id)
+
+        return
 
     def leave(self, sid: str) -> Optional[BlackBoardSession]:
         session_id = self.__sid_to_session_db.pop(sid)
         if not session_id:
             return
-        session = self.__db.pop(session_id)
+
+        session: Optional[BlackBoardSession] = self.__db.get(session_id)
+        room: Optional[MemDb[str, str]]
+        if session and (room := self.__rooms.get(session.room_id)):
+            sip_room_session = room.pop(sid)
+            pass
         return session
 
     def get(self, session_id: str) -> Optional[BlackBoardSession]:
