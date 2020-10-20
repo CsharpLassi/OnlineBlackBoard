@@ -9,6 +9,7 @@ class UserData(BaseDataClass):
     user_id: str
     username: str
     mode: str
+    creator: bool
     allow_draw: bool = False
 
 

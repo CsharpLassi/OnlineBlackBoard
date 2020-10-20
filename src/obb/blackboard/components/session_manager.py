@@ -75,12 +75,15 @@ class BlackBoardSessionManager:
                        mode: str = 'default') -> BlackBoardSession:
         if user is None and current_user.is_authenticated:
             user = current_user
+        elif not current_user.is_authenticated:
+            pass  # Todo: raise exception
 
         room = BlackboardRoom.get(room_id)
 
         user_data = UserData(
             user_id=id_generator(),
             username='Guest' if not user else user.username,
+            creator=room.creator_id == user.id,
             mode=mode,
         )
         self.__users.add(user_data.user_id, user_data)

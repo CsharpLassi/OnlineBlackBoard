@@ -12,9 +12,11 @@ function addUser(user) {
         }).appendTo(user_element);
 
         // Name
-        $('<td />', {
+        let td_name = $('<td />', {
             text: user.username,
         }).appendTo(user_element);
+        if (user.creator)
+            td_name.css('color','red');
 
         // Mode
         $('<td />', {

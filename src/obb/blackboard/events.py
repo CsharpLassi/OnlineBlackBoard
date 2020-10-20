@@ -116,9 +116,12 @@ def blackboard_room_update_user(msg: RoomUpdateUserRequestMessage,
     updated_user = bb_session_manager.get_user(msg.user_id)
 
     update_counter = 0
-    if updated_user and msg.allow_draw is not None:
-        updated_user.allow_draw = msg.allow_draw
-        update_counter += 1
+
+    allow_change = session.session_user_data.creator
+    if allow_change:
+        if updated_user and msg.allow_draw is not None:
+            updated_user.allow_draw = msg.allow_draw
+            update_counter += 1
 
     response_data = RoomUpdateUserResponseMessage(
         user=updated_user,
