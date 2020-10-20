@@ -1,3 +1,4 @@
+import datetime
 from flask import Blueprint, render_template, redirect, url_for, session, flash, request
 from flask_login import login_required, current_user
 
@@ -30,6 +31,7 @@ def home():
 
     rooms = BlackboardRoom.get_rooms(public=True)
     form.room_name.data = session.get('room_name')
+
     return render_template('blackboard/home.html', form=form, rooms=rooms)
 
 
@@ -151,6 +153,12 @@ def list_rooms():
         return redirect(url_for('blackboard.list_rooms'))
 
     rooms = BlackboardRoom.get_rooms()
+
+    lectures = [lecture for lecture in
+                LectureSession.get_lectures_by_maintainer(current_user.id)
+                if lecture.end_time > datetime.datetime.utcnow()]
+
     return render_template('blackboard/rooms.html',
                            create_form=create_form,
-                           rooms=rooms)
+                           rooms=rooms,
+                           lectures=lectures)

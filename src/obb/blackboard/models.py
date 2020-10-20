@@ -168,9 +168,16 @@ class LectureSession(db.Model):
     duration = db.Column(db.Integer, nullable=False, default=120, server_default='120')
 
     end_time: datetime.datetime = property(
-        lambda self: self.start_time + datetime.timedelta(self.duration))
+        lambda self: self.start_time + datetime.timedelta(minutes=self.duration))
 
     def is_open(self) -> bool:
         current_time = datetime.datetime.utcnow()
         result = current_time > self.start_time and current_time < self.end_time
         return result
+
+    @staticmethod
+    def get_lectures_by_maintainer(maintainer_id: int) \
+            -> Iterator[LectureSession]:
+        query = LectureSession.query.filter_by(maintainer_id=maintainer_id)
+
+        return query.all()
