@@ -176,8 +176,11 @@ class LectureSession(db.Model):
         return result
 
     @staticmethod
-    def get_lectures_by_maintainer(maintainer_id: int) \
+    def get_lectures(maintainer_id: int = None) \
             -> Iterator[LectureSession]:
-        query = LectureSession.query.filter_by(maintainer_id=maintainer_id)
+        query = LectureSession.query
+
+        if maintainer_id:
+            query = query.filter_by(maintainer_id=maintainer_id)
 
         return query.all()

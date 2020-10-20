@@ -12,27 +12,50 @@ bp = Blueprint('blackboard', __name__, url_prefix=namespace)
 
 @bp.route('/', methods=['GET', 'POST'])
 def home():
-    from .forms import ConnectToRoom
-    form = ConnectToRoom()
+    lectures = [lecture for lecture in
+                LectureSession.get_lectures()
+                if lecture.end_time > datetime.datetime.utcnow()
+                if lecture.is_open() and lecture.room.can_join()]
 
-    mode = request.args.get('mode')
+    return render_template('blackboard/home.html', lectures=lectures)
 
-    if form.validate_on_submit():
-        room_name = form.room_name.data
-        room = BlackboardRoom.get_by_name(room_name)
-        if not room or not room.can_join():
-            flash('room does not exist')
-            return redirect(url_for('blackboard.home'))
 
-        session['room_name'] = room_name
+@bp.route('/rooms', methods=['GET', 'POST'])
+@login_required
+def list_rooms():
+    from .forms import CreateRoomForm
 
-        return redirect(
-            url_for('blackboard.link', room_id=room.id, mode=mode))
+    create_form = CreateRoomForm()
+    if create_form.validate_on_submit():
+        room_name = create_form.room_name.data
+        room_full_name = f'{current_user.username}.{room_name}'
 
-    rooms = BlackboardRoom.get_rooms(public=True)
-    form.room_name.data = session.get('room_name')
+        room = BlackboardRoom.get_by_name(room_full_name)
+        if room:
+            flash('Room already exist')
+            return redirect(url_for('blackboard.list_rooms'))
 
-    return render_template('blackboard/home.html', form=form, rooms=rooms)
+        room = BlackboardRoom()
+        room.name = room_name
+        room.full_name = room_full_name
+        room.creator = current_user
+        room.visibility = create_form.visibility.data
+
+        db.session.add(room)
+        db.session.commit()
+
+        return redirect(url_for('blackboard.list_rooms'))
+
+    rooms = BlackboardRoom.get_rooms()
+
+    lectures = [lecture for lecture in
+                LectureSession.get_lectures(current_user.id)
+                if lecture.end_time > datetime.datetime.utcnow()]
+
+    return render_template('blackboard/rooms.html',
+                           create_form=create_form,
+                           rooms=rooms,
+                           lectures=lectures)
 
 
 @bp.route('/link/<room_id>', methods=['GET', 'POST'])
@@ -124,41 +147,3 @@ def create_session(room_id: str):
             return redirect(url_for('blackboard.list_rooms'))
 
     return render_template('blackboard/create_session.html', form=form)
-
-
-@bp.route('/rooms', methods=['GET', 'POST'])
-@login_required
-def list_rooms():
-    from .forms import CreateRoomForm
-
-    create_form = CreateRoomForm()
-    if create_form.validate_on_submit():
-        room_name = create_form.room_name.data
-        room_full_name = f'{current_user.username}.{room_name}'
-
-        room = BlackboardRoom.get_by_name(room_full_name)
-        if room:
-            flash('Room already exist')
-            return redirect(url_for('blackboard.list_rooms'))
-
-        room = BlackboardRoom()
-        room.name = room_name
-        room.full_name = room_full_name
-        room.creator = current_user
-        room.visibility = create_form.visibility.data
-
-        db.session.add(room)
-        db.session.commit()
-
-        return redirect(url_for('blackboard.list_rooms'))
-
-    rooms = BlackboardRoom.get_rooms()
-
-    lectures = [lecture for lecture in
-                LectureSession.get_lectures_by_maintainer(current_user.id)
-                if lecture.end_time > datetime.datetime.utcnow()]
-
-    return render_template('blackboard/rooms.html',
-                           create_form=create_form,
-                           rooms=rooms,
-                           lectures=lectures)

@@ -2,34 +2,31 @@
 {% from 'form.html' import show_form %}
 
 {% block col %}
-    <div class="col-3 mt-3">
-        <div class="card">
-            <div class="card-header">Rooms</div>
-            <div class="card-body">
-                <ul id="roomList" class="nav flex-column">
-                    {% for room in rooms %}
-                        {% if room.can_join() %}
-                            <li id="room-{{ room.room_id }}" class="nav-item">
-                                <a class="nav-link"
-                                   href="{{ url_for('blackboard.link',room_id=room.id,mode='Blackboard') }}">{{ room.full_name }} ({{ room.get_current_lecture().name }})</a>
-                            </li>
-                        {% endif %}
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
+    <div class="col mt-3">
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Name</th>
+                <th scope="col">Start-Time</th>
+                <th scope="col">End-Time</th>
+                <th scope="col">Duration</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for lecture in lectures %}
+                <tr>
+                    <th scope="row">{{ loop.index }}</th>
+                    <td>
+                        <a href="{{ url_for('blackboard.link',room_id=lecture.room.id,mode='blackboard') }}">
+                            {{ lecture.room.full_name }} ({{ lecture.name }})</a></td>
+                    <td>{{ lecture.start_time }}</td>
+                    <td>{{ lecture.end_time }}</td>
+                    <td>{{ lecture.duration }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
     </div>
-    <div class="col-3">
-        <div class="card mt-3">
-            <div class="card-header">
-                Join Session
-            </div>
-            <div class="card-body">
-                {{ show_form(form,action='?mode=Blackboard') }}
-            </div>
-        </div>
-    </div>
-    <div class="col">
 
-    </div>
 {% endblock %}
