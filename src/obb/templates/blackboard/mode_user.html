@@ -19,18 +19,28 @@
     <div class="row justify-content-center mt-3">
         <div class="col-4">
             <div class="card">
-                <div class="card-header">Clients</div>
+                <div class="card-header">Room Settings</div>
                 <div class="card-body">
-                    <div id="userList">
-                    </div>
+                    {{ show_form(edit_form,id='roomEdit') }}
                 </div>
             </div>
         </div>
         <div class="col-8">
             <div class="card">
-                <div class="card-header">Room Settings</div>
+                <div class="card-header">Clients</div>
                 <div class="card-body">
-                    {{ show_form(edit_form,id='roomEdit') }}
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th scope="col">Name</th>
+                        </tr>
+                        </thead>
+                        <tbody id="userList">
+
+                        </tbody>
+                    </table>
+                    <div>
+                    </div>
                 </div>
             </div>
         </div>
