@@ -87,7 +87,7 @@ class BlackboardRoom(db.Model):
             style += f'width:{self.draw_width}px;'
         return style
 
-    def get_current_lecture(self) -> Optional[LectureSession]:
+    def get_current_lecture_session(self) -> Optional[LectureSession]:
         lecture: LectureSession
         for lecture in self.lecture_sessions:
             if lecture.is_open():
@@ -162,6 +162,10 @@ class Lecture(db.Model):
     start_page = db.relationship('LecturePage',
                                  primaryjoin="Lecture.start_page_id == LecturePage.id")
 
+    current_page_id = db.Column(db.Integer, db.ForeignKey('lecture_page.id'))
+    current_page = db.relationship('LecturePage',
+                                   primaryjoin="Lecture.current_page_id == LecturePage.id")
+
     pages = db.relationship('LecturePage',
                             primaryjoin="Lecture.id == LecturePage.lecture_id")
 
@@ -171,27 +175,22 @@ class LecturePage(db.Model):
     name = db.Column(db.Integer)
 
     lecture_id = db.Column(db.Integer, db.ForeignKey('lecture.id'), nullable=False)
-    lecture = db.relationship('Lecture',
-                              primaryjoin="Lecture.start_page_id == LecturePage.id")
+    lecture = db.relationship('Lecture', foreign_keys=[lecture_id])
 
     creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    creator = db.relationship('User')
+    creator = db.relationship('User', foreign_keys=[creator_id])
 
     left_page_id = db.Column(db.Integer, db.ForeignKey('lecture_page.id'))
-    left_page = db.relationship('LecturePage',
-                                primaryjoin="LecturePage.left_page_id == LecturePage.id")
+    left_page = db.relationship('LecturePage', foreign_keys=[left_page_id])
 
     right_page_id = db.Column(db.Integer, db.ForeignKey('lecture_page.id'))
-    right_page = db.relationship('LecturePage',
-                                 primaryjoin="LecturePage.right_page_id == LecturePage.id")
+    right_page = db.relationship('LecturePage', foreign_keys=[right_page_id])
 
     top_page_id = db.Column(db.Integer, db.ForeignKey('lecture_page.id'))
-    top_page = db.relationship('LecturePage',
-                               primaryjoin="LecturePage.top_page_id == LecturePage.id")
+    top_page = db.relationship('LecturePage', foreign_keys=[top_page_id])
 
     bottom_page_id = db.Column(db.Integer, db.ForeignKey('lecture_page.id'))
-    bottom_page = db.relationship('LecturePage',
-                                  primaryjoin="LecturePage.bottom_page_id == LecturePage.id")
+    bottom_page = db.relationship('LecturePage', foreign_keys=[bottom_page_id])
 
 
 class LectureSession(db.Model):

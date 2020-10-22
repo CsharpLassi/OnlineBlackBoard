@@ -65,8 +65,16 @@
                 {% for l_session in lecture_sessions %}
                     <tr>
                         <th scope="row">{{ loop.index }}</th>
-                        <td>{{ l_session.name }}</td>
-                        <td><span class="{{ 'is-open' if l_session.is_open() else 'is-close' }}">{{ 'Open' if l_session.is_open() else 'Closed' }}</span></td>
+                        <td>
+                            {%-  if l_session.is_open() -%}
+                            <a href="{{ url_for('blackboard.link_user',room_id=l_session.room_id) }}">{{ l_session.name }}</a>
+                            {%- else -%}
+                                {{ l_session.name }}
+                            {%- endif -%}
+                        </td>
+                        <td><span
+                                class="{{ 'is-open' if l_session.is_open() else 'is-close' }}">{{ 'Open' if l_session.is_open() else 'Closed' }}</span>
+                        </td>
                         <td><a href="#">{{ l_session.room.full_name }}</a></td>
                         <td>{{ l_session.start_time | df }} </td>
                         <td>{{ l_session.end_time | df }} </td>

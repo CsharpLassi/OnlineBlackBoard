@@ -1,4 +1,5 @@
 from flask import request, current_app, escape
+from flask_login import current_user
 from flask_socketio import emit, join_room
 
 from obb.users.models import User
@@ -11,7 +12,7 @@ from .messages.response_messages import *
 from .decorators import convert, to_form_dict, event_login_required
 from .ext import namespace, bb_session_manager
 
-from .models import BlackboardRoom
+from .models import BlackboardRoom, LecturePage
 
 from ..ext import socket, db
 
@@ -71,6 +72,19 @@ def blackboard_room_update_content(msg: RoomUpdateContentRequestMessage,
         markdown=escape(msg.raw_text),
         creator=session.session_user_data,
     )
+
+    l_session = room.get_current_lecture_session()
+    lecture = l_session.lecture
+
+    current_page = lecture.current_page
+    # Todo: Verallgemeinern
+    if current_page is None:
+        page = LecturePage()
+        page.lecture = lecture
+        page.creator = current_user
+
+        lecture.start_page = lecture.current_page = page
+        db.session.commit()
 
     emit('room:print', data.to_dict(), room=room.id)
 

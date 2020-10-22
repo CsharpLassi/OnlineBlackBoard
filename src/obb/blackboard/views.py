@@ -146,11 +146,11 @@ def create_session(room_id: str):
             lecture_session.lecture = new_lecture
         else:
             flash('No lecture found')
-            return redirect(url_for('blackboard.list_rooms'))
+            return render_template('blackboard/create_session.html', form=form)
 
         if room.intersect_lecture(lecture_session.start_time, lecture_session.duration):
             flash('Session intersects')
-            return redirect(url_for('blackboard.list_rooms'))
+            return render_template('blackboard/create_session.html', form=form)
 
         room.lecture_sessions.append(lecture_session)
         db.session.commit()
