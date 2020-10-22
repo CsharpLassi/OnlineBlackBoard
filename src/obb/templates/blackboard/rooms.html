@@ -16,12 +16,12 @@
         </div>
         <div class="col mt-3">
             <div class="card">
-                <div class="card-header">Create Lectures</div>
+                <div class="card-header">Rooms</div>
                 <div class="card-body">
-                    <ul id="roomList" class="nav flex-column">
+                    <ul class="nav flex-column">
                         {% for room in rooms %}
                             {% if True %}
-                                <li id="room-{{ room.room_id }}" class="nav-item">
+                                <li class="nav-item">
                                     <a class="nav-link"
                                        href="{{ url_for('blackboard.create_session',room_id=room.id) }}">{{ room.name }}</a>
                                 </li>
@@ -33,17 +33,14 @@
         </div>
         <div class="col mt-3">
             <div class="card">
-                <div class="card-header">Opened Rooms</div>
+                <div class="card-header">Lectures</div>
                 <div class="card-body">
-                    <ul id="roomList" class="nav flex-column">
-                        {% for room in rooms %}
-                            {% if room.can_join() %}
-                                <li id="room-{{ room.room_id }}" class="nav-item">
-                                    <a class="nav-link"
-                                       href="{{ url_for('blackboard.link_user',room_id=room.id) }}">{{ room.name }}
-                                        ({{ room.get_current_lecture().name }})</a>
-                                </li>
-                            {% endif %}
+                    <ul class="nav flex-column">
+                        {% for lecture in current_user.lectures %}
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   href="#">{{ lecture.name }}</a>
+                            </li>
                         {% endfor %}
                     </ul>
                 </div>
