@@ -48,14 +48,14 @@ def list_rooms():
 
     rooms = BlackboardRoom.get_rooms()
 
-    lectures = [lecture for lecture in
-                LectureSession.get_lectures(current_user.id)
-                if lecture.end_time > datetime.datetime.utcnow()]
+    lecture_sessions = [l_session for l_session in
+                        LectureSession.get_lectures(current_user.id)
+                        if l_session.end_time > datetime.datetime.utcnow()]
 
     return render_template('blackboard/rooms.html',
                            create_form=create_form,
                            rooms=rooms,
-                           lectures=lectures)
+                           lecture_sessions=lecture_sessions)
 
 
 @bp.route('/link/<room_id>', methods=['GET', 'POST'])
