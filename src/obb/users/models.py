@@ -16,6 +16,8 @@ class User(UserMixin, db.Model):
     is_admin = db.Column(db.BOOLEAN, server_default='0', default=False,
                          nullable=False)
 
+    lectures = db.relationship('Lecture', lazy=True)
+
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 

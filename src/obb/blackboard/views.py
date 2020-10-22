@@ -1,11 +1,11 @@
 import datetime
-from flask import Blueprint, render_template, redirect, url_for, session, flash, request
+from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 
 from ..ext import db
 
 from .ext import namespace, bb_session_manager
-from .models import BlackboardRoom, LectureSession
+from .models import BlackboardRoom, LectureSession, Lecture
 
 bp = Blueprint('blackboard', __name__, url_prefix=namespace)
 
@@ -138,12 +138,23 @@ def create_session(room_id: str):
         lecture_session.maintainer = current_user
         form.write_data(lecture_session)
 
+        if form.new_lecture.data:
+            new_lecture = Lecture()
+            new_lecture.name = form.name.data
+            new_lecture.creator = current_user
+
+            lecture_session.lecture = new_lecture
+        else:
+            flash('No lecture found')
+            return redirect(url_for('blackboard.list_rooms'))
+
         if room.intersect_lecture(lecture_session.start_time, lecture_session.duration):
             flash('Session intersects')
-        else:
-            room.lecture_sessions.append(lecture_session)
-            db.session.commit()
-
             return redirect(url_for('blackboard.list_rooms'))
+
+        room.lecture_sessions.append(lecture_session)
+        db.session.commit()
+
+        return redirect(url_for('blackboard.list_rooms'))
 
     return render_template('blackboard/create_session.html', form=form)

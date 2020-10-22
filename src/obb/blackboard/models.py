@@ -151,12 +151,23 @@ class BlackboardRoom(db.Model):
         return f_query.all()
 
 
+class Lecture(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Integer, nullable=False)
+
+    creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    creator = db.relationship('User')
+
+
 class LectureSession(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Integer, nullable=False)
 
     maintainer_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     maintainer = db.relationship('User')
+
+    lecture_id = db.Column(db.Integer, db.ForeignKey('lecture.id'), nullable=False)
+    lecture = db.relationship('Lecture')
 
     room_id = db.Column(db.String, db.ForeignKey('blackboard_room.id'), nullable=False)
     room = db.relationship('BlackboardRoom')

@@ -1,6 +1,11 @@
 import datetime
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, IntegerField, SelectField, DateTimeField
+from wtforms import (StringField,
+                     SubmitField,
+                     IntegerField,
+                     SelectField,
+                     DateTimeField,
+                     BooleanField)
 from wtforms.validators import DataRequired, Length
 from .models import default_visibility, blackboardRoom_visibilities
 
@@ -32,4 +37,5 @@ class CreateSession(FlaskForm, BaseDataForm):
                                default=datetime.datetime.now,
                                validators=[DataRequired()])
     duration = IntegerField('Duration', default=100, validators=[DataRequired()])
+    new_lecture = BooleanField('Create new lecture?', default=True)
     submit = SubmitField('Create')
