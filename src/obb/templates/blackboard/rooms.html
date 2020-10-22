@@ -54,6 +54,8 @@
                 <tr>
                     <th scope="col">#</th>
                     <th scope="col">Name</th>
+                    <th scope="col">Open?</th>
+                    <th scope="col">Room</th>
                     <th scope="col">Start-Time</th>
                     <th scope="col">End-Time</th>
                     <th scope="col">Duration</th>
@@ -64,6 +66,8 @@
                     <tr>
                         <th scope="row">{{ loop.index }}</th>
                         <td>{{ lecture.name }}</td>
+                        <td><span class="{{ 'is-open' if lecture.is_open() else 'is-close' }}">{{ 'Open' if lecture.is_open() else 'Closed' }}</span></td>
+                        <td><a href="#">{{ lecture.room.full_name }}</a></td>
                         <td>{{ lecture.start_time | df }} </td>
                         <td>{{ lecture.end_time | df }} </td>
                         <td>{{ lecture.duration }} min</td>
