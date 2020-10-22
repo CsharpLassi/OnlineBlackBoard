@@ -158,6 +158,41 @@ class Lecture(db.Model):
     creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     creator = db.relationship('User')
 
+    start_page_id = db.Column(db.Integer, db.ForeignKey('lecture_page.id'))
+    start_page = db.relationship('LecturePage',
+                                 primaryjoin="Lecture.start_page_id == LecturePage.id")
+
+    pages = db.relationship('LecturePage',
+                            primaryjoin="Lecture.id == LecturePage.lecture_id")
+
+
+class LecturePage(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Integer)
+
+    lecture_id = db.Column(db.Integer, db.ForeignKey('lecture.id'), nullable=False)
+    lecture = db.relationship('Lecture',
+                              primaryjoin="Lecture.start_page_id == LecturePage.id")
+
+    creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    creator = db.relationship('User')
+
+    left_page_id = db.Column(db.Integer, db.ForeignKey('lecture_page.id'))
+    left_page = db.relationship('LecturePage',
+                                primaryjoin="LecturePage.left_page_id == LecturePage.id")
+
+    right_page_id = db.Column(db.Integer, db.ForeignKey('lecture_page.id'))
+    right_page = db.relationship('LecturePage',
+                                 primaryjoin="LecturePage.right_page_id == LecturePage.id")
+
+    top_page_id = db.Column(db.Integer, db.ForeignKey('lecture_page.id'))
+    top_page = db.relationship('LecturePage',
+                               primaryjoin="LecturePage.top_page_id == LecturePage.id")
+
+    bottom_page_id = db.Column(db.Integer, db.ForeignKey('lecture_page.id'))
+    bottom_page = db.relationship('LecturePage',
+                                  primaryjoin="LecturePage.bottom_page_id == LecturePage.id")
+
 
 class LectureSession(db.Model):
     id = db.Column(db.Integer, primary_key=True)

@@ -7,3 +7,6 @@ node_modules/
 
 # Static
 onlineblackboard/static/components/
+
+# App Data
+blackboard_data/

@@ -15,6 +15,8 @@ def create_app(conf: Optional[C] = Config) -> Flask:
     load_cli(app)
     register_shellcontext(app)
 
+    create_default(app)
+
     return app
 
 
@@ -59,3 +61,11 @@ def register_shellcontext(app: Flask):
         return {"db": db, "User": User}
 
     app.shell_context_processor(shell_context)
+
+
+def create_default(app: Flask):
+    import os
+    path = app.config['BLACKBOARD_DATA_PATH']
+    if os.path.exists(path) and os.path.isdir(path):
+        return
+    os.mkdir(path)

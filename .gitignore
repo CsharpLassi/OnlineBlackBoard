@@ -150,5 +150,7 @@ flask_session/
 **/app.db
 new_db.sh
 
+# App Data
+blackboard_data/
 
 
