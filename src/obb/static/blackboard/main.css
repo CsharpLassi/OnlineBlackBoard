@@ -20,6 +20,11 @@
     position: absolute;
 }
 
+.drawControl {
+    margin-right: 0.5em;
+    margin-left: 0.5em;
+}
+
 #content h1 {
     margin-bottom: 0.25rem;
 }

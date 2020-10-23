@@ -1,13 +1,17 @@
 $(document).ready(function () {
-    let token = $('meta[name=session-token]').attr("content");
     let recordStrokes = true
+    let mode = 'draw'
+
+    let token = $('meta[name=session-token]').attr("content");
+
 
     let sketchpad_global_canvas = $('#contentSketchpadGlobal')
     $.sketchpadGlobal = new Atrament(document.querySelector('#contentSketchpadGlobal'));
     $.sketchpadGlobal.recordStrokes = recordStrokes;
 
-    $.sketchpadGlobal.width = sketchpad_global_canvas.attr('width')
-    $.sketchpadGlobal.height = sketchpad_global_canvas.attr('height')
+    $.sketchpadGlobal.mode = mode;
+    $.sketchpadGlobal.width = sketchpad_global_canvas.attr('width');
+    $.sketchpadGlobal.height = sketchpad_global_canvas.attr('height');
 
     $(document).on('content:change', function () {
         let sketchpad_canvas = $('#contentSketchpadGlobal')
@@ -28,6 +32,7 @@ $(document).ready(function () {
     $.sketchpad_user_canvas = new Atrament(document.querySelector('#contentSketchpadUser'));
     $.sketchpad_user_canvas.recordStrokes = recordStrokes;
 
+    $.sketchpad_user_canvas.mode = mode;
     $.sketchpad_user_canvas.width = sketchpad_user_canvas.attr('width')
     $.sketchpad_user_canvas.height = sketchpad_user_canvas.attr('height')
 
@@ -53,6 +58,26 @@ $(document).ready(function () {
         $.sketchpadGlobal.recordStrokes = recordStrokes;
     });
 
+     $('#cmdModeDraw').click(function () {
+        mode = 'draw';
+        $(this).css('color', 'black');
+
+        $.sketchpad_user_canvas.mode = mode;
+        $.sketchpadGlobal.mode = mode;
+
+        $('#cmdModeEraser').css('color','gray');
+    });
+
+    $('#cmdModeEraser').click(function () {
+        mode = 'erase';
+        $(this).css('color', 'black');
+
+        $.sketchpad_user_canvas.mode = mode;
+        $.sketchpadGlobal.mode = mode;
+
+         $('#cmdModeDraw').css('color','gray');
+    });
+
 })
 
 $(document).on('socket:ready', function () {
@@ -64,7 +89,7 @@ $(document).on('socket:ready', function () {
         } else {
             $('#contentSketchpadUser').css('z-index', 4);
         }
-        $.socket.emit('room:get:draw', {token:token});
+        $.socket.emit('room:get:draw', {token: token});
     });
 
     $.socket.on('room:updated:user', function (msg) {
@@ -80,6 +105,7 @@ $(document).on('socket:ready', function () {
         if (msg.creator !== null && msg.creator.user_id === $.user.user_id)
             return
         let old_record = $.sketchpadGlobal.recordStrokes
+        let old_mode = $.sketchpadGlobal.mode
         $.sketchpadGlobal.recordStrokes = false;
 
         let stroke = msg.stroke
@@ -119,5 +145,6 @@ $(document).on('socket:ready', function () {
         $.sketchpadGlobal.endStroke(prevPoint.x, prevPoint.y);
 
         $.sketchpadGlobal.recordStrokes = old_record;
+        $.sketchpadGlobal.mode = old_mode;
     });
 });
