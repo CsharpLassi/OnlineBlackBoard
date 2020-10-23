@@ -96,8 +96,8 @@ $(document).on('socket:ready', function () {
     });
 
     $.socket.on('room:print', function (msg) {
-        if (msg.creator.user_id !== $.user.user_id)
-            $("#board").val(msg.text)
+        if (msg.creator === null || msg.creator.user_id !== $.user.user_id)
+            $("#board").val(msg.raw_text)
     });
 
 

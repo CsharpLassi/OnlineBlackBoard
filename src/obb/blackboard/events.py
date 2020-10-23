@@ -122,7 +122,6 @@ def blackboard_room_get_content(msg: RoomGetContentRequestMessage,
         data = RoomPrintResponse(
             raw_text=raw_text,
             markdown=escape(raw_text),
-            creator=session.session_user_data,
         )
 
         emit('room:print', data.to_dict(), room=room.id)

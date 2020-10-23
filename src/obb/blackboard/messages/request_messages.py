@@ -12,8 +12,9 @@ class RoomUpdateContentRequestMessage(BaseRequestMessage):
     raw_text: str
 
 
+@dataclass
 class RoomGetContentRequestMessage(BaseRequestMessage):
-    pass
+    page: int = 0
 
 
 @dataclass
