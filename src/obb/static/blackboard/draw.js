@@ -1,6 +1,7 @@
 $(document).ready(function () {
-    let recordStrokes = true
-    let mode = 'draw'
+    let recordStrokes = true;
+    let mode = 'draw';
+    let thickness = 2;
 
     let token = $('meta[name=session-token]').attr("content");
 
@@ -12,6 +13,8 @@ $(document).ready(function () {
     $.sketchpadGlobal.mode = mode;
     $.sketchpadGlobal.width = sketchpad_global_canvas.attr('width');
     $.sketchpadGlobal.height = sketchpad_global_canvas.attr('height');
+
+    $.sketchpadGlobal.weight = thickness;
 
     $(document).on('content:change', function () {
         let sketchpad_canvas = $('#contentSketchpadGlobal')
@@ -36,6 +39,8 @@ $(document).ready(function () {
     $.sketchpad_user_canvas.width = sketchpad_user_canvas.attr('width')
     $.sketchpad_user_canvas.height = sketchpad_user_canvas.attr('height')
 
+    $.sketchpad_user_canvas.weight = thickness;
+
     $(document).on('content:change', function () {
         let sketchpad_canvas = $('#contentSketchpadUser')
 
@@ -58,14 +63,14 @@ $(document).ready(function () {
         $.sketchpadGlobal.recordStrokes = recordStrokes;
     });
 
-     $('#cmdModeDraw').click(function () {
+    $('#cmdModeDraw').click(function () {
         mode = 'draw';
         $(this).css('color', 'black');
 
         $.sketchpad_user_canvas.mode = mode;
         $.sketchpadGlobal.mode = mode;
 
-        $('#cmdModeEraser').css('color','gray');
+        $('#cmdModeEraser').css('color', 'gray');
     });
 
     $('#cmdModeEraser').click(function () {
@@ -75,8 +80,17 @@ $(document).ready(function () {
         $.sketchpad_user_canvas.mode = mode;
         $.sketchpadGlobal.mode = mode;
 
-         $('#cmdModeDraw').css('color','gray');
+        $('#cmdModeDraw').css('color', 'gray');
     });
+
+    $('#rangeThickness')
+        .attr('value', thickness)
+        .on('change', function () {
+            thickness = parseFloat(this.value);
+
+            $.sketchpadGlobal.weight = thickness;
+            $.sketchpad_user_canvas.weight = thickness;
+        });
 
 })
 
