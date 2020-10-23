@@ -1,4 +1,7 @@
+import os
+
 from flask import request, current_app, escape
+from flask_login import current_user
 from flask_socketio import emit, join_room
 
 from obb.users.models import User
@@ -9,9 +12,9 @@ from .messages.request_messages import *
 from .messages.response_messages import *
 
 from .decorators import convert, to_form_dict, event_login_required
-from .ext import namespace, bb_session_manager
+from .ext import namespace, bb_session_manager, page_manager
 
-from .models import BlackboardRoom
+from .models import BlackboardRoom, LecturePage
 
 from ..ext import socket, db
 
@@ -74,11 +77,67 @@ def blackboard_room_update_content(msg: RoomUpdateContentRequestMessage,
 
     emit('room:print', data.to_dict(), room=room.id)
 
+    # Save Markdown
+    l_session = room.get_current_lecture_session()
+    lecture = l_session.lecture
+
+    page_id = lecture.current_page_id or lecture.start_page_id
+    page_session = page_manager.get(page_id, lecture=lecture)
+    if page_session:
+        page_session.set_markdown(msg.raw_text)
+
+
+@socket.on('room:get:content', namespace=namespace)
+@convert(RoomGetContentRequestMessage)
+@event_login_required
+def blackboard_room_get_content(msg: RoomGetContentRequestMessage,
+                                room: BlackboardRoom = None):
+    session = bb_session_manager.get(msg.session.session_id)
+
+    # Read Markdown
+    l_session = room.get_current_lecture_session()
+    lecture = l_session.lecture
+
+    page_id = msg.page or lecture.current_page_id or lecture.start_page_id
+    page_session = page_manager.get(page_id, lecture=lecture)
+
+    if page_session and (markdown := page_session.get_markdown()):
+        data = RoomPrintResponse(
+            raw_text=markdown,
+            markdown=escape(markdown),
+        )
+
+        emit('room:print', data.to_dict())
+
+
+@socket.on('room:get:draw', namespace=namespace)
+@convert(RoomGetDrawRequestMessage)
+@event_login_required
+def blackboard_room_get_draw(msg: RoomGetDrawRequestMessage,
+                             room: BlackboardRoom = None):
+    session = bb_session_manager.get(msg.session.session_id)
+
+    # Read Markdown
+    l_session = room.get_current_lecture_session()
+    lecture = l_session.lecture
+
+    page_id = msg.page or lecture.current_page_id or lecture.start_page_id
+    page_session = page_manager.get(page_id, lecture=lecture)
+
+    if page_session:
+        for stroke in page_session.get_strokes():
+            data = RoomDrawResponseMessage(
+                stroke=stroke,
+            )
+
+            emit('room:draw:stroke', data.to_dict())
+
 
 @socket.on('room:update:draw', namespace=namespace)
 @convert(RoomDrawRequestMessage)
 @event_login_required
-def room_update_draw(msg: RoomDrawRequestMessage, room: BlackboardRoom = None):
+def blackboard_room_update_draw(msg: RoomDrawRequestMessage,
+                                room: BlackboardRoom = None):
     session = bb_session_manager.get(msg.session.session_id)
 
     if not session.session_user_data.allow_draw:
@@ -91,6 +150,15 @@ def room_update_draw(msg: RoomDrawRequestMessage, room: BlackboardRoom = None):
     )
 
     emit('room:draw:stroke', data.to_dict(), room=room.id)
+
+    # Save History
+    l_session = room.get_current_lecture_session()
+    lecture = l_session.lecture
+
+    page_id = lecture.current_page_id or lecture.start_page_id
+    page_session = page_manager.get(page_id, lecture=lecture)
+
+    page_session.add_stroke(data.stroke)
 
 
 @socket.on('room:update:settings', namespace=namespace)

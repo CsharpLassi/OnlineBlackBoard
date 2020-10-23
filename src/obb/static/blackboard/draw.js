@@ -56,13 +56,15 @@ $(document).ready(function () {
 })
 
 $(document).on('socket:ready', function () {
+    let token = $('meta[name=session-token]').attr("content");
     $.socket.on('room:joined', function (msg) {
-        let user = msg.user
+        let user = msg.user;
         if (user.allow_draw) {
-            $('#contentSketchpadUser').css('z-index', 1)
+            $('#contentSketchpadUser').css('z-index', 1);
         } else {
-            $('#contentSketchpadUser').css('z-index', 4)
+            $('#contentSketchpadUser').css('z-index', 4);
         }
+        $.socket.emit('room:get:draw', {token:token});
     });
 
     $.socket.on('room:updated:user', function (msg) {
@@ -75,7 +77,7 @@ $(document).on('socket:ready', function () {
     });
 
     $.socket.on('room:draw:stroke', function (msg) {
-        if (msg.creator.user_id === $.user.user_id)
+        if (msg.creator !== null && msg.creator.user_id === $.user.user_id)
             return
         let old_record = $.sketchpadGlobal.recordStrokes
         $.sketchpadGlobal.recordStrokes = false;
@@ -116,6 +118,6 @@ $(document).on('socket:ready', function () {
         // endStroke closes the path
         $.sketchpadGlobal.endStroke(prevPoint.x, prevPoint.y);
 
-        $.sketchpadGlobal.recordStrokes =  old_record;
+        $.sketchpadGlobal.recordStrokes = old_record;
     });
 });

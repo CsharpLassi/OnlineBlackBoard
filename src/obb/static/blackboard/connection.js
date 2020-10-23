@@ -19,6 +19,8 @@ $(document).ready(function () {
     socket.on('room:joined', function (msg) {
         $.user = msg.user
         $('#status').text(msg.room.room_name + ':' + msg.user.user_id);
+
+        socket.emit('room:get:content', {token: token});
     });
 
 

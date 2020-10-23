@@ -5,6 +5,7 @@ from typing import Optional, Iterator
 
 import datetime
 
+from flask_login import current_user
 from sqlalchemy.sql import func
 
 from ..ext import db
@@ -87,7 +88,7 @@ class BlackboardRoom(db.Model):
             style += f'width:{self.draw_width}px;'
         return style
 
-    def get_current_lecture(self) -> Optional[LectureSession]:
+    def get_current_lecture_session(self) -> Optional[LectureSession]:
         lecture: LectureSession
         for lecture in self.lecture_sessions:
             if lecture.is_open():
@@ -151,12 +152,82 @@ class BlackboardRoom(db.Model):
         return f_query.all()
 
 
+class Lecture(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Integer, nullable=False)
+
+    creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    creator = db.relationship('User')
+
+    start_page_id = db.Column(db.Integer, db.ForeignKey('lecture_page.id'))
+    start_page = db.relationship('LecturePage',
+                                 primaryjoin="Lecture.start_page_id == LecturePage.id")
+
+    current_page_id = db.Column(db.Integer, db.ForeignKey('lecture_page.id'))
+    current_page = db.relationship('LecturePage',
+                                   primaryjoin="Lecture.current_page_id == LecturePage.id")
+
+    pages = db.relationship('LecturePage',
+                            primaryjoin="Lecture.id == LecturePage.lecture_id")
+
+    def get_page(self, page_id: int = None) -> Optional[LecturePage]:
+        if page_id is None:
+            page_id = self.current_page_id or self.start_page_id
+
+        page = LecturePage.get(page_id)
+
+        if page and page.lecture_id != self.id:
+            # Todo: Exception
+            return None
+
+        if page is None:
+            page = LecturePage()
+            page.lecture = self
+            page.creator = current_user
+
+            self.start_page = self.current_page = page
+            db.session.commit()
+        return page
+
+
+class LecturePage(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Integer)
+
+    lecture_id = db.Column(db.Integer, db.ForeignKey('lecture.id'), nullable=False)
+    lecture = db.relationship('Lecture', foreign_keys=[lecture_id])
+
+    creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    creator = db.relationship('User', foreign_keys=[creator_id])
+
+    left_page_id = db.Column(db.Integer, db.ForeignKey('lecture_page.id'))
+    left_page = db.relationship('LecturePage', foreign_keys=[left_page_id])
+
+    right_page_id = db.Column(db.Integer, db.ForeignKey('lecture_page.id'))
+    right_page = db.relationship('LecturePage', foreign_keys=[right_page_id])
+
+    top_page_id = db.Column(db.Integer, db.ForeignKey('lecture_page.id'))
+    top_page = db.relationship('LecturePage', foreign_keys=[top_page_id])
+
+    bottom_page_id = db.Column(db.Integer, db.ForeignKey('lecture_page.id'))
+    bottom_page = db.relationship('LecturePage', foreign_keys=[bottom_page_id])
+
+    @staticmethod
+    def get(page_id: int) -> Optional[LecturePage]:
+        if page_id is None:
+            return None
+        return LecturePage.query.get(page_id)
+
+
 class LectureSession(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Integer, nullable=False)
 
     maintainer_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     maintainer = db.relationship('User')
+
+    lecture_id = db.Column(db.Integer, db.ForeignKey('lecture.id'), nullable=False)
+    lecture = db.relationship('Lecture')
 
     room_id = db.Column(db.String, db.ForeignKey('blackboard_room.id'), nullable=False)
     room = db.relationship('BlackboardRoom')

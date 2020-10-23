@@ -16,12 +16,12 @@
         </div>
         <div class="col mt-3">
             <div class="card">
-                <div class="card-header">Create Lectures</div>
+                <div class="card-header">Rooms</div>
                 <div class="card-body">
-                    <ul id="roomList" class="nav flex-column">
+                    <ul class="nav flex-column">
                         {% for room in rooms %}
                             {% if True %}
-                                <li id="room-{{ room.room_id }}" class="nav-item">
+                                <li class="nav-item">
                                     <a class="nav-link"
                                        href="{{ url_for('blackboard.create_session',room_id=room.id) }}">{{ room.name }}</a>
                                 </li>
@@ -33,17 +33,14 @@
         </div>
         <div class="col mt-3">
             <div class="card">
-                <div class="card-header">Opened Rooms</div>
+                <div class="card-header">Lectures</div>
                 <div class="card-body">
-                    <ul id="roomList" class="nav flex-column">
-                        {% for room in rooms %}
-                            {% if room.can_join() %}
-                                <li id="room-{{ room.room_id }}" class="nav-item">
-                                    <a class="nav-link"
-                                       href="{{ url_for('blackboard.link_user',room_id=room.id) }}">{{ room.name }}
-                                        ({{ room.get_current_lecture().name }})</a>
-                                </li>
-                            {% endif %}
+                    <ul class="nav flex-column">
+                        {% for lecture in current_user.lectures %}
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   href="#">{{ lecture.name }}</a>
+                            </li>
                         {% endfor %}
                     </ul>
                 </div>
@@ -57,19 +54,31 @@
                 <tr>
                     <th scope="col">#</th>
                     <th scope="col">Name</th>
+                    <th scope="col">Open?</th>
+                    <th scope="col">Room</th>
                     <th scope="col">Start-Time</th>
                     <th scope="col">End-Time</th>
                     <th scope="col">Duration</th>
                 </tr>
                 </thead>
                 <tbody>
-                {% for lecture in lectures %}
+                {% for l_session in lecture_sessions %}
                     <tr>
                         <th scope="row">{{ loop.index }}</th>
-                        <td>{{ lecture.name }}</td>
-                        <td>{{ lecture.start_time | df }} </td>
-                        <td>{{ lecture.end_time | df }} </td>
-                        <td>{{ lecture.duration }} min</td>
+                        <td>
+                            {%-  if l_session.is_open() -%}
+                            <a href="{{ url_for('blackboard.link_user',room_id=l_session.room_id) }}">{{ l_session.name }}</a>
+                            {%- else -%}
+                                {{ l_session.name }}
+                            {%- endif -%}
+                        </td>
+                        <td><span
+                                class="{{ 'is-open' if l_session.is_open() else 'is-close' }}">{{ 'Open' if l_session.is_open() else 'Closed' }}</span>
+                        </td>
+                        <td><a href="#">{{ l_session.room.full_name }}</a></td>
+                        <td>{{ l_session.start_time | df }} </td>
+                        <td>{{ l_session.end_time | df }} </td>
+                        <td>{{ l_session.duration }} min</td>
                     </tr>
                 {% endfor %}
                 </tbody>

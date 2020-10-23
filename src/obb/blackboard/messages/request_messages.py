@@ -13,8 +13,18 @@ class RoomUpdateContentRequestMessage(BaseRequestMessage):
 
 
 @dataclass
+class RoomGetContentRequestMessage(BaseRequestMessage):
+    page: int = 0
+
+
+@dataclass
 class RoomDrawRequestMessage(BaseRequestMessage):
     stroke: StrokeData
+
+
+@dataclass
+class RoomGetDrawRequestMessage(BaseRequestMessage):
+    page: int = 0
 
 
 @dataclass()
