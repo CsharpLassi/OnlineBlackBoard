@@ -170,11 +170,16 @@ class Lecture(db.Model):
     pages = db.relationship('LecturePage',
                             primaryjoin="Lecture.id == LecturePage.lecture_id")
 
-    def get_page(self, page_id: int = None) -> LecturePage:
+    def get_page(self, page_id: int = None) -> Optional[LecturePage]:
         if page_id is None:
             page_id = self.current_page_id or self.start_page_id
 
         page = LecturePage.get(page_id)
+
+        if page and page.lecture_id != self.id:
+            # Todo: Exception
+            return None
+
         if page is None:
             page = LecturePage()
             page.lecture = self

@@ -12,7 +12,7 @@ from .messages.request_messages import *
 from .messages.response_messages import *
 
 from .decorators import convert, to_form_dict, event_login_required
-from .ext import namespace, bb_session_manager
+from .ext import namespace, bb_session_manager, page_manager
 
 from .models import BlackboardRoom, LecturePage
 
@@ -81,17 +81,10 @@ def blackboard_room_update_content(msg: RoomUpdateContentRequestMessage,
     l_session = room.get_current_lecture_session()
     lecture = l_session.lecture
 
-    page = lecture.get_page()
-
-    # Todo: Verallgemeiner und Thread sicher machen
-    base_dir = current_app.config['BLACKBOARD_DATA_PATH']
-    base_path = os.path.join(base_dir, 'lectures', str(lecture.id), str(page.id))
-
-    file_path = os.path.join(base_path, 'markdown.md')
-
-    os.makedirs(base_path, exist_ok=True)
-    with open(file_path, 'w')as fs:
-        fs.write(msg.raw_text)
+    page_id = lecture.current_page_id or lecture.start_page_id
+    page_session = page_manager.get(page_id, lecture=lecture)
+    if page_session:
+        page_session.save_markdown(msg.raw_text)
 
 
 @socket.on('room:get:content', namespace=namespace)
@@ -105,23 +98,13 @@ def blackboard_room_get_content(msg: RoomGetContentRequestMessage,
     l_session = room.get_current_lecture_session()
     lecture = l_session.lecture
 
-    page = lecture.get_page()
+    page_id = msg.page or lecture.current_page_id or lecture.start_page_id
+    page_session = page_manager.get(page_id, lecture=lecture)
 
-    # Todo: Verallgemeiner und Thread sicher machen
-    base_dir = current_app.config['BLACKBOARD_DATA_PATH']
-    base_path = os.path.join(base_dir, 'lectures', str(lecture.id), str(page.id))
-
-    file_path = os.path.join(base_path, 'markdown.md')
-
-    raw_text: str = ''
-    if os.path.exists(file_path):
-        with open(file_path, 'r')as fs:
-            while buffer := fs.read(1024):
-                raw_text += buffer
-
+    if page_session and (markdown := page_session.read_markdown()):
         data = RoomPrintResponse(
-            raw_text=raw_text,
-            markdown=escape(raw_text),
+            raw_text=markdown,
+            markdown=escape(markdown),
         )
 
         emit('room:print', data.to_dict(), room=room.id)
