@@ -48,7 +48,7 @@ def blackboard_join(msg: JoinRequestMessage, room: BlackboardRoom = None):
     session: BlackBoardSession = bb_session_manager.get(msg.session.session_id)
 
     user: User = session.get_user()
-    if not user and room.can_join(session, user=user):
+    if not room.can_join(user=user):
         return
 
     join_room(room.id)
