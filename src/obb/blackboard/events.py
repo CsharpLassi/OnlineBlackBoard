@@ -1,3 +1,5 @@
+import os
+
 from flask import request, current_app, escape
 from flask_login import current_user
 from flask_socketio import emit, join_room
@@ -73,20 +75,25 @@ def blackboard_room_update_content(msg: RoomUpdateContentRequestMessage,
         creator=session.session_user_data,
     )
 
+    emit('room:print', data.to_dict(), room=room.id)
+
+    # Save Markdown
     l_session = room.get_current_lecture_session()
     lecture = l_session.lecture
 
-    current_page = lecture.current_page
-    # Todo: Verallgemeinern
-    if current_page is None:
-        page = LecturePage()
-        page.lecture = lecture
-        page.creator = current_user
+    page = lecture.get_page()
 
-        lecture.start_page = lecture.current_page = page
-        db.session.commit()
+    # Todo: Verallgemeiner und Thread sicher machen
+    base_dir = current_app.config['BLACKBOARD_DATA_PATH']
+    base_path = os.path.join(base_dir, 'lectures', str(lecture.id), str(page.id))
 
-    emit('room:print', data.to_dict(), room=room.id)
+    file_path = os.path.join(base_path, 'markdown.md')
+
+    os.makedirs(base_path, exist_ok=True)
+    with open(file_path, 'w')as fs:
+        fs.write(msg.raw_text)
+
+
 
 
 @socket.on('room:update:draw', namespace=namespace)

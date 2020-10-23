@@ -5,6 +5,7 @@ from typing import Optional, Iterator
 
 import datetime
 
+from flask_login import current_user
 from sqlalchemy.sql import func
 
 from ..ext import db
@@ -169,6 +170,20 @@ class Lecture(db.Model):
     pages = db.relationship('LecturePage',
                             primaryjoin="Lecture.id == LecturePage.lecture_id")
 
+    def get_page(self, page_id: int = None) -> LecturePage:
+        if page_id is None:
+            page_id = self.current_page_id or self.start_page_id
+
+        page = LecturePage.get(page_id)
+        if page is None:
+            page = LecturePage()
+            page.lecture = self
+            page.creator = current_user
+
+            self.start_page = self.current_page = page
+            db.session.commit()
+        return page
+
 
 class LecturePage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -191,6 +206,12 @@ class LecturePage(db.Model):
 
     bottom_page_id = db.Column(db.Integer, db.ForeignKey('lecture_page.id'))
     bottom_page = db.relationship('LecturePage', foreign_keys=[bottom_page_id])
+
+    @staticmethod
+    def get(page_id: int) -> Optional[LecturePage]:
+        if page_id is None:
+            return None
+        return LecturePage.query.get(page_id)
 
 
 class LectureSession(db.Model):
