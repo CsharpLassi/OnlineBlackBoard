@@ -94,12 +94,45 @@ def blackboard_room_update_content(msg: RoomUpdateContentRequestMessage,
         fs.write(msg.raw_text)
 
 
+@socket.on('room:get:content', namespace=namespace)
+@convert(RoomGetContentRequestMessage)
+@event_login_required
+def blackboard_room_get_content(msg: RoomGetContentRequestMessage,
+                                room: BlackboardRoom = None):
+    session = bb_session_manager.get(msg.session.session_id)
+
+    # Read Markdown
+    l_session = room.get_current_lecture_session()
+    lecture = l_session.lecture
+
+    page = lecture.get_page()
+
+    # Todo: Verallgemeiner und Thread sicher machen
+    base_dir = current_app.config['BLACKBOARD_DATA_PATH']
+    base_path = os.path.join(base_dir, 'lectures', str(lecture.id), str(page.id))
+
+    file_path = os.path.join(base_path, 'markdown.md')
+
+    raw_text: str = ''
+    if os.path.exists(file_path):
+        with open(file_path, 'r')as fs:
+            while buffer := fs.read(1024):
+                raw_text += buffer
+
+        data = RoomPrintResponse(
+            raw_text=raw_text,
+            markdown=escape(raw_text),
+            creator=session.session_user_data,
+        )
+
+        emit('room:print', data.to_dict(), room=room.id)
 
 
 @socket.on('room:update:draw', namespace=namespace)
 @convert(RoomDrawRequestMessage)
 @event_login_required
-def room_update_draw(msg: RoomDrawRequestMessage, room: BlackboardRoom = None):
+def blackboard_room_update_draw(msg: RoomDrawRequestMessage,
+                                room: BlackboardRoom = None):
     session = bb_session_manager.get(msg.session.session_id)
 
     if not session.session_user_data.allow_draw:

@@ -12,6 +12,10 @@ class RoomUpdateContentRequestMessage(BaseRequestMessage):
     raw_text: str
 
 
+class RoomGetContentRequestMessage(BaseRequestMessage):
+    pass
+
+
 @dataclass
 class RoomDrawRequestMessage(BaseRequestMessage):
     stroke: StrokeData
