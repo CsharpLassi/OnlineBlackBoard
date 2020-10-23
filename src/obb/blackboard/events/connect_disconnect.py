@@ -5,7 +5,7 @@ from flask_socketio import emit
 
 from obb.ext import socket
 from ..ext import namespace, bb_session_manager
-from ..messages.response_messages import BaseResponseMessage
+from ..messages.base_messages import BaseResponseMessage
 from ..messages.datas import UserData, RoomData
 
 

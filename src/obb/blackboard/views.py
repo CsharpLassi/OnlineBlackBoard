@@ -1,13 +1,28 @@
 import datetime
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
+from flask_assets import Bundle
 
-from ..ext import db
+from ..ext import db, assets
 
 from .ext import namespace, bb_session_manager
 from .models import BlackboardRoom, LectureSession, Lecture
 
 bp = Blueprint('blackboard', __name__, url_prefix=namespace)
+
+js_blackboard = Bundle('js/socket.js')
+assets.register('js_blackboard', js_blackboard)
+
+js_blackboard_user = Bundle('js/socket.js',
+                            'js/blackboard/admin_user_list.js',
+                            'js/blackboard/room_settings.js',
+                            'js/blackboard/markdown_editor.js',
+                            'js/blackboard/content.js')
+assets.register('js_blackboard_user', js_blackboard_user)
+
+js_blackboard_board = Bundle('js/socket.js',
+                             'js/blackboard/content.js')
+assets.register('js_blackboard_board', js_blackboard_board)
 
 
 @bp.route('/', methods=['GET', 'POST'])

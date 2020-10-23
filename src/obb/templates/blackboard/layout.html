@@ -16,9 +16,15 @@
     <script src="{{ url_for('static', filename='components/marked/marked.min.js') }}"></script>
     <script src="{{ url_for('static', filename='components/atrament/dist/atrament.min.js') }}"></script>
 
-    <script src="{{ url_for('static', filename='blackboard/main.js') }}"></script>
-    <script src="{{ url_for('static', filename='blackboard/connection.js') }}"></script>
-
     {% block blackboard_js %}
+        {% assets "js_blackboard" %}
+            <script type="text/javascript" src="{{ ASSET_URL }}"></script>
+        {% endassets %}
     {% endblock %}
+
+    <script>
+        $(document).ready(obbSocket.init({
+            namespace: '/blackboard'
+        }));
+    </script>
 {% endblock %}

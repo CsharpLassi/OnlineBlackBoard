@@ -22,12 +22,13 @@ def create_app(conf: Optional[C] = Config) -> Flask:
 
 def load_ext(app: Flask):
     from .ext import (session,
-                      db, migrate, login, socket)
+                      db, migrate, login, socket, assets)
     session.init_app(app)
     db.init_app(app)
     migrate.init_app(app, db)
     login.init_app(app)
     socket.init_app(app, manage_session=False)
+    assets.init_app(app)
 
 
 def load_blueprints(app: Flask):

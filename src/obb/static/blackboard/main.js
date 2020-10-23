@@ -33,12 +33,6 @@ function drawContent() {
     $(document).trigger('content:change')
 }
 
-$.urlParam = function (name) {
-    let results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
-    if (results === null)
-        return null
-    return results[1] || null;
-}
 
 $(document).on('socket:ready', function (socket) {
     $.socket.on('room:updated:settings', function (data) {

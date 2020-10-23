@@ -1,9 +1,8 @@
-#content {
-    border: 2px solid lightgrey;
+#ContentBox {
 
+    border: 2px solid lightgrey;
     position: relative;
     background: transparent;
-
 }
 
 #contentText {
