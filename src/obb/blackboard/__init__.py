@@ -1,1 +1,1 @@
-from . import views, events
+from . import views, events, event

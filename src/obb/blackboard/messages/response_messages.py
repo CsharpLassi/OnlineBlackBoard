@@ -11,12 +11,6 @@ class UserJoinedResponse(BaseResponseMessage):
 
 
 @dataclass
-class UserLeaveResponse(BaseResponseMessage):
-    user: UserData
-    room: RoomData
-
-
-@dataclass
 class RoomPrintResponse(BaseResponseMessage):
     raw_text: str
     markdown: str
