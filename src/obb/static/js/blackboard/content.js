@@ -11,6 +11,10 @@ var obbContentBox = {
     },
 
     setup: function () {
+        obbSocket.on('room:join', function (msg) {
+            obbSocket.emit('room:get:content')
+        });
+
         obbSocket.on('room:update:content', function (msg) {
             obbContentBox.config.textItem.html(marked(msg.markdown));
         });
@@ -21,6 +25,10 @@ var obbContentBox = {
                 .css('width', `${msg.content_draw_width}px`)
 
             obbContentBox.updateLayout();
+        });
+
+        obbSocket.on('room:get:content', function (msg) {
+            obbContentBox.config.textItem.html(marked(msg.markdown));
         });
 
         obbContentBox.updateLayout();

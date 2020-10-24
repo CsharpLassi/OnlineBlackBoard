@@ -27,6 +27,10 @@ var obbMarkdownEditor = {
             }
 
         });
+
+        obbSocket.on('room:get:content', function (msg) {
+            obbMarkdownEditor.config.items.val(msg.raw_text)
+        });
     },
 }
 

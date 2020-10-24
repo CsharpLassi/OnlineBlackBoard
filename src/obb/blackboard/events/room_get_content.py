@@ -42,4 +42,4 @@ def room_get_content(msg: RoomGetContentRequest,
             markdown=escape(markdown),
         )
 
-        emit('room:print', data.to_dict())
+        emit('room:get:content', data.to_dict())
