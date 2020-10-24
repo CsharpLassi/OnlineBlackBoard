@@ -29,7 +29,7 @@ class UserJoinedResponse(BaseResponseMessage):
 @convert(JoinRequestMessage)
 @event_login_required
 def join(msg: JoinRequestMessage,
-                    room: BlackboardRoom = None):
+         room: BlackboardRoom = None):
     sid = request.sid
     session: BlackBoardSession = bb_session_manager.get(msg.session.session_id)
 

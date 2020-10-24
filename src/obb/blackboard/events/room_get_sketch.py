@@ -1,11 +1,12 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import List
 
 from flask_socketio import emit
 
 from obb.ext import socket
 from ..decorators import convert, event_login_required
 from ..ext import namespace, bb_session_manager, page_manager
-from ..messages.base_messages import BaseRequestMessage
+from ..messages.base_messages import BaseRequestMessage, BaseResponseMessage
 from ..messages.datas import StrokeData, UserData
 from ..models import BlackboardRoom
 
@@ -16,9 +17,8 @@ class RoomGetSketchRequest(BaseRequestMessage):
 
 
 @dataclass
-class RoomGetSketchResponse(BaseRequestMessage):
-    stroke: StrokeData
-    creator: UserData = None
+class RoomGetSketchResponse(BaseResponseMessage):
+    strokes: List[StrokeData] = field(default_factory=list)
 
 
 @socket.on('room:get:sketch', namespace=namespace)
@@ -36,9 +36,8 @@ def room_get_sketch(msg: RoomGetSketchRequest,
     page_session = page_manager.get(page_id, lecture=lecture)
 
     if page_session:
-        for stroke in page_session.get_strokes():
-            data = RoomGetSketchResponse(
-                stroke=stroke,
-            )
+        data = RoomGetSketchResponse(
+            strokes=list(page_session.get_strokes()),
+        )
 
-            emit('room:draw:stroke', data.to_dict())
+        emit('room:get:sketch', data.to_dict())

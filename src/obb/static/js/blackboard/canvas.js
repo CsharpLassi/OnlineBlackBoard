@@ -149,6 +149,8 @@ var obbSketchContent = {
         obbSocket.on('room:join', function (msg) {
             let user = msg.user;
 
+            obbSocket.emit('room:get:sketch');
+
             if (user.allow_draw) {
                 obbSketchContent.globalSketchPad.changeRecordStroke(true);
 
@@ -193,6 +195,12 @@ var obbSketchContent = {
                 return
 
             obbSketchContent.globalSketchPad.draw(msg.stroke);
+        });
+
+        obbSocket.on('room:get:sketch', function (msg) {
+            msg.strokes.forEach(s => {
+                obbSketchContent.globalSketchPad.draw(s);
+            });
         });
 
         obbSketchContent.showAll();
