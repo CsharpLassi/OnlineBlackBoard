@@ -23,7 +23,7 @@
                             {% if True %}
                                 <li class="nav-item">
                                     <a class="nav-link"
-                                       href="{{ url_for('blackboard.create_session',room_id=room.id) }}">{{ room.name }}</a>
+                                       href="{{ url_for('blackboard.session_create',room_id=room.id) }}">{{ room.name }}</a>
                                 </li>
                             {% endif %}
                         {% endfor %}
@@ -54,6 +54,7 @@
                 <tr>
                     <th scope="col">#</th>
                     <th scope="col">Name</th>
+                    <th scope="col"></th>
                     <th scope="col">Open?</th>
                     <th scope="col">Room</th>
                     <th scope="col">Start-Time</th>
@@ -71,6 +72,10 @@
                             {%- else -%}
                                 {{ l_session.name }}
                             {%- endif -%}
+                        </td>
+                        <td>
+                            <a href="#"><i class="fas fa-edit"></i></a>
+                            <a href="#"><i class="fas fa-trash text-danger"></i></a>
                         </td>
                         <td><span
                                 class="{{ 'is-open' if l_session.is_open() else 'is-close' }}">{{ 'Open' if l_session.is_open() else 'Closed' }}</span>
