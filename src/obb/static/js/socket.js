@@ -61,6 +61,8 @@ var obbSocket = {
         });
 
         obbSocket.socket.on('room:join', function (msg) {
+            obbSocket.emit('room:get:page');
+
             obbSocket.user = obbUser.init(msg.user);
             obbSocket.room = obbRoom.init(msg.room);
             $('#status').text(obbSocket.room.room_name + ':' + obbSocket.user.user_id);

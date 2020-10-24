@@ -149,7 +149,6 @@ var obbSketchContent = {
         obbSocket.on('room:join', function (msg) {
             let user = msg.user;
 
-            obbSocket.emit('room:get:sketch');
 
             if (user.allow_draw) {
                 obbSketchContent.globalSketchPad.changeRecordStroke(true);
@@ -165,6 +164,10 @@ var obbSketchContent = {
 
 
             obbSketchContent.showAll();
+        });
+
+        obbSocket.on('room:get:page', function () {
+            obbSocket.emit('room:get:sketch');
         });
 
         obbSocket.on('room:update:user', function (msg) {

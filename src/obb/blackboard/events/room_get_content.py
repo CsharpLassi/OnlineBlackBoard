@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 
 from flask import escape
 from flask_socketio import emit
@@ -7,10 +6,10 @@ from flask_socketio import emit
 from obb.ext import socket
 from .functions import get_page_session
 from ..decorators import convert, event_login_required
-from ..ext import namespace, bb_session_manager, page_manager
+from ..ext import namespace, bb_session_manager
 from ..messages.base_messages import BaseRequestMessage, BaseResponseMessage
 from ..messages.datas import UserData
-from ..models import BlackboardRoom, Lecture
+from ..models import BlackboardRoom
 
 
 @dataclass
