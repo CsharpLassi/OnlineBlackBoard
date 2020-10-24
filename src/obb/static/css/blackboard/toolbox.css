@@ -1,0 +1,12 @@
+.sketchToolboxControl {
+    margin-right: 0.5em;
+    margin-left: 0.5em;
+}
+
+.sketchToolboxControl.modeControl{
+    color: black;
+}
+
+.sketchToolboxControl.disabled{
+    color: gray;
+}

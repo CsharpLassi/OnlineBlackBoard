@@ -1,14 +1,16 @@
 {% extends 'blackboard/layout.html' %}
 {% from 'form.html' import show_form %}
 
-{% block css %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='blackboard/main.css') }}">
+{% block blackboard_js %}
+    {% assets "js_blackboard_user" %}
+        <script type="text/javascript" src="{{ ASSET_URL }}"></script>
+    {% endassets %}
 {% endblock %}
 
 {% block row %}
     <div class="row justify-content-center mt-3">
         <div class="col-6">
-            <textarea id="board" class="form-control" style="width: 100%;height: 20em"></textarea>
+            <textarea id="MarkdownEditor" class="form-control" style="width: 100%;height: 20em"></textarea>
 
         </div>
         <div class="col-6">
@@ -38,7 +40,7 @@
                             <th scope="col">Draw?</th>
                         </tr>
                         </thead>
-                        <tbody id="userList">
+                        <tbody id="UserList">
 
                         </tbody>
                     </table>
@@ -50,8 +52,4 @@
     </div>
 {% endblock %}
 
-{% block blackboard_js %}
-    <script src="{{ url_for('static', filename='blackboard/draw.js') }}"></script>
-    <script src="{{ url_for('static', filename='blackboard/user.js') }}"></script>
-{% endblock %}
 

@@ -29,7 +29,7 @@ def convert(cls):
     return helper
 
 
-def to_form_dict(item: str = None):
+def to_form_dict(item: str = 'form_data'):
     def helper(func):
         @wraps(func)
         def wrapper(*args, **kwargs):

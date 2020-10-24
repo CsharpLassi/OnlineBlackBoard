@@ -1,33 +1,46 @@
-<div id="content">
-    <canvas id="contentSketchpadUser" class="contentSketchpad" style="opacity: 50%;z-index: 4;">
+<div id="Content">
+    <div id="ContentBox">
+        <canvas id="ContentSketchpadUser" class="contentSketchpad" style="opacity: 50%;z-index: 4;">
 
-    </canvas>
-    <canvas id="contentSketchpadGlobal" class="contentSketchpad" style="z-index: 3;">
+        </canvas>
+        <canvas id="ContentSketchpadGlobal" class="contentSketchpad" style="z-index: 3;">
 
-    </canvas>
-    <div id="contentText" style="z-index: 1;{{ room.get_style() }}">
+        </canvas>
+        <div id="ContentText" style="z-index: 0;{{ room.get_style() }}">
 
-    </div>
+        </div>
 
-    <div id="contentBlocker" style="z-index: 0">
-
-    </div>
-</div>
-<div class="row mt-1">
-    <div class="col-auto">
-        <div class="row justify-content-center">
-            <div class="col-auto"><i class="fas fa-arrow-left fa-3x"></i></div>
-            <div id="cmdEnableDraw" class="drawControl"><i class="far fa-check-square fa-3x"></i></div>
-            <div id="cmdModeDraw" class="drawControl" style="color: black;"><i class="fas fa-pen fa-3x"></i></div>
-            <div id="cmdModeEraser" class="drawControl" style="color: gray;"><i class="fas fa-eraser fa-3x"></i></div>
-
-            <input id="rangeThickness" type="range" min="1" max="20" value="2" step="0.1">
+        <div id="ContentBlocker" style="z-index: 2">
 
         </div>
     </div>
-    <div class="col">
-    </div>
-    <div class="col-auto">
-        <i class="fas fa-arrow-right ml-2 fa-3x"></i>
+</div>
+
+<div id="ContentToolBox" class="mt-1">
+    <div class="row">
+        <div class="col-auto">
+            <div class="row justify-content-center">
+                <div class="col-auto"><i class="fas fa-arrow-left fa-3x"></i></div>
+
+                <div id="cmdEnableDraw" class="sketchToolboxControl">
+                    <i class="far fa-check-square fa-3x"></i>
+                </div>
+
+                <div id="cmdModeDraw" class="sketchToolboxControl modeControl">
+                    <i class="fas fa-pen fa-3x"></i>
+                </div>
+                <div id="cmdModeEraser" class="sketchToolboxControl modeControl">
+                    <i class="fas fa-eraser fa-3x"></i>
+                </div>
+
+                <input id="rangeThickness" type="range" min="1" max="20" value="2" step="0.1">
+
+            </div>
+        </div>
+        <div class="col">
+        </div>
+        <div class="col-auto">
+            <i class="fas fa-arrow-right ml-2 fa-3x"></i>
+        </div>
     </div>
 </div>

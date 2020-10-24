@@ -1,0 +1,12 @@
+#ContentText h1 {
+    margin-bottom: 0.25rem;
+}
+
+#ContentText p {
+    font-size: 24px;
+    margin: 0px;
+}
+
+#ContentText li {
+    font-size: 24px;
+}

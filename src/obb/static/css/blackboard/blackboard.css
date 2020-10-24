@@ -1,0 +1,18 @@
+#ContentBox {
+    border: 2px solid lightgrey;
+    position: relative;
+    background: transparent;
+    height: 100%;
+    width: 100%;
+}
+
+#ContentText {
+    position: absolute;
+}
+
+.contentSketchpad, #ContentBlocker {
+    background: transparent;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+}
