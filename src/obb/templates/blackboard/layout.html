@@ -6,6 +6,16 @@
     {% endif %}
 {% endblock %}
 
+{% block css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='blackboard/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/blackboard/toolbox.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/blackboard/blackboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/blackboard/blackboard.style.css') }}">
+
+    {% block blackboard_css %}
+    {% endblock %}
+{% endblock %}
+
 {% block navbar_right %}
     <li class="nav-item">
         <span class="nav-link" id="status">Not Connected</span>

@@ -16,17 +16,3 @@
     height: 100%;
     position: absolute;
 }
-
-
-#content h1 {
-    margin-bottom: 0.25rem;
-}
-
-#content p {
-    font-size: 24px;
-    margin: 0px;
-}
-
-#content li {
-    font-size: 24px;
-}
