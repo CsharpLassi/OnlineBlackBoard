@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from flask_socketio import emit
 
 from obb.ext import socket
+from .functions import get_page_session
 from ..decorators import convert, event_login_required
 from ..ext import namespace, bb_session_manager, page_manager
 from ..messages.base_messages import BaseRequestMessage, BaseResponseMessage
@@ -40,10 +41,6 @@ def room_update_sketch(msg: RoomUpdateSketchRequest,
     emit('room:update:sketch', data.to_dict(), room=room.id)
 
     # Save History
-    l_session = room.get_current_lecture_session()
-    lecture = l_session.lecture
-
-    page_id = lecture.current_page_id or lecture.start_page_id
-    page_session = page_manager.get(page_id, lecture=lecture)
-
-    page_session.add_stroke(data.stroke)
+    page_session = get_page_session(session, room)
+    if page_session:
+        page_session.add_stroke(data.stroke)

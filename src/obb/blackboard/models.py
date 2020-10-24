@@ -189,7 +189,8 @@ class Lecture(db.Model):
     pages = db.relationship('LecturePage',
                             primaryjoin="Lecture.id == LecturePage.lecture_id")
 
-    def get_page(self, page_id: int = None) -> Optional[LecturePage]:
+    def get_page(self, page_id: int = None, width: int = None, height: int = None) \
+            -> Optional[LecturePage]:
         if page_id is None:
             page_id = self.current_page_id or self.start_page_id
 
@@ -203,6 +204,8 @@ class Lecture(db.Model):
             page = LecturePage()
             page.lecture = self
             page.creator = current_user
+            page.draw_width = width
+            page.draw_height = height
 
             self.start_page = self.current_page = page
             db.session.commit()
@@ -247,6 +250,9 @@ class Lecture(db.Model):
 class LecturePage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Integer)
+
+    draw_height = db.Column(db.Integer, default=default_draw_height)
+    draw_width = db.Column(db.Integer, default=default_draw_width)
 
     lecture_id = db.Column(db.Integer, db.ForeignKey('lecture.id'), nullable=False)
     lecture = db.relationship('Lecture', foreign_keys=[lecture_id])

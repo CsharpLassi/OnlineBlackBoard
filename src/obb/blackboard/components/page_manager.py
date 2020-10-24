@@ -93,10 +93,10 @@ class PageSession:
 
 
 class PageManager(MemDb[int, PageSession]):
-    def _on_get(self, key: int, item: Optional[PageSession], lecture: Lecture = None) \
-            -> Optional[PageSession]:
+    def _on_get(self, key: int, item: Optional[PageSession], lecture: Lecture = None,
+                **kwargs) -> Optional[PageSession]:
 
-        page = lecture.get_page(key)
+        page = lecture.get_page(key, **kwargs)
 
         if not page:
             return None

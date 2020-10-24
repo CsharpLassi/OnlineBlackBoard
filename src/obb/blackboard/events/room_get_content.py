@@ -5,6 +5,7 @@ from flask import escape
 from flask_socketio import emit
 
 from obb.ext import socket
+from .functions import get_page_session
 from ..decorators import convert, event_login_required
 from ..ext import namespace, bb_session_manager, page_manager
 from ..messages.base_messages import BaseRequestMessage, BaseResponseMessage
@@ -31,14 +32,7 @@ def room_get_content(msg: RoomGetContentRequest,
                      room: BlackboardRoom = None):
     session = bb_session_manager.get(msg.session.session_id)
 
-    # Read Markdown
-    lecture: Optional[Lecture] = Lecture.get(session.lecture_id)
-    if not lecture:
-        l_session = room.get_current_lecture_session()
-        lecture = l_session.lecture
-
-    page_id = msg.page or lecture.current_page_id or lecture.start_page_id
-    page_session = page_manager.get(page_id, lecture=lecture)
+    page_session = get_page_session(session, room, msg.page)
 
     if page_session and (markdown := page_session.get_markdown()):
         data = RoomGetContentResponse(
