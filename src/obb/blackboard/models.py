@@ -255,22 +255,26 @@ class LecturePage(db.Model):
     draw_width = db.Column(db.Integer, default=default_draw_width)
 
     lecture_id = db.Column(db.Integer, db.ForeignKey('lecture.id'), nullable=False)
-    lecture = db.relationship('Lecture', foreign_keys=[lecture_id])
+    lecture = db.relationship('Lecture', uselist=False, foreign_keys=[lecture_id])
 
     creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    creator = db.relationship('User', foreign_keys=[creator_id])
+    creator = db.relationship('User', uselist=False, foreign_keys=[creator_id])
 
     left_page_id = db.Column(db.Integer, db.ForeignKey('lecture_page.id'))
-    left_page = db.relationship('LecturePage', foreign_keys=[left_page_id])
+    left_page = db.relationship('LecturePage', uselist=False, post_update=True,
+                                foreign_keys=[left_page_id])
 
     right_page_id = db.Column(db.Integer, db.ForeignKey('lecture_page.id'))
-    right_page = db.relationship('LecturePage', foreign_keys=[right_page_id])
+    right_page = db.relationship('LecturePage', uselist=False, post_update=True,
+                                 foreign_keys=[right_page_id])
 
     top_page_id = db.Column(db.Integer, db.ForeignKey('lecture_page.id'))
-    top_page = db.relationship('LecturePage', foreign_keys=[top_page_id])
+    top_page = db.relationship('LecturePage', uselist=False, post_update=True,
+                               foreign_keys=[top_page_id])
 
     bottom_page_id = db.Column(db.Integer, db.ForeignKey('lecture_page.id'))
-    bottom_page = db.relationship('LecturePage', foreign_keys=[bottom_page_id])
+    bottom_page = db.relationship('LecturePage', uselist=False, post_update=True,
+                                  foreign_keys=[bottom_page_id])
 
     @staticmethod
     def get(page_id: int) -> Optional[LecturePage]:

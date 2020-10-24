@@ -33,7 +33,8 @@ def room_get_content(msg: RoomGetContentRequest,
 
     page_session = get_page_session(session, room, msg.page)
 
-    if page_session and (markdown := page_session.get_markdown()):
+    if page_session:
+        markdown = page_session.get_markdown()
         data = RoomGetContentResponse(
             raw_text=markdown,
             markdown=escape(markdown),

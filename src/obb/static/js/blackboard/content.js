@@ -12,7 +12,7 @@ var obbContentBox = {
 
     setup: function () {
         obbSocket.on('room:get:page', function (msg) {
-            obbSocket.emit('room:get:content')
+            obbSocket.emit('room:get:content', {page: msg.page_id})
         });
 
         obbSocket.on('room:update:content', function (msg) {

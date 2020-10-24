@@ -78,6 +78,10 @@ var obbSketchCanvas = {
         this.selector.css('z-index', this.onZ)
     },
 
+    clear: function () {
+        this.sketchpad.clear();
+    },
+
     draw: function (stroke) {
         this.sketchpad.mode = stroke.mode;
         this.sketchpad.weight = stroke.weight;
@@ -166,8 +170,8 @@ var obbSketchContent = {
             obbSketchContent.showAll();
         });
 
-        obbSocket.on('room:get:page', function () {
-            obbSocket.emit('room:get:sketch');
+        obbSocket.on('room:get:page', function (msg) {
+            obbSocket.emit('room:get:sketch', {page: msg.page_id});
         });
 
         obbSocket.on('room:update:user', function (msg) {
@@ -201,6 +205,7 @@ var obbSketchContent = {
         });
 
         obbSocket.on('room:get:sketch', function (msg) {
+            obbSketchContent.globalSketchPad.clear()
             msg.strokes.forEach(s => {
                 obbSketchContent.globalSketchPad.draw(s);
             });
@@ -261,9 +266,9 @@ var obbSketchToolboxButton = {
         });
 
         if (this.default)
-            this.setOn()
+            this.setOn(false)
         else
-            this.setOff()
+            this.setOff(false)
     },
 
     click: function () {
@@ -305,6 +310,8 @@ var obbSketchToolboxButton = {
 }
 
 var obbSketchToolbox = {
+    cmdGetLeftPage: null,
+    cmdGetRightPage: null,
     cmdEnable: null,
     cmdModeDraw: null,
 
@@ -318,6 +325,22 @@ var obbSketchToolbox = {
     },
 
     setup: function () {
+        this.cmdGetLeftPage = obbSketchToolboxButton.init({
+            onClick: function () {
+                obbSocket.emit('room:get:page:left')
+            },
+            onlyOn: true,
+            cmd: $('#cmdGetLeftPage'),
+        });
+
+        this.cmdGetRightPage = obbSketchToolboxButton.init({
+            onClick: function () {
+                obbSocket.emit('room:get:page:right')
+            },
+            onlyOn: true,
+            cmd: $('#cmdGetRightPage'),
+        });
+
         this.cmdEnable = obbSketchToolboxButton.init({
             onClick: obbSketchContent.showAll,
             offClick: obbSketchContent.hideAll,

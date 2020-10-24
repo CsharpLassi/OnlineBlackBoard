@@ -33,7 +33,6 @@ def lecture_show(lecture_id):
 
     bb_session = bb_session_manager.create_session(room_id=room.id)
     bb_session.session_user_data.mode = 'viewer'
-    bb_session.session_user_data.allow_draw = False
     bb_session.lecture_id = lecture.id
 
     return render(lecture, bb_session)
