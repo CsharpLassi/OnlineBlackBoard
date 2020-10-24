@@ -1,13 +1,5 @@
 $(document).on('socket:ready', function () {
 
-    $.socket.on('room:updated:user', function (msg) {
-        let user = msg.user
-        if (user.allow_draw) {
-            $('#contentSketchpadUser').css('z-index', 1)
-        } else {
-            $('#contentSketchpadUser').css('z-index', 4)
-        }
-    });
 
     $.socket.on('room:draw:stroke', function (msg) {
         if (msg.creator !== null && msg.creator.user_id === $.user.user_id)

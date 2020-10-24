@@ -37,7 +37,7 @@ def room_update_sketch(msg: RoomUpdateSketchRequest,
         creator=session.session_user_data,
     )
 
-    emit('room:draw:stroke', data.to_dict(), room=room.id)
+    emit('room:update:sketch', data.to_dict(), room=room.id)
 
     # Save History
     l_session = room.get_current_lecture_session()

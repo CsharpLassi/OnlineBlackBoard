@@ -78,6 +78,45 @@ var obbSketchCanvas = {
         this.selector.css('z-index', this.onZ)
     },
 
+    draw: function (stroke) {
+        this.sketchpad.mode = stroke.mode;
+        this.sketchpad.weight = stroke.weight;
+        this.sketchpad.smoothing = stroke.smoothing;
+        this.sketchpad.color = stroke.color;
+        this.sketchpad.adaptiveStroke = stroke.adaptiveStroke;
+
+        // don't want to modify original data
+        const points = stroke.points.slice();
+
+        let firstPoint = points.shift();
+        firstPoint.x *= this.sketchpad.width;
+        firstPoint.y *= this.sketchpad.height;
+        // beginStroke moves the "pen" to the given position and starts the path
+        this.sketchpad.beginStroke(firstPoint.x, firstPoint.y);
+
+        let prevPoint = firstPoint;
+        while (points.length > 0) {
+            let point = points.shift();
+            point.x *= this.sketchpad.width;
+            point.y *= this.sketchpad.height;
+
+            // the `draw` method accepts the current real coordinates
+            // (i. e. actual cursor position), and the previous processed (filtered)
+            // position. It returns an object with the current processed position.
+            const {x, y} = this.sketchpad.draw(point.x, point.y, prevPoint.x, prevPoint.y);
+
+            // the processed position is the one where the line is actually drawn to
+            // so we have to store it and pass it to `draw` in the next step
+            prevPoint = {x, y};
+        }
+
+        // endStroke closes the path
+        this.sketchpad.endStroke(prevPoint.x, prevPoint.y);
+
+        this.sketchpad.recordStrokes = this.recordStrokes;
+        this.sketchpad.mode = this.mode;
+    }
+
 };
 
 var obbSketchContent = {
@@ -111,9 +150,13 @@ var obbSketchContent = {
             let user = msg.user;
 
             if (user.allow_draw) {
+                obbSketchContent.globalSketchPad.changeRecordStroke(true);
+
                 obbSketchContent.globalSketchPad.onZ = 4;
                 obbSketchContent.userSketchPad.onZ = 3;
             } else {
+                obbSketchContent.globalSketchPad.changeRecordStroke(false);
+
                 obbSketchContent.globalSketchPad.onZ = 3;
                 obbSketchContent.userSketchPad.onZ = 4;
             }
@@ -129,15 +172,27 @@ var obbSketchContent = {
                 return
 
             if (user.allow_draw) {
+                obbSketchContent.globalSketchPad.changeRecordStroke(true);
+
                 obbSketchContent.globalSketchPad.onZ = 4;
                 obbSketchContent.userSketchPad.onZ = 3;
             } else {
+                obbSketchContent.globalSketchPad.changeRecordStroke(false);
+
                 obbSketchContent.globalSketchPad.onZ = 3;
                 obbSketchContent.userSketchPad.onZ = 4;
             }
 
 
             obbSketchContent.showAll();
+        });
+
+        obbSocket.on('room:update:sketch', function (msg) {
+            let creator = msg.creator;
+            if (obbSocket.isUser(creator))
+                return
+
+            obbSketchContent.globalSketchPad.draw(msg.stroke);
         });
 
         obbSketchContent.showAll();

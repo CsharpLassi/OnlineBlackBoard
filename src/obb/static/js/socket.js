@@ -81,9 +81,9 @@ var obbSocket = {
         this.socket.emit(event, data);
     },
 
-    isUser: function (user) {
+    isUser: function (user, defaultValue =false) {
         if (!user)
-            return false;
+            return defaultValue;
         return user.user_id === obbSocket.user.user_id;
     }
 
