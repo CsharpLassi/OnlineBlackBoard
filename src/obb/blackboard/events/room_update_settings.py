@@ -18,6 +18,7 @@ class RoomUpdateSettingsRequest(BaseRequestMessage):
 @dataclass()
 class RoomUpdateSettingsResponse(BaseResponseMessage):
     content_draw_height: int
+    content_draw_width: int
 
 
 @socket.on('room:update:settings', namespace=namespace)
@@ -25,7 +26,7 @@ class RoomUpdateSettingsResponse(BaseResponseMessage):
 @convert(RoomUpdateSettingsRequest)
 @event_login_required
 def room_update_settings(msg: RoomUpdateSettingsRequest, form_data,
-                                    room: BlackboardRoom = None):
+                         room: BlackboardRoom = None):
     room_settings = RoomSettings(form_data)
     if room_settings.validate():
         room_settings.write_data(room)
@@ -33,7 +34,8 @@ def room_update_settings(msg: RoomUpdateSettingsRequest, form_data,
         db.session.commit()
 
         data = RoomUpdateSettingsResponse(
-            content_draw_height=room.draw_height
+            content_draw_height=room.draw_height,
+            content_draw_width=room.draw_width
         )
 
         emit('room:update:settings', data.to_dict(), room=room.id)

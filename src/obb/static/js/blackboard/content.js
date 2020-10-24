@@ -2,8 +2,8 @@ var obbContentBox = {
     init: function (settings) {
         obbContentBox.config = {
             item: $('#Content'),
+            textItem: $('#ContentText'),
             boxItem: $('#ContentBox'),
-            textItem: $('#contentText'),
         };
 
         $.extend(obbContentBox.config, settings);
@@ -15,33 +15,40 @@ var obbContentBox = {
             obbContentBox.config.textItem.html(marked(msg.markdown));
         });
 
-        this.updateLayout();
+        obbSocket.on('room:update:settings', function (msg) {
+            obbContentBox.config.textItem
+                .css('height', `${msg.content_draw_height}px`)
+                .css('width', `${msg.content_draw_width}px`)
+
+            obbContentBox.updateLayout();
+        });
+
+        obbContentBox.updateLayout();
     },
 
     updateLayout: function () {
         let contentSelector = obbContentBox.config.item;
-        let contentBox = obbContentBox.config.boxItem;
+        let contentText = obbContentBox.config.textItem;
 
         let contentWidth = contentSelector.width();
-        let contentHeight = contentSelector.height();
 
-        let boxWidth = contentBox.width();
-        let boxHeight = contentBox.height();
+        let textWidth = contentText.width();
+        let textHeight = contentText.height();
 
 
-        let factorX = contentWidth / boxWidth;
+        let factorMin = contentWidth / textWidth;
 
-        let factorMin = factorX;
+        let translateX = textWidth * (factorMin - 1) / 2;
+        let translateY = textHeight * (factorMin - 1) / 2;
 
-        let translateX = boxWidth * (factorMin - 1) / 2;
-        let translateY = boxHeight * (factorMin - 1) / 2;
-
-        contentBox.css('transform',
+        contentText.css('transform',
             'translateX(' + translateX + 'px) ' +
             'translateY(' + translateY + 'px) ' +
             'scale(' + factorMin + ') ');
 
-        contentSelector.height(contentHeight * factorMin)
+        contentSelector.height(textHeight * factorMin);
+
+        obbContentBox.config.boxItem.trigger('resize');
     },
 }
 

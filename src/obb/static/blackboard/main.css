@@ -1,28 +1,22 @@
 #ContentBox {
-
     border: 2px solid lightgrey;
     position: relative;
     background: transparent;
+    height: 100%;
+    width: 100%;
 }
 
-#contentText {
-    width: 1024px;
-    height: 256px;
-    z-index: 1;
+#ContentText {
     position: absolute;
 }
 
-.contentSketchpad, #contentBlocker {
+.contentSketchpad, #ContentBlocker {
     background: transparent;
     width: 100%;
     height: 100%;
     position: absolute;
 }
 
-.drawControl {
-    margin-right: 0.5em;
-    margin-left: 0.5em;
-}
 
 #content h1 {
     margin-bottom: 0.25rem;

@@ -30,6 +30,6 @@ var obbMarkdownEditor = {
     },
 }
 
-$(obbSocket).on('socket:read', function () {
+$(obbSocket).on('socket:ready', function () {
     obbMarkdownEditor.init()
 });

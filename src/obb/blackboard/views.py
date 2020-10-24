@@ -17,10 +17,12 @@ js_blackboard_user = Bundle('js/socket.js',
                             'js/blackboard/admin_user_list.js',
                             'js/blackboard/room_settings.js',
                             'js/blackboard/markdown_editor.js',
+                            'js/blackboard/canvas.js',
                             'js/blackboard/content.js')
 assets.register('js_blackboard_user', js_blackboard_user)
 
 js_blackboard_board = Bundle('js/socket.js',
+                             'js/blackboard/canvas.js',
                              'js/blackboard/content.js')
 assets.register('js_blackboard_board', js_blackboard_board)
 
