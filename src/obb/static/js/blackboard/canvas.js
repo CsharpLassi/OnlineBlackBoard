@@ -82,6 +82,8 @@ var obbSketchCanvas = {
 
 var obbSketchContent = {
     sketchCanvases: [],
+    globalSketchPad: null,
+    userSketchPad: null,
 
     init: function (settings) {
         obbSketchContent.config = {
@@ -95,12 +97,48 @@ var obbSketchContent = {
     },
 
     setup: function () {
-        obbSketchContent.sketchCanvases.push(obbSketchCanvas.init(obbSketchContent.config.globalCanvas, {
+        obbSketchContent.globalSketchPad = obbSketchCanvas.init(obbSketchContent.config.globalCanvas, {
             onZ: 3,
-        }));
-        obbSketchContent.sketchCanvases.push(obbSketchCanvas.init(obbSketchContent.config.userCanvas, {
+        });
+        obbSketchContent.sketchCanvases.push(obbSketchContent.globalSketchPad);
+
+        obbSketchContent.userSketchPad = obbSketchCanvas.init(obbSketchContent.config.userCanvas, {
             onZ: 4,
-        }));
+        });
+        obbSketchContent.sketchCanvases.push(obbSketchContent.userSketchPad);
+
+        obbSocket.on('room:join', function (msg) {
+            let user = msg.user;
+
+            if (user.allow_draw) {
+                obbSketchContent.globalSketchPad.onZ = 4;
+                obbSketchContent.userSketchPad.onZ = 3;
+            } else {
+                obbSketchContent.globalSketchPad.onZ = 3;
+                obbSketchContent.userSketchPad.onZ = 4;
+            }
+
+
+            obbSketchContent.showAll();
+        });
+
+        obbSocket.on('room:update:user', function (msg) {
+            let user = msg.user;
+
+            if (!obbSocket.isUser(user))
+                return
+
+            if (user.allow_draw) {
+                obbSketchContent.globalSketchPad.onZ = 4;
+                obbSketchContent.userSketchPad.onZ = 3;
+            } else {
+                obbSketchContent.globalSketchPad.onZ = 3;
+                obbSketchContent.userSketchPad.onZ = 4;
+            }
+
+
+            obbSketchContent.showAll();
+        });
 
         obbSketchContent.showAll();
     },
@@ -117,7 +155,7 @@ var obbSketchContent = {
         obbSketchContent.sketchCanvases.forEach(e => e.changeMode(mode));
     },
 
-    setThickness: function (thickness){
+    setThickness: function (thickness) {
         obbSketchContent.sketchCanvases.forEach(e => e.changeThickness(thickness));
     },
 

@@ -1,28 +1,4 @@
-$(document).ready(function () {
-
-
-    $('#rangeThickness')
-        .attr('value', thickness)
-        .on('change', function () {
-            thickness = parseFloat(this.value);
-
-            $.sketchpadGlobal.weight = thickness;
-            $.sketchpad_user_canvas.weight = thickness;
-        });
-
-})
-
 $(document).on('socket:ready', function () {
-    let token = $('meta[name=session-token]').attr("content");
-    $.socket.on('room:joined', function (msg) {
-        let user = msg.user;
-        if (user.allow_draw) {
-            $('#contentSketchpadUser').css('z-index', 1);
-        } else {
-            $('#contentSketchpadUser').css('z-index', 4);
-        }
-        $.socket.emit('room:get:draw', {token: token});
-    });
 
     $.socket.on('room:updated:user', function (msg) {
         let user = msg.user

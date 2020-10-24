@@ -84,7 +84,7 @@ var obbSocket = {
     isUser: function (user) {
         if (!user)
             return false;
-        return user.user_id === obbUser.user_id;
+        return user.user_id === obbSocket.user.user_id;
     }
 
 };
