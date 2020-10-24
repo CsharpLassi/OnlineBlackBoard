@@ -39,7 +39,7 @@
                         {% for lecture in current_user.lectures %}
                             <li class="nav-item">
                                 <a class="nav-link"
-                                   href="#">{{ lecture.name }}</a>
+                                   href="{{ url_for('blackboard.lecture_show',lecture_id= lecture.id) }}">{{ lecture.name }}</a>
                             </li>
                         {% endfor %}
                     </ul>
@@ -67,8 +67,8 @@
                     <tr>
                         <th scope="row">{{ loop.index }}</th>
                         <td>
-                            {%-  if l_session.is_open() -%}
-                            <a href="{{ url_for('blackboard.link_user',room_id=l_session.room_id) }}">{{ l_session.name }}</a>
+                            {%- if l_session.is_open() -%}
+                                <a href="{{ url_for('blackboard.link_user',room_id=l_session.room_id) }}">{{ l_session.name }}</a>
                             {%- else -%}
                                 {{ l_session.name }}
                             {%- endif -%}

@@ -46,6 +46,10 @@ class BlackboardRoom(db.Model):
                            server_default=default_visibility,
                            default=default_visibility)
 
+    is_invisible = db.Column(db.Boolean, nullable=False,
+                             server_default='0',
+                             default=False)
+
     creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     creator = db.relationship('User')
 
@@ -55,15 +59,6 @@ class BlackboardRoom(db.Model):
     def can_join(self, user=None) -> bool:
         from flask_login import current_user
         from ..users.models import User
-
-        is_open = False
-        for session in self.lecture_sessions:
-            if session.is_open():
-                is_open = True
-                break
-
-        if not is_open:
-            return False
 
         if isinstance(user, int):
             user = User.get(user)
@@ -75,6 +70,15 @@ class BlackboardRoom(db.Model):
 
         if user_id == self.creator_id:
             return True
+
+        is_open = False
+        for session in self.lecture_sessions:
+            if session.is_open():
+                is_open = True
+                break
+
+        if not is_open:
+            return False
 
         if self.visibility == 'usable':
             return True
@@ -130,7 +134,7 @@ class BlackboardRoom(db.Model):
 
         query = BlackboardRoom.query
 
-        query = query.filter_by(creator_id=user.id)
+        query = query.filter_by(creator_id=user.id, is_invisible=False)
 
         query = query.filter(or_(BlackboardRoom.full_name == name,
                                  BlackboardRoom.name == name))
@@ -154,6 +158,7 @@ class BlackboardRoom(db.Model):
         user_id = 0 if not user else user.id
 
         f_query = BlackboardRoom.query
+        f_query = f_query.filter_by(is_invisible=False)
 
         if not usable:
             f_query = f_query.filter(BlackboardRoom.creator_id == user_id)
@@ -168,6 +173,9 @@ class Lecture(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
     full_name = db.Column(db.String, nullable=False, index=True, unique=True)
+
+    edit_room_id = db.Column(db.Integer, db.ForeignKey('blackboard_room.id'))
+    edit_room = db.relationship('BlackboardRoom', foreign_keys=[edit_room_id])
 
     creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     creator = db.relationship('User')
@@ -276,7 +284,7 @@ class LectureSession(db.Model):
     lecture = db.relationship('Lecture')
 
     room_id = db.Column(db.String, db.ForeignKey('blackboard_room.id'), nullable=False)
-    room = db.relationship('BlackboardRoom')
+    room = db.relationship('BlackboardRoom', cascade="all, delete")
 
     start_time = db.Column(db.TIMESTAMP, nullable=False,
                            default=datetime.datetime.utcnow,

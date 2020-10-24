@@ -6,7 +6,7 @@
         <canvas id="ContentSketchpadGlobal" class="contentSketchpad" style="z-index: 3;">
 
         </canvas>
-        <div id="ContentText" style="z-index: 0;{{ room.get_style() }}">
+        <div id="ContentText" style="z-index: 0;{% if room %}{{ room.get_style() }}{% endif %}">
 
         </div>
 

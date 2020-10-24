@@ -16,3 +16,8 @@ js_blackboard_board = Bundle('js/socket.js',
                              'js/blackboard/canvas.js',
                              'js/blackboard/content.js')
 assets.register('js_blackboard_board', js_blackboard_board)
+
+js_blackboard_lecture = Bundle('js/socket.js',
+                               'js/blackboard/canvas.js',
+                               'js/blackboard/content.js')
+assets.register('js_blackboard_lecture', js_blackboard_lecture)
