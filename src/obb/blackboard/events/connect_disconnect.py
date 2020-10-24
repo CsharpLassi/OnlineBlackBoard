@@ -33,4 +33,4 @@ def blackboard_disconnect():
             room=session.session_room_data
         )
 
-        emit('room:user:leave', leave_data.to_dict(), room=session.room_id)
+        emit('room:leave:user', leave_data.to_dict(), room=session.room_id)

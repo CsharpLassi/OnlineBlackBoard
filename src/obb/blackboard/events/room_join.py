@@ -45,5 +45,5 @@ def join(msg: JoinRequestMessage,
         room=session.session_room_data)
     response_data_dict = response_data.to_dict()
 
-    emit('room:user:join', response_data_dict, room=room.id)
+    emit('room:join:user', response_data_dict, room=room.id)
     emit('room:join', response_data_dict)
