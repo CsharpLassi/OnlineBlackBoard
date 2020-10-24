@@ -231,6 +231,10 @@ class Lecture(db.Model):
 
         return query.first()
 
+    @staticmethod
+    def get(lecture_id) -> Optional[Lecture]:
+        return Lecture.query.get(lecture_id)
+
 
 class LecturePage(db.Model):
     id = db.Column(db.Integer, primary_key=True)

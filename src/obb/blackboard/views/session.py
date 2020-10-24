@@ -19,9 +19,13 @@ def session_create():
                                lectures=lectures)
 
     room: Optional[BlackboardRoom] = None
+    lecture: Optional[Lecture] = None
     if room_id := request.args.get('room_id'):
         room = BlackboardRoom.get(room_id)
         # Todo: Check Access
+
+    if lecture_id := request.args.get('lecture_id'):
+        lecture = Lecture.get(lecture_id)
 
     rooms = BlackboardRoom.get_rooms(usable=True)
     lectures = Lecture.get_lectures()
@@ -68,5 +72,8 @@ def session_create():
 
     if room:
         form.room_name.data = room.full_name
+
+    if lecture:
+        form.lecture_name.data = lecture.name
 
     return render(form, rooms, lectures)
