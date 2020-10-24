@@ -31,7 +31,7 @@ def room_list():
         db.session.add(room)
         db.session.commit()
 
-        return redirect(url_for('blackboard.list_rooms'))
+        return redirect(url_for('blackboard.room_list'))
 
     rooms = BlackboardRoom.get_rooms()
 

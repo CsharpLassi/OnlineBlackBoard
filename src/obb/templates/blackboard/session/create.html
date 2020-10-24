@@ -1,0 +1,67 @@
+{% extends 'blackboard/layout.html' %}
+{% from 'form.html' import show_form %}
+
+{% block col %}
+    <div class="col mt-3">
+        <div class="card">
+            <div class="card-header">Rooms</div>
+            <div class="card-bod">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">User</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for room in rooms %}
+                        <tr>
+                            <th scope="row">{{ loop.index }}</th>
+                            <td>
+                                <a href="#" onclick="$('#room_name').val('{{ room.full_name }}')">{{ room.name }}</a>
+                            </td>
+                            <td>
+                                <a>{{ room.creator.username }}</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-3 mt-3">
+        <div class="card">
+            <div class="card-header">Create Session</div>
+            <div class="card-body">
+                {{ show_form(form) }}
+            </div>
+        </div>
+    </div>
+    <div class="col mt-3">
+        <div class="card">
+            <div class="card-header">Lectures</div>
+            <div class="card-bod">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Name</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for lecture in lectures %}
+                        <tr>
+                            <th scope="row">{{ loop.index }}</th>
+                            <td>
+                                <a href="#" onclick="$('#lecture_name').val('{{ lecture.full_name }}')">{{ lecture.name }}</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}

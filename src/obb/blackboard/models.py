@@ -51,6 +51,7 @@ class BlackboardRoom(db.Model):
 
     lecture_sessions = db.relationship('LectureSession', lazy=True)
 
+    # Todo: entfernen
     def can_join(self, user=None) -> bool:
         from flask_login import current_user
         from ..users.models import User
@@ -75,7 +76,7 @@ class BlackboardRoom(db.Model):
         if user_id == self.creator_id:
             return True
 
-        if self.visibility == 'public':
+        if self.visibility == 'usable':
             return True
 
         return False
@@ -120,16 +121,27 @@ class BlackboardRoom(db.Model):
         return BlackboardRoom.query.get(id)
 
     @staticmethod
-    def get_by_name(name: str) -> Optional[BlackboardRoom]:
-        query_name = BlackboardRoom.query.filter_by(name=name)
-        if query_name.count() == 1:
-            return query_name.first()
+    def get_by_name(name: str, user=None) -> Optional[BlackboardRoom]:
+        if not user and current_user and current_user.is_authenticated:
+            user = current_user
 
-        query_fullname = BlackboardRoom.query.filter_by(full_name=name)
-        return query_fullname.first()
+        if not user:
+            return None
+
+        query = BlackboardRoom.query
+
+        query = query.filter_by(creator_id=user.id)
+
+        query = query.filter(or_(BlackboardRoom.full_name == name,
+                                 BlackboardRoom.name == name))
+
+        if query.count() != 1:
+            return None
+
+        return query.first()
 
     @staticmethod
-    def get_rooms(user=None, public=False) -> Iterator[BlackboardRoom]:
+    def get_rooms(user=None, usable=False) -> Iterator[BlackboardRoom]:
         from flask_login import current_user
         from ..users.models import User
 
@@ -143,7 +155,7 @@ class BlackboardRoom(db.Model):
 
         f_query = BlackboardRoom.query
 
-        if not public:
+        if not usable:
             f_query = f_query.filter(BlackboardRoom.creator_id == user_id)
         else:
             f_query = f_query.filter(or_(BlackboardRoom.creator_id == user_id,
@@ -154,18 +166,17 @@ class BlackboardRoom(db.Model):
 
 class Lecture(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Integer, nullable=False)
+    name = db.Column(db.String, nullable=False)
+    full_name = db.Column(db.String, nullable=False, index=True, unique=True)
 
     creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     creator = db.relationship('User')
 
     start_page_id = db.Column(db.Integer, db.ForeignKey('lecture_page.id'))
-    start_page = db.relationship('LecturePage',
-                                 primaryjoin="Lecture.start_page_id == LecturePage.id")
+    start_page = db.relationship('LecturePage', foreign_keys=[start_page_id])
 
     current_page_id = db.Column(db.Integer, db.ForeignKey('lecture_page.id'))
-    current_page = db.relationship('LecturePage',
-                                   primaryjoin="Lecture.current_page_id == LecturePage.id")
+    current_page = db.relationship('LecturePage', foreign_keys=[current_page_id])
 
     pages = db.relationship('LecturePage',
                             primaryjoin="Lecture.id == LecturePage.lecture_id")
@@ -188,6 +199,37 @@ class Lecture(db.Model):
             self.start_page = self.current_page = page
             db.session.commit()
         return page
+
+    @staticmethod
+    def get_lectures(user=None) -> Iterator[Lecture]:
+        if not user and current_user and current_user.is_authenticated:
+            user = current_user
+
+        query = Lecture.query
+        if user:
+            query = query.filter_by(creator_id=user.id)
+
+        return query
+
+    @staticmethod
+    def get_by_name(name: str, user=None) -> Optional[Lecture]:
+        if not user and current_user and current_user.is_authenticated:
+            user = current_user
+
+        if not user:
+            return None
+
+        query = Lecture.query
+
+        query = query.filter_by(creator_id=user.id)
+
+        query = query.filter(or_(BlackboardRoom.full_name == name,
+                                 BlackboardRoom.name == name))
+
+        if query.count() != 1:
+            return None
+
+        return query.first()
 
 
 class LecturePage(db.Model):

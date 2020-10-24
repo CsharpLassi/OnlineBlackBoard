@@ -12,4 +12,4 @@ socket = SocketIO()
 session = Session()
 assets = Environment()
 
-login.login_view = 'public.login'
+login.login_view = 'usable.login'
