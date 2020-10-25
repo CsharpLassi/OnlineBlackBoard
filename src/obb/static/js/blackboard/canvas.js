@@ -29,6 +29,8 @@ var obbSketchCanvas = {
 
         this.setAllValues();
 
+        this.hide();
+
         this.config.contentParent.resize({item: this}, function (event) {
             let item = event.data.item;
             let sel = $(this)
@@ -140,6 +142,8 @@ var obbSketchContent = {
     globalSketchPad: null,
     userSketchPad: null,
 
+    mode: 'user',
+
     init: function (settings) {
         obbSketchContent.config = {
             globalCanvas: $('#ContentSketchpadGlobal'),
@@ -152,34 +156,14 @@ var obbSketchContent = {
     },
 
     setup: function () {
-        obbSketchContent.globalSketchPad = obbSketchCanvas.init(obbSketchContent.config.globalCanvas, {
-            onZ: 3,
-        });
+        obbSketchContent.globalSketchPad = obbSketchCanvas.init(obbSketchContent.config.globalCanvas);
         obbSketchContent.sketchCanvases.push(obbSketchContent.globalSketchPad);
 
-        obbSketchContent.userSketchPad = obbSketchCanvas.init(obbSketchContent.config.userCanvas, {
-            onZ: 4,
-        });
+        obbSketchContent.userSketchPad = obbSketchCanvas.init(obbSketchContent.config.userCanvas);
         obbSketchContent.sketchCanvases.push(obbSketchContent.userSketchPad);
 
         obbSocket.on('room:join', function (msg) {
-            let user = msg.user;
 
-
-            if (user.allow_draw) {
-                obbSketchContent.globalSketchPad.changeRecordStroke(true);
-
-                obbSketchContent.globalSketchPad.onZ = 4;
-                obbSketchContent.userSketchPad.onZ = 3;
-            } else {
-                obbSketchContent.globalSketchPad.changeRecordStroke(false);
-
-                obbSketchContent.globalSketchPad.onZ = 3;
-                obbSketchContent.userSketchPad.onZ = 4;
-            }
-
-
-            obbSketchContent.hideAll();
         });
 
         obbSocket.on('room:get:page', function (msg) {
@@ -191,21 +175,7 @@ var obbSketchContent = {
 
             if (!obbSocket.isUser(user))
                 return
-
-            if (user.allow_draw) {
-                obbSketchContent.globalSketchPad.changeRecordStroke(true);
-
-                obbSketchContent.globalSketchPad.onZ = 4;
-                obbSketchContent.userSketchPad.onZ = 3;
-            } else {
-                obbSketchContent.globalSketchPad.changeRecordStroke(false);
-
-                obbSketchContent.globalSketchPad.onZ = 3;
-                obbSketchContent.userSketchPad.onZ = 4;
-            }
-
-
-            obbSketchContent.showAll();
+            return;
         });
 
         obbSocket.on('room:update:sketch', function (msg) {
@@ -216,14 +186,20 @@ var obbSketchContent = {
             obbSketchContent.globalSketchPad.draw(msg.stroke);
         });
 
+        obbSocket.on('room:clear:sketch', function (msg) {
+            let creator = msg.creator;
+            if (obbSocket.isUser(creator))
+                return
+
+            obbSketchContent.globalSketchPad.clear();
+        });
+
         obbSocket.on('room:get:sketch', function (msg) {
             obbSketchContent.globalSketchPad.clear()
             msg.strokes.forEach(s => {
                 obbSketchContent.globalSketchPad.draw(s);
             });
         });
-
-        obbSketchContent.showAll();
     },
 
     setDraw: function () {
@@ -246,11 +222,33 @@ var obbSketchContent = {
         obbSketchContent.sketchCanvases.forEach(e => e.changeColor(color));
     },
 
-    showAll: function () {
-        obbSketchContent.sketchCanvases.forEach(e => e.show());
+    changeModeToGlobal: function () {
+        obbSketchContent.mode = 'global'
     },
 
-    hideAll: function () {
+    changeModeToUser: function () {
+        obbSketchContent.mode = 'user'
+    },
+
+    show: function () {
+        if (obbSketchContent.mode === 'global') {
+            obbSketchContent.globalSketchPad.show()
+        } else {
+            obbSketchContent.userSketchPad.show()
+        }
+
+    },
+
+    clear: function () {
+        if (obbSketchContent.mode === 'global') {
+            obbSketchContent.globalSketchPad.clear();
+            obbSocket.emit('room:clear:sketch');
+        } else {
+            obbSketchContent.userSketchPad.clear();
+        }
+    },
+
+    hide: function () {
         obbSketchContent.sketchCanvases.forEach(e => e.hide());
     }
 };
@@ -301,8 +299,11 @@ var obbSketchToolboxButton = {
     },
 
     setOn: function (call = true) {
-        if (call)
-            this.onClick();
+        if (call) {
+            if (!this.checkOnClick())
+                return
+            this.onClick()
+        }
 
         if (this.group && this.groupOff)
             this.group.removeClass(this.onClasses).addClass(this.offClasses);
@@ -321,6 +322,10 @@ var obbSketchToolboxButton = {
         this.cmd.removeClass(this.onClasses).addClass(this.offClasses);
 
         this.cmd.children().removeClass(this.symbolOnClasses).addClass(this.symbolOffClasses);
+    },
+
+    checkOnClick: function () {
+        return true
     },
 
     onClick: function () {
@@ -345,7 +350,9 @@ var obbSketchToolbox = {
     cmdGetRightPage: null,
     cmdCreateRightPage: null,
     cmdModeDraw: null,
+    cmdChangeMode: null,
 
+    cmdClear: null,
 
     init: function (settings) {
         obbSketchToolbox.config = {};
@@ -386,10 +393,10 @@ var obbSketchToolbox = {
 
         obbSketchToolbox.cmdModeDraw = obbSketchToolboxButton.init({
             onClick: function () {
-                obbSketchContent.showAll();
+                obbSketchContent.show();
                 obbSketchContent.setDraw();
             },
-            offClick: obbSketchContent.hideAll,
+            offClick: obbSketchContent.hide,
             default: false,
             cmd: $('#cmdModeDraw'),
             group: $('.sketchToolboxControl.modeControl'),
@@ -398,15 +405,15 @@ var obbSketchToolbox = {
 
         obbSketchToolbox.cmdModeErease = obbSketchToolboxButton.init({
             onClick: function () {
-                obbSketchContent.showAll();
+                obbSketchContent.show();
                 obbSketchContent.setErase();
             },
-            offClick: obbSketchContent.hideAll,
+            offClick: obbSketchContent.hide,
             default: false,
             cmd: $('#cmdModeEraser'),
             group: $('.sketchToolboxControl.modeControl'),
             groupOn: false,
-        })
+        });
 
         // Todo: obbSketchToolboxRange
         $('#rangeThickness')
@@ -426,11 +433,41 @@ var obbSketchToolbox = {
             }
         });
 
+        obbSketchToolbox.cmdcmdClear = obbSketchToolboxButton.init({
+            onClick: function () {
+                obbSketchContent.clear()
+            },
+            onlyOn: true,
+            default: true,
+            cmd: $('#cmdClear'),
+        });
+
+        obbSketchToolbox.cmdChangeMode = obbSketchToolboxButton.init({
+            onClick: function () {
+                obbSketchContent.changeModeToGlobal();
+
+                obbSketchToolbox.cmdModeDraw.setOff();
+                obbSketchToolbox.cmdModeErease.setOff();
+                $('.sketchToolboxControl.userModeControl').addClass('globalMode');
+            },
+            offClick: function () {
+                obbSketchContent.changeModeToUser()
+
+                obbSketchToolbox.cmdModeDraw.setOff();
+                obbSketchToolbox.cmdModeErease.setOff();
+                $('.sketchToolboxControl.userModeControl').removeClass('globalMode');
+            },
+            default: false,
+            cmd: $('#cmdChangeMode'),
+            groupOn: false,
+        });
+
+
         // socket
         obbSocket.on('room:get:page', function (msg) {
             obbSketchToolbox.cmdGetLeftPage.setEnable(msg.has_left_page);
             obbSketchToolbox.cmdGetRightPage.setEnable(msg.has_right_page);
-        })
+        });
 
         obbSocket.on('room:join', function (msg) {
             obbSketchToolbox.cmdCreateRightPage.setEnable(msg.user.allow_new_page);
@@ -438,7 +475,28 @@ var obbSketchToolbox = {
                 let selector = $('.sketchToolboxControl svg')
                 selector.addClass('fa-2x')
             }
-        })
+
+            obbSketchToolbox.cmdChangeMode.setEnable(msg.user.allow_draw);
+            obbSketchContent.globalSketchPad.changeRecordStroke(msg.user.allow_draw)
+        });
+
+        obbSocket.on('disconnect', function () {
+            obbSketchToolbox.cmdChangeMode.setEnable(false);
+            obbSketchToolbox.cmdChangeMode.setOff();
+
+            obbSketchContent.globalSketchPad.changeRecordStroke(false)
+        });
+
+        obbSocket.on('room:update:user', function (msg) {
+            if (!obbSocket.isUser(msg.user))
+                return
+
+            obbSketchToolbox.cmdChangeMode.setEnable(msg.user.allow_draw);
+            if (!msg.user.allow_draw)
+                obbSketchToolbox.cmdChangeMode.setOff();
+
+            obbSketchContent.globalSketchPad.changeRecordStroke(msg.user.allow_draw)
+        });
     }
 }
 

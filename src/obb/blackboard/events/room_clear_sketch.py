@@ -12,20 +12,19 @@ from ..models import BlackboardRoom
 
 
 @dataclass
-class RoomUpdateSketchRequest(BaseRequestMessage):
-    stroke: StrokeData
+class RoomClearSketchRequest(BaseRequestMessage):
+    pass
 
 
 @dataclass
-class RoomUpdateSketchResponse(BaseResponseMessage):
-    stroke: StrokeData
+class RoomClearSketchResponse(BaseResponseMessage):
     creator: UserData = None
 
 
-@socket.on('room:update:sketch', namespace=namespace)
-@convert(RoomUpdateSketchRequest)
+@socket.on('room:clear:sketch', namespace=namespace)
+@convert(RoomClearSketchRequest)
 @event_login_required
-def room_update_sketch(msg: RoomUpdateSketchRequest,
+def room_update_sketch(msg: RoomClearSketchRequest,
                        room: BlackboardRoom = None):
     session = bb_session_manager.get(msg.session.session_id)
 
@@ -33,17 +32,13 @@ def room_update_sketch(msg: RoomUpdateSketchRequest,
         # Todo: Msg
         return
 
-    if len(msg.stroke.points) < 2:
-        return
-
-    data = RoomUpdateSketchResponse(
-        stroke=msg.stroke,
+    data = RoomClearSketchResponse(
         creator=session.session_user_data,
     )
 
-    emit('room:update:sketch', data.to_dict(), room=room.id)
+    emit('room:clear:sketch', data.to_dict(), room=room.id)
 
     # Save History
     page_session = get_page_session(session, room)
     if page_session:
-        page_session.add_stroke(data.stroke)
+        page_session.clear_stroke()

@@ -16,6 +16,7 @@ from . import room_get_content
 # Sketch
 from . import room_get_sketch
 from . import room_update_sketch
+from . import room_clear_sketch
 
 # Settings
 from . import room_update_settings

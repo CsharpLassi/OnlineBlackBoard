@@ -34,7 +34,7 @@ def session_create():
     if form.validate_on_submit():
 
         room = BlackboardRoom.get_by_name(form.room_name.data)
-        lecture = Lecture.get_by_name(form.room_name.data)
+        lecture = Lecture.get_by_name(form.lecture_name.data)
 
         if form.new_room.data and room:
             flash('room already exist')
@@ -45,7 +45,7 @@ def session_create():
             room.full_name = f'{current_user.username}.{room.name}'
             room.creator = current_user
             db.session.add(room)
-        else:
+        elif not room:
             flash('room does not exist')
             return render(form, rooms, lectures)
 
@@ -58,7 +58,7 @@ def session_create():
             lecture.full_name = f'{current_user.username}.{lecture.name}'
             lecture.creator = current_user
             db.session.add(lecture)
-        else:
+        elif not lecture:
             flash('lecture does not exist')
             return render(form, rooms, lectures)
 

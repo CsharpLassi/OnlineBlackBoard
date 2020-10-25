@@ -1,16 +1,18 @@
 <div id="Content">
     <div id="ContentBox">
-        <canvas id="ContentSketchpadUser" class="contentSketchpad" style="opacity: 50%;z-index: 4;">
+        <canvas id="ContentSketchpadUser" class="contentSketchpad" style="opacity: 50%;z-index: 1;">
 
         </canvas>
-        <canvas id="ContentSketchpadGlobal" class="contentSketchpad" style="z-index: 3;">
+
+        <canvas id="ContentSketchpadGlobal" class="contentSketchpad" style="z-index: 1;">
 
         </canvas>
-        <div id="ContentText" style="z-index: 0;{% if room %}{{ room.get_style() }}{% endif %}">
+
+        <div id="ContentBlocker" style="z-index: 2">
 
         </div>
 
-        <div id="ContentBlocker" style="z-index: 2">
+        <div id="ContentText" style="z-index: 0;{% if room %}{{ room.get_style() }}{% endif %}">
 
         </div>
     </div>
@@ -38,23 +40,30 @@
 
                 <input id="rangeThickness" type="range" min="1" max="20" value="2" step="0.1">
 
-                <button id="cmdUndo" class="btn sketchToolboxControl">
-                    <i class="fas fa-undo"></i>
-                </button>
+                <div class="sketchToolboxControl userModeControl">
+                    <button id="cmdUndo" class="btn sketchToolboxControl">
+                        <i class="fas fa-undo"></i>
+                    </button>
 
-                <button id="cmdRedo" class="btn sketchToolboxControl">
-                    <i class="fas fa-redo"></i>
-                </button>
+                    <button id="cmdRedo" class="btn sketchToolboxControl">
+                        <i class="fas fa-redo"></i>
+                    </button>
 
-                <button id="cmdClear" class="btn sketchToolboxControl">
-                    <i class="fas fa-bacon"></i>
-                </button>
+                    <button id="cmdClear" class="btn sketchToolboxControl">
+                        <i class="fas fa-bacon"></i>
+                    </button>
+
+                    <button id="cmdChangeMode" class="btn sketchToolboxControl">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                    </button>
+                </div>
+
 
             </div>
         </div>
         <div class="col">
         </div>
-         <button id="cmdDeletePage" class="btn sketchToolboxControl">
+        <button id="cmdDeletePage" class="btn sketchToolboxControl">
             <i class="fas fa-trash"></i>
         </button>
 

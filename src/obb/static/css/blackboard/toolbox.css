@@ -1,23 +1,34 @@
 .sketchToolboxControl {
 }
 
-.sketchToolboxControl.modeControl{
+.sketchToolboxControl.modeControl {
     color: black;
 }
 
-.sketchToolboxControl.disabled{
+.sketchToolboxControl.userModeControl {
+    border: 2px solid transparent;
+    margin: 0.1em;
+    padding: 0.2em;
+}
+
+.sketchToolboxControl.userModeControl.globalMode {
+    border-color: orange;
+    border-radius: 4px;
+}
+
+.sketchToolboxControl.disabled {
     color: gray;
 }
 
 .colorPickSelector {
-  border-radius: 5px;
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-  -webkit-transition: all linear .2s;
-  -moz-transition: all linear .2s;
-  -ms-transition: all linear .2s;
-  -o-transition: all linear .2s;
-  transition: all linear .2s;
+    border-radius: 5px;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    -webkit-transition: all linear .2s;
+    -moz-transition: all linear .2s;
+    -ms-transition: all linear .2s;
+    -o-transition: all linear .2s;
+    transition: all linear .2s;
 }
 

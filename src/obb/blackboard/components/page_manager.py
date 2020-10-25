@@ -87,6 +87,10 @@ class PageSession:
         self.__stroke_history.append(data)
         self.__save_strokes()
 
+    def clear_stroke(self):
+        self.__stroke_history.clear()
+        self.__save_strokes()
+
     def get_strokes(self) -> Iterator[StrokeData]:
         for item in self.__stroke_history:
             yield item
