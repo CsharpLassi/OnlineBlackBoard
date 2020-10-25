@@ -169,7 +169,7 @@ var obbSketchContent = {
             }
 
 
-            obbSketchContent.showAll();
+            obbSketchContent.hideAll();
         });
 
         obbSocket.on('room:get:page', function (msg) {
@@ -245,6 +245,8 @@ var obbSketchToolboxButton = {
     default: true,
     cmd: null,
     group: null,
+    groupOn: true,
+    groupOff: true,
     onlyOn: false,
     onClasses: ['enabled'],
     offClasses: ['disabled'],
@@ -288,7 +290,7 @@ var obbSketchToolboxButton = {
         if (call)
             this.onClick();
 
-        if (this.group)
+        if (this.group && this.groupOff)
             this.group.removeClass(this.onClasses).addClass(this.offClasses);
 
         this.cmd.addClass(this.onClasses).removeClass(this.offClasses);
@@ -299,7 +301,7 @@ var obbSketchToolboxButton = {
         if (call)
             this.offClick();
 
-        if (this.group)
+        if (this.group && this.groupOn)
             this.group.addClass(this.onClasses).removeClass(this.offClasses);
 
         this.cmd.removeClass(this.onClasses).addClass(this.offClasses);
@@ -328,7 +330,6 @@ var obbSketchToolbox = {
     cmdGetLeftPage: null,
     cmdGetRightPage: null,
     cmdCreateRightPage: null,
-    cmdEnable: null,
     cmdModeDraw: null,
 
 
@@ -368,28 +369,29 @@ var obbSketchToolbox = {
         });
         obbSketchToolbox.cmdCreateRightPage.disable()
 
-        obbSketchToolbox.cmdEnable = obbSketchToolboxButton.init({
-            onClick: obbSketchContent.showAll,
-            offClick: obbSketchContent.hideAll,
-            cmd: $('#cmdEnableDraw'),
-            symbolOnClasses: ['fa-check-square'],
-            symbolOffClasses: ['fa-square']
-        });
 
         obbSketchToolbox.cmdModeDraw = obbSketchToolboxButton.init({
-            onClick: obbSketchContent.setDraw,
-            default: true,
-            onlyOn: true,
+            onClick: function () {
+                obbSketchContent.showAll();
+                obbSketchContent.setDraw();
+            },
+            offClick: obbSketchContent.hideAll,
+            default: false,
             cmd: $('#cmdModeDraw'),
-            group: $('.sketchToolboxControl.modeControl')
+            group: $('.sketchToolboxControl.modeControl'),
+            groupOn: false,
         });
 
         obbSketchToolbox.cmdModeErease = obbSketchToolboxButton.init({
-            onClick: obbSketchContent.setErase,
+            onClick: function () {
+                obbSketchContent.showAll();
+                obbSketchContent.setErase();
+            },
+            offClick: obbSketchContent.hideAll,
             default: false,
-            onlyOn: true,
             cmd: $('#cmdModeEraser'),
-            group: $('.sketchToolboxControl.modeControl')
+            group: $('.sketchToolboxControl.modeControl'),
+            groupOn: false,
         })
 
         // Todo: obbSketchToolboxRange
