@@ -46,23 +46,19 @@ class BlackboardRoom(db.Model):
                            server_default=default_visibility,
                            default=default_visibility)
 
+    is_invisible = db.Column(db.Boolean, nullable=False,
+                             server_default='0',
+                             default=False)
+
     creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     creator = db.relationship('User')
 
     lecture_sessions = db.relationship('LectureSession', lazy=True)
 
+    # Todo: entfernen
     def can_join(self, user=None) -> bool:
         from flask_login import current_user
         from ..users.models import User
-
-        is_open = False
-        for session in self.lecture_sessions:
-            if session.is_open():
-                is_open = True
-                break
-
-        if not is_open:
-            return False
 
         if isinstance(user, int):
             user = User.get(user)
@@ -75,7 +71,16 @@ class BlackboardRoom(db.Model):
         if user_id == self.creator_id:
             return True
 
-        if self.visibility == 'public':
+        is_open = False
+        for session in self.lecture_sessions:
+            if session.is_open():
+                is_open = True
+                break
+
+        if not is_open:
+            return False
+
+        if self.visibility == 'usable':
             return True
 
         return False
@@ -120,16 +125,27 @@ class BlackboardRoom(db.Model):
         return BlackboardRoom.query.get(id)
 
     @staticmethod
-    def get_by_name(name: str) -> Optional[BlackboardRoom]:
-        query_name = BlackboardRoom.query.filter_by(name=name)
-        if query_name.count() == 1:
-            return query_name.first()
+    def get_by_name(name: str, user=None) -> Optional[BlackboardRoom]:
+        if not user and current_user and current_user.is_authenticated:
+            user = current_user
 
-        query_fullname = BlackboardRoom.query.filter_by(full_name=name)
-        return query_fullname.first()
+        if not user:
+            return None
+
+        query = BlackboardRoom.query
+
+        query = query.filter_by(creator_id=user.id, is_invisible=False)
+
+        query = query.filter(or_(BlackboardRoom.full_name == name,
+                                 BlackboardRoom.name == name))
+
+        if query.count() != 1:
+            return None
+
+        return query.first()
 
     @staticmethod
-    def get_rooms(user=None, public=False) -> Iterator[BlackboardRoom]:
+    def get_rooms(user=None, usable=False) -> Iterator[BlackboardRoom]:
         from flask_login import current_user
         from ..users.models import User
 
@@ -142,8 +158,9 @@ class BlackboardRoom(db.Model):
         user_id = 0 if not user else user.id
 
         f_query = BlackboardRoom.query
+        f_query = f_query.filter_by(is_invisible=False)
 
-        if not public:
+        if not usable:
             f_query = f_query.filter(BlackboardRoom.creator_id == user_id)
         else:
             f_query = f_query.filter(or_(BlackboardRoom.creator_id == user_id,
@@ -154,23 +171,26 @@ class BlackboardRoom(db.Model):
 
 class Lecture(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Integer, nullable=False)
+    name = db.Column(db.String, nullable=False)
+    full_name = db.Column(db.String, nullable=False, index=True, unique=True)
+
+    edit_room_id = db.Column(db.Integer, db.ForeignKey('blackboard_room.id'))
+    edit_room = db.relationship('BlackboardRoom', foreign_keys=[edit_room_id])
 
     creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     creator = db.relationship('User')
 
     start_page_id = db.Column(db.Integer, db.ForeignKey('lecture_page.id'))
-    start_page = db.relationship('LecturePage',
-                                 primaryjoin="Lecture.start_page_id == LecturePage.id")
+    start_page = db.relationship('LecturePage', foreign_keys=[start_page_id])
 
     current_page_id = db.Column(db.Integer, db.ForeignKey('lecture_page.id'))
-    current_page = db.relationship('LecturePage',
-                                   primaryjoin="Lecture.current_page_id == LecturePage.id")
+    current_page = db.relationship('LecturePage', foreign_keys=[current_page_id])
 
     pages = db.relationship('LecturePage',
                             primaryjoin="Lecture.id == LecturePage.lecture_id")
 
-    def get_page(self, page_id: int = None) -> Optional[LecturePage]:
+    def get_page(self, page_id: int = None, width: int = None, height: int = None) \
+            -> Optional[LecturePage]:
         if page_id is None:
             page_id = self.current_page_id or self.start_page_id
 
@@ -184,33 +204,77 @@ class Lecture(db.Model):
             page = LecturePage()
             page.lecture = self
             page.creator = current_user
+            page.draw_width = width
+            page.draw_height = height
 
             self.start_page = self.current_page = page
             db.session.commit()
         return page
+
+    @staticmethod
+    def get_lectures(user=None) -> Iterator[Lecture]:
+        if not user and current_user and current_user.is_authenticated:
+            user = current_user
+
+        query = Lecture.query
+        if user:
+            query = query.filter_by(creator_id=user.id)
+
+        return query
+
+    @staticmethod
+    def get_by_name(name: str, user=None) -> Optional[Lecture]:
+        if not user and current_user and current_user.is_authenticated:
+            user = current_user
+
+        if not user:
+            return None
+
+        query = Lecture.query
+
+        query = query.filter_by(creator_id=user.id)
+
+        query = query.filter(or_(BlackboardRoom.full_name == name,
+                                 BlackboardRoom.name == name))
+
+        if query.count() != 1:
+            return None
+
+        return query.first()
+
+    @staticmethod
+    def get(lecture_id) -> Optional[Lecture]:
+        return Lecture.query.get(lecture_id)
 
 
 class LecturePage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Integer)
 
+    draw_height = db.Column(db.Integer, default=default_draw_height)
+    draw_width = db.Column(db.Integer, default=default_draw_width)
+
     lecture_id = db.Column(db.Integer, db.ForeignKey('lecture.id'), nullable=False)
-    lecture = db.relationship('Lecture', foreign_keys=[lecture_id])
+    lecture = db.relationship('Lecture', uselist=False, foreign_keys=[lecture_id])
 
     creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    creator = db.relationship('User', foreign_keys=[creator_id])
+    creator = db.relationship('User', uselist=False, foreign_keys=[creator_id])
 
     left_page_id = db.Column(db.Integer, db.ForeignKey('lecture_page.id'))
-    left_page = db.relationship('LecturePage', foreign_keys=[left_page_id])
+    left_page = db.relationship('LecturePage', uselist=False, post_update=True,
+                                foreign_keys=[left_page_id])
 
     right_page_id = db.Column(db.Integer, db.ForeignKey('lecture_page.id'))
-    right_page = db.relationship('LecturePage', foreign_keys=[right_page_id])
+    right_page = db.relationship('LecturePage', uselist=False, post_update=True,
+                                 foreign_keys=[right_page_id])
 
     top_page_id = db.Column(db.Integer, db.ForeignKey('lecture_page.id'))
-    top_page = db.relationship('LecturePage', foreign_keys=[top_page_id])
+    top_page = db.relationship('LecturePage', uselist=False, post_update=True,
+                               foreign_keys=[top_page_id])
 
     bottom_page_id = db.Column(db.Integer, db.ForeignKey('lecture_page.id'))
-    bottom_page = db.relationship('LecturePage', foreign_keys=[bottom_page_id])
+    bottom_page = db.relationship('LecturePage', uselist=False, post_update=True,
+                                  foreign_keys=[bottom_page_id])
 
     @staticmethod
     def get(page_id: int) -> Optional[LecturePage]:
@@ -230,7 +294,7 @@ class LectureSession(db.Model):
     lecture = db.relationship('Lecture')
 
     room_id = db.Column(db.String, db.ForeignKey('blackboard_room.id'), nullable=False)
-    room = db.relationship('BlackboardRoom')
+    room = db.relationship('BlackboardRoom', cascade="all, delete")
 
     start_time = db.Column(db.TIMESTAMP, nullable=False,
                            default=datetime.datetime.utcnow,

@@ -6,6 +6,9 @@ from . import room_join
 # User
 from . import room_update_user
 
+# Pages
+from . import room_get_page
+
 # Content
 from . import room_update_content
 from . import room_get_content

@@ -11,8 +11,8 @@ var obbContentBox = {
     },
 
     setup: function () {
-        obbSocket.on('room:join', function (msg) {
-            obbSocket.emit('room:get:content')
+        obbSocket.on('room:get:page', function (msg) {
+            obbSocket.emit('room:get:content', {page: msg.page_id})
         });
 
         obbSocket.on('room:update:content', function (msg) {
@@ -23,6 +23,14 @@ var obbContentBox = {
             obbContentBox.config.textItem
                 .css('height', `${msg.content_draw_height}px`)
                 .css('width', `${msg.content_draw_width}px`)
+
+            obbContentBox.updateLayout();
+        });
+
+        obbSocket.on('room:get:page', function (msg) {
+            obbContentBox.config.textItem
+                .css('height', `${msg.height}px`)
+                .css('width', `${msg.width}px`)
 
             obbContentBox.updateLayout();
         });

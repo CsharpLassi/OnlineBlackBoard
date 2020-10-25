@@ -11,6 +11,7 @@ class UserData(BaseDataClass):
     mode: str
     creator: bool
     allow_draw: bool = False
+    allow_new_page: bool = False
 
 
 @dataclass

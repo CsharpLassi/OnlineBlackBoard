@@ -1,10 +1,12 @@
 from dataclasses import dataclass
+
 from flask import escape
 from flask_socketio import emit
 
 from obb.ext import socket
+from .functions import get_page_session
 from ..decorators import convert, event_login_required
-from ..ext import namespace, bb_session_manager, page_manager
+from ..ext import namespace, bb_session_manager
 from ..messages.base_messages import BaseRequestMessage, BaseResponseMessage
 from ..messages.datas import UserData
 from ..models import BlackboardRoom
@@ -26,17 +28,13 @@ class RoomGetContentResponse(BaseResponseMessage):
 @convert(RoomGetContentRequest)
 @event_login_required
 def room_get_content(msg: RoomGetContentRequest,
-                                room: BlackboardRoom = None):
+                     room: BlackboardRoom = None):
     session = bb_session_manager.get(msg.session.session_id)
 
-    # Read Markdown
-    l_session = room.get_current_lecture_session()
-    lecture = l_session.lecture
+    page_session = get_page_session(session, room, msg.page)
 
-    page_id = msg.page or lecture.current_page_id or lecture.start_page_id
-    page_session = page_manager.get(page_id, lecture=lecture)
-
-    if page_session and (markdown := page_session.get_markdown()):
+    if page_session:
+        markdown = page_session.get_markdown()
         data = RoomGetContentResponse(
             raw_text=markdown,
             markdown=escape(markdown),

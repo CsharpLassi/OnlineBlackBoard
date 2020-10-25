@@ -48,6 +48,10 @@ class BlackBoardSession:
     user_id: int
     session_user_data: UserData
     session_room_data: RoomData
+
+    page_id: int = None
+    lecture_id: int = None
+
     exp: datetime.datetime = dataclasses.field(
         default_factory=lambda: calc_exp(minutes=120))
 
