@@ -12,10 +12,13 @@ var obbContentBox = {
 
     setup: function () {
         obbSocket.on('room:get:page', function (msg) {
-            obbSocket.emit('room:get:content', {page: msg.page_id})
+            obbSocket.emit('room:get:content', {page_id: msg.page_id})
         });
 
         obbSocket.on('room:update:content', function (msg) {
+            if (msg.page_id !== obbSocket.current_page.page)
+                return
+
             obbContentBox.config.textItem.html(marked(msg.markdown));
         });
 
@@ -36,6 +39,9 @@ var obbContentBox = {
         });
 
         obbSocket.on('room:get:content', function (msg) {
+            if (obbSocket.current_page.page_id !== msg.page_id)
+                return
+
             obbContentBox.config.textItem.html(marked(msg.markdown));
         });
 

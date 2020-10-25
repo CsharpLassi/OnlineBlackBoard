@@ -14,11 +14,12 @@ from ..models import BlackboardRoom
 
 @dataclass
 class RoomGetContentRequest(BaseRequestMessage):
-    page: int = 0
+    page_id: int
 
 
 @dataclass
 class RoomGetContentResponse(BaseResponseMessage):
+    page_id: int
     raw_text: str
     markdown: str
     creator: UserData = None
@@ -31,11 +32,12 @@ def room_get_content(msg: RoomGetContentRequest,
                      room: BlackboardRoom = None):
     session = bb_session_manager.get(msg.session.session_id)
 
-    page_session = get_page_session(session, room, msg.page)
+    page_session = get_page_session(session, room, msg.page_id)
 
     if page_session:
         markdown = page_session.get_markdown()
         data = RoomGetContentResponse(
+            page_id=msg.page_id,
             raw_text=markdown,
             markdown=escape(markdown),
         )

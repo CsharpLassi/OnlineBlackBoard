@@ -30,6 +30,7 @@ var obbSocket = {
     connected: false,
     user: null,
     room: null,
+    current_page: null,
 
     init: function (settings) {
         obbSocket.config = {
@@ -68,6 +69,10 @@ var obbSocket = {
             $('#status').text(obbSocket.room.room_name + ':' + obbSocket.user.user_id);
         });
 
+        obbSocket.socket.on('room:get:page', function (msg) {
+            obbSocket.current_page = msg;
+        });
+
         $(this).trigger('socket:ready')
     },
 
@@ -83,7 +88,7 @@ var obbSocket = {
         this.socket.emit(event, data);
     },
 
-    isUser: function (user, defaultValue =false) {
+    isUser: function (user, defaultValue = false) {
         if (!user)
             return defaultValue;
         return user.user_id === obbSocket.user.user_id;

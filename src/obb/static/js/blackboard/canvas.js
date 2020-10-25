@@ -50,7 +50,8 @@ var obbSketchCanvas = {
                 stroke.points[i].x /= this.sketchpad.width
                 stroke.points[i].y /= this.sketchpad.height
             }
-            obbSocket.emit('room:update:sketch', {stroke: stroke});
+
+            obbSocket.emit('room:update:sketch', {page_id: obbSocket.current_page.page_id, stroke: stroke});
         });
     },
 
@@ -181,6 +182,9 @@ var obbSketchContent = {
         obbSocket.on('room:update:sketch', function (msg) {
             let creator = msg.creator;
             if (obbSocket.isUser(creator))
+                return
+
+            if (obbSocket.current_page.page_id !== msg.page_id)
                 return
 
             obbSketchContent.globalSketchPad.draw(msg.stroke);

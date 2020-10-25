@@ -17,18 +17,25 @@ var obbMarkdownEditor = {
                 return
 
             obbMarkdownEditor.currentValue = currentVal;
-            obbSocket.emit('room:update:content', {'raw_text': currentVal})
+            obbSocket.emit('room:update:content', {page_id: obbSocket.current_page.page_id, 'raw_text': currentVal})
         });
 
         obbSocket.on('room:update:content', function (msg) {
             let creator = obbUser.init(msg.creator);
-            if (!obbSocket.isUser(creator)) {
-                obbMarkdownEditor.config.items.val(msg.raw_text);
-            }
+            if (obbSocket.isUser(creator))
+                return
+
+            if (msg.page_id !== obbSocket.current_page.page)
+                return
+
+            obbMarkdownEditor.config.items.val(msg.raw_text);
 
         });
 
         obbSocket.on('room:get:content', function (msg) {
+            if (msg.page_id !== obbSocket.current_page.page)
+                return
+
             obbMarkdownEditor.config.items.val(msg.raw_text)
         });
     },

@@ -13,11 +13,13 @@ from ..models import BlackboardRoom
 
 @dataclass
 class RoomUpdateContentRequest(BaseRequestMessage):
+    page_id: int
     raw_text: str
 
 
 @dataclass
 class RoomUpdateContentResponse(BaseResponseMessage):
+    page_id: int
     raw_text: str
     markdown: str
     creator: UserData = None
@@ -30,6 +32,7 @@ def room_update_content(msg: RoomUpdateContentRequest,
                         room: BlackboardRoom = None):
     session = bb_session_manager.get(msg.session.session_id)
     data = RoomUpdateContentResponse(
+        page_id=msg.page_id,
         raw_text=msg.raw_text,
         markdown=escape(msg.raw_text),
         creator=session.session_user_data,
@@ -38,6 +41,7 @@ def room_update_content(msg: RoomUpdateContentRequest,
     emit('room:update:content', data.to_dict(), room=room.id)
 
     # Save Markdown
-    page_session = get_page_session(session, room)
+    page_session = get_page_session(session, room, msg_page=msg.page_id)
+
     if page_session:
         page_session.set_markdown(msg.raw_text)
