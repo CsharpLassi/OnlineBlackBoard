@@ -55,36 +55,6 @@ class BlackboardRoom(db.Model):
 
     lecture_sessions = db.relationship('LectureSession', lazy=True)
 
-    # Todo: entfernen
-    def can_join(self, user=None) -> bool:
-        from flask_login import current_user
-        from ..users.models import User
-
-        if isinstance(user, int):
-            user = User.get(user)
-
-        if not user and current_user.is_authenticated:
-            user = current_user
-
-        user_id = 0 if not user else user.id
-
-        if user_id == self.creator_id:
-            return True
-
-        is_open = False
-        for session in self.lecture_sessions:
-            if session.is_open():
-                is_open = True
-                break
-
-        if not is_open:
-            return False
-
-        if self.visibility == 'usable':
-            return True
-
-        return False
-
     def get_style(self) -> str:
         style = ''
         if self.draw_height > 0:

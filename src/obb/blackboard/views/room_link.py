@@ -15,10 +15,6 @@ def link_blackboard(room_id: str):
         flash('room does not exist')
         return redirect('blackboard.home')
 
-    if not room.can_join():
-        flash('not allowed')
-        return redirect(url_for('blackboard.home'))
-
     bb_session = bb_session_manager.create_session(room_id=room.id)
 
     bb_session.session_user_data.mode = 'blackboard'
@@ -36,7 +32,8 @@ def link_user(room_id: str):
         flash('Room does not exist')
         return redirect(url_for('blackboard.list_rooms'))
 
-    if not room.can_join():
+    # Todo: Abfrage einfügen
+    if False:
         flash('room is closed')
         return redirect(url_for('blackboard.list_rooms'))
 

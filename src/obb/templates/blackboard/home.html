@@ -8,21 +8,27 @@
             <tr>
                 <th scope="col">#</th>
                 <th scope="col">Name</th>
+                <th scope="col">Lecture</th>
+                <th scope="col">User</th>
+                <th scope="col">Room</th>
                 <th scope="col">Start-Time</th>
                 <th scope="col">End-Time</th>
                 <th scope="col">Duration</th>
             </tr>
             </thead>
             <tbody>
-            {% for lecture in lectures %}
+            {% for l_session in l_sessions %}
                 <tr>
                     <th scope="row">{{ loop.index }}</th>
                     <td>
-                        <a href="{{ url_for('blackboard.link_blackboard',room_id=lecture.room.id,mode='blackboard') }}">
-                            {{ lecture.room.full_name }} ({{ lecture.name }})</a></td>
-                    <td>{{ lecture.start_time | df }} </td>
-                    <td>{{ lecture.end_time | df }} </td>
-                    <td>{{ lecture.duration }} min</td>
+                        <a href="{{ url_for('blackboard.link_blackboard',room_id=l_session.room.id,mode='blackboard') }}">
+                            {{ l_session.name }}</a></td>
+                    <td>{{ l_session.lecture.name }} </td>
+                    <td>{{ l_session.maintainer.username }} </td>
+                    <td>{{ l_session.room.name }} </td>
+                    <td>{{ l_session.start_time | df }} </td>
+                    <td>{{ l_session.end_time | df }} </td>
+                    <td>{{ l_session.duration }} min</td>
                 </tr>
             {% endfor %}
             </tbody>

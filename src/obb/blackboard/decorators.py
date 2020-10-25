@@ -70,7 +70,7 @@ def event_login_required(func):
                 return
 
             room = BlackboardRoom.get(session.room_id)
-            if room is None or not room.can_join(session.user_id):
+            if room is None:
                 return
 
             session.refresh()

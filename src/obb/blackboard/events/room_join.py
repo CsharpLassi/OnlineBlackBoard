@@ -34,8 +34,6 @@ def join(msg: JoinRequestMessage,
     session: BlackBoardSession = bb_session_manager.get(msg.session.session_id)
 
     user: User = session.get_user()
-    if not room.can_join(user=user):
-        return
 
     join_room(room.id)
     bb_session_manager.join(sid, msg.session.session_id)

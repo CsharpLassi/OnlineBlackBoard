@@ -8,9 +8,9 @@ from ..models import LectureSession
 
 @bp.route('/', methods=['GET', 'POST'])
 def home():
-    lectures = [lecture for lecture in
+    l_sessions = [l_session for l_session in
                 LectureSession.get_lectures()
-                if lecture.end_time > datetime.datetime.utcnow()
-                if lecture.is_open() and lecture.room.can_join()]
+                if l_session.end_time > datetime.datetime.utcnow()
+                if l_session.is_open()]
 
-    return render_template('blackboard/home.html', lectures=lectures)
+    return render_template('blackboard/home.html', l_sessions=l_sessions)
