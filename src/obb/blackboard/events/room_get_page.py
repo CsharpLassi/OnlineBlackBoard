@@ -14,6 +14,7 @@ from ...ext import socket, db
 @dataclass
 class RoomGetPageRequest(BaseRequestMessage):
     page: int
+    insert: bool = False
 
 
 @dataclass
@@ -21,6 +22,9 @@ class RoomGetPageResponse(BaseResponseMessage):
     page_id: int
     width: int
     height: int
+
+    has_left_page: bool
+    has_right_page: bool
 
 
 @socket.on('room:get:page', namespace=namespace)
@@ -38,7 +42,9 @@ def room_get_page(msg: RoomGetPageRequest,
         data = RoomGetPageResponse(
             page_id=page_session.page_id,
             width=page.draw_width,
-            height=page.draw_height
+            height=page.draw_height,
+            has_left_page=page.left_page is not None,
+            has_right_page=page.right_page is not None,
         )
 
         emit('room:get:page', data.to_dict())
@@ -55,7 +61,7 @@ def room_get_page_left(msg: RoomGetPageRequest,
 
     if page_session and (page := LecturePage.get(page_session.page_id)):
         left_page = page.left_page
-        if left_page is None and session.session_user_data.allow_new_page:
+        if left_page is None and msg.insert and session.session_user_data.allow_new_page:
             left_page = LecturePage()
             left_page.draw_height = room.draw_height
             left_page.draw_width = room.draw_width
@@ -72,7 +78,9 @@ def room_get_page_left(msg: RoomGetPageRequest,
         data = RoomGetPageResponse(
             page_id=left_page.id,
             width=left_page.draw_width,
-            height=left_page.draw_height
+            height=left_page.draw_height,
+            has_left_page=left_page.left_page is not None,
+            has_right_page=left_page.right_page is not None,
         )
 
         emit('room:get:page', data.to_dict())
@@ -89,7 +97,7 @@ def room_get_page_right(msg: RoomGetPageRequest,
 
     if page_session and (page := LecturePage.get(page_session.page_id)):
         right_page = page.right_page
-        if right_page is None and session.session_user_data.allow_new_page:
+        if right_page is None and msg.insert and session.session_user_data.allow_new_page:
             right_page = LecturePage()
             right_page.draw_height = room.draw_height
             right_page.draw_width = room.draw_width
@@ -106,7 +114,9 @@ def room_get_page_right(msg: RoomGetPageRequest,
         data = RoomGetPageResponse(
             page_id=right_page.id,
             width=right_page.draw_width,
-            height=right_page.draw_height
+            height=right_page.draw_height,
+            has_left_page=right_page.left_page is not None,
+            has_right_page=right_page.right_page is not None,
         )
 
         emit('room:get:page', data.to_dict())
