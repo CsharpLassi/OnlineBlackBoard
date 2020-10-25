@@ -44,6 +44,7 @@ def session_create():
             room.name = form.name.data
             room.full_name = f'{current_user.username}.{room.name}'
             room.creator = current_user
+            db.session.add(room)
         else:
             flash('room does not exist')
             return render(form, rooms, lectures)
@@ -56,6 +57,7 @@ def session_create():
             lecture.name = form.lecture_name.data
             lecture.full_name = f'{current_user.username}.{lecture.name}'
             lecture.creator = current_user
+            db.session.add(lecture)
         else:
             flash('lecture does not exist')
             return render(form, rooms, lectures)
@@ -67,11 +69,14 @@ def session_create():
         lecture_session.lecture = lecture
         lecture_session.room = room
 
+        db.session.add(lecture_session)
+
         if room.intersect_lecture(lecture_session.start_time, lecture_session.duration):
             flash('Session intersects')
             return render(form, rooms, lectures)
 
         room.lecture_sessions.append(lecture_session)
+
         db.session.commit()
 
         return redirect(url_for('blackboard.room_list'))
