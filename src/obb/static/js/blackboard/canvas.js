@@ -499,6 +499,7 @@ var obbSketchToolbox = {
             if (!msg.user.allow_draw)
                 obbSketchToolbox.cmdChangeMode.setOff();
 
+            obbSketchToolbox.cmdCreateRightPage.setEnable(msg.user.allow_new_page);
             obbSketchContent.globalSketchPad.changeRecordStroke(msg.user.allow_draw)
         });
     }

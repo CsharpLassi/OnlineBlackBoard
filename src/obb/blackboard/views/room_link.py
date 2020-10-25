@@ -30,16 +30,16 @@ def link_user(room_id: str):
 
     if room is None:
         flash('Room does not exist')
-        return redirect(url_for('blackboard.list_rooms'))
+        return redirect(url_for('blackboard.room_list'))
 
     # Todo: Abfrage einfügen
     if False:
         flash('room is closed')
-        return redirect(url_for('blackboard.list_rooms'))
+        return redirect(url_for('blackboard.room_list'))
 
     if room.creator_id != current_user.id:
         flash('you have no access to the page')
-        return redirect(url_for('blackboard.list_rooms'))
+        return redirect(url_for('blackboard.room_list'))
 
     edit_form = RoomSettings()
 

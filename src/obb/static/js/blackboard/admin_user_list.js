@@ -32,7 +32,7 @@ var obbUserUserPlugin = {
 
         //Draw
         let allowDrawCheckbox = $('<input />', {
-            class: 'allow-draw',
+            class: 'allowDraw',
             type: 'checkbox'
         })
             .prop('checked', this.allow_draw)
@@ -46,13 +46,38 @@ var obbUserUserPlugin = {
             });
         $('<td />').append(allowDrawCheckbox).appendTo(trUser);
 
+        //Draw
+        let allowNewPageCheckbox = $('<input />', {
+            class: 'allowNewPage',
+            type: 'checkbox'
+        })
+            .prop('checked', this.allow_new_page)
+            .click({user: this}, function (event) {
+                let user = event.data.user;
+                let allow_new_page = this.checked;
+                obbSocket.emit('room:update:user', {
+                    user_id: user.user_id,
+                    allow_new_page: allow_new_page,
+                });
+            });
+        $('<td />').append(allowNewPageCheckbox).appendTo(trUser);
+
+        //Draw
+        let syncCheckbox = $('<input />', {
+            class: 'inSync',
+            type: 'checkbox'
+        })
+            .prop('checked', false)
+        $('<td />').append(syncCheckbox).appendTo(trUser);
+
         return trUser;
     },
 
     updateAdminContent: function () {
         let selector = this.getAdminSelector();
 
-        selector.find('.allow-draw').prop('checked', this.allow_draw);
+        selector.find('.allowDraw').prop('checked', this.allow_draw);
+        selector.find('.allowNewPage').prop('checked', this.allow_new_page);
     },
 
     removeAdminContent: function () {

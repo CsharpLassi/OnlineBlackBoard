@@ -10,6 +10,8 @@ from ..messages.base_messages import BaseRequestMessage, BaseResponseMessage
 from ..models import BlackboardRoom, LecturePage
 from ...ext import socket, db
 
+from .global_message import RoomUpdatedMessage
+
 
 @dataclass
 class RoomGetPageRequest(BaseRequestMessage):
@@ -18,13 +20,8 @@ class RoomGetPageRequest(BaseRequestMessage):
 
 
 @dataclass
-class RoomGetPageResponse(BaseResponseMessage):
-    page_id: int
-    width: int
-    height: int
-
-    has_left_page: bool
-    has_right_page: bool
+class RoomGetPageResponse(RoomUpdatedMessage):
+    pass
 
 
 @socket.on('room:get:page', namespace=namespace)
@@ -75,7 +72,7 @@ def room_get_page_left(msg: RoomGetPageRequest,
 
         session.page_id = left_page.id
 
-        data = RoomGetPageResponse(
+        response_data = RoomGetPageResponse(
             page_id=left_page.id,
             width=left_page.draw_width,
             height=left_page.draw_height,
@@ -83,7 +80,7 @@ def room_get_page_left(msg: RoomGetPageRequest,
             has_right_page=left_page.right_page is not None,
         )
 
-        emit('room:get:page', data.to_dict())
+        emit('room:get:page', response_data.to_dict())
 
 
 @socket.on('room:get:page:right', namespace=namespace)
@@ -103,7 +100,8 @@ def room_get_page_right(msg: RoomGetPageRequest,
             new_page.draw_height = room.draw_height
             new_page.draw_width = room.draw_width
             new_page.lecture = page.lecture
-            new_page.creator = current_user
+            if current_user and current_user.is_authenticated:
+                new_page.creator = current_user
 
             page.right_page = new_page
             new_page.left_page = page

@@ -14,6 +14,7 @@ from ..models import BlackboardRoom
 class RoomUpdateUserRequestMessage(BaseRequestMessage):
     user_id: str
     allow_draw: bool = None
+    allow_new_page: bool = None
 
 
 @dataclass()
@@ -32,9 +33,13 @@ def blackboard_room_update_user(msg: RoomUpdateUserRequestMessage,
     update_counter = 0
 
     allow_change = session.session_user_data.creator
-    if allow_change:
-        if updated_user and msg.allow_draw is not None:
+    if allow_change and updated_user:
+        if msg.allow_draw is not None:
             updated_user.allow_draw = msg.allow_draw
+            update_counter += 1
+
+        if msg.allow_new_page is not None:
+            updated_user.allow_new_page = msg.allow_new_page
             update_counter += 1
 
     response_data = RoomUpdateUserResponseMessage(

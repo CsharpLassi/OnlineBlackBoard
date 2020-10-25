@@ -227,7 +227,7 @@ class LecturePage(db.Model):
     lecture_id = db.Column(db.Integer, db.ForeignKey('lecture.id'), nullable=False)
     lecture = db.relationship('Lecture', uselist=False, foreign_keys=[lecture_id])
 
-    creator_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    creator_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     creator = db.relationship('User', uselist=False, foreign_keys=[creator_id])
 
     left_page_id = db.Column(db.Integer, db.ForeignKey('lecture_page.id'))
