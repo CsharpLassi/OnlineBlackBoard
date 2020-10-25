@@ -1,6 +1,4 @@
 .sketchToolboxControl {
-    margin-right: 0.5em;
-    margin-left: 0.5em;
 }
 
 .sketchToolboxControl.modeControl{
@@ -13,8 +11,8 @@
 
 .colorPickSelector {
   border-radius: 5px;
-  width: 36px;
-  height: 36px;
+  width: 16px;
+  height: 16px;
   cursor: pointer;
   -webkit-transition: all linear .2s;
   -moz-transition: all linear .2s;

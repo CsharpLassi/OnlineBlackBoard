@@ -59,7 +59,7 @@ var obbSketchCanvas = {
         this.sketchpad.color = this.color;
     },
 
-    changeColor: function (color='#000000'){
+    changeColor: function (color = '#000000') {
         this.sketchpad.color = this.color = color;
     },
 
@@ -242,7 +242,7 @@ var obbSketchContent = {
         obbSketchContent.sketchCanvases.forEach(e => e.changeThickness(thickness));
     },
 
-    setColor: function (color){
+    setColor: function (color) {
         obbSketchContent.sketchCanvases.forEach(e => e.changeColor(color));
     },
 
@@ -434,6 +434,10 @@ var obbSketchToolbox = {
 
         obbSocket.on('room:join', function (msg) {
             obbSketchToolbox.cmdCreateRightPage.setEnable(msg.user.allow_new_page);
+            if (msg.user.mode === 'blackboard') {
+                let selector = $('.sketchToolboxControl svg')
+                selector.addClass('fa-2x')
+            }
         })
     }
 }
