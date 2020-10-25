@@ -48,7 +48,7 @@
 
 {% macro print_boolean_field(field) %}
     <div class="form-check">
-        <input type="checkbox" class="form-check-input" name="{{ field.name }}" id="{{ field.id }}">
+        <input type="checkbox" {{ 'checked' if field.data else '' }} class="form-check-input" name="{{ field.name }}" id="{{ field.id }}">
         <label class="form-check-label" for="{{ field.id }}">{{ field.label.text }}</label>
     </div>
 {% endmacro %}

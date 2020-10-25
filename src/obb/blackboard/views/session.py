@@ -44,6 +44,9 @@ def session_create():
             room.name = form.name.data
             room.full_name = f'{current_user.username}.{room.name}'
             room.creator = current_user
+        else:
+            flash('room does not exist')
+            return render(form, rooms, lectures)
 
         if form.new_lecture.data and lecture:
             flash('lecture already exist')
@@ -53,6 +56,9 @@ def session_create():
             lecture.name = form.lecture_name.data
             lecture.full_name = f'{current_user.username}.{lecture.name}'
             lecture.creator = current_user
+        else:
+            flash('lecture does not exist')
+            return render(form, rooms, lectures)
 
         lecture_session = LectureSession()
         lecture_session.maintainer = current_user
