@@ -32,3 +32,8 @@
     transition: all linear .2s;
 }
 
+.colorPickSelector.fa-2x {
+    width: 32px;
+    height: 32px;
+}
+

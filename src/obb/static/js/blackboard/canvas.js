@@ -476,8 +476,8 @@ var obbSketchToolbox = {
         obbSocket.on('room:join', function (msg) {
             obbSketchToolbox.cmdCreateRightPage.setEnable(msg.user.allow_new_page);
             if (msg.user.mode === 'blackboard') {
-                let selector = $('.sketchToolboxControl svg')
-                selector.addClass('fa-2x')
+                $('.sketchToolboxControl svg').addClass('fa-2x')
+                $('.colorPickSelector').addClass('fa-2x');
             }
 
             obbSketchToolbox.cmdChangeMode.setEnable(msg.user.allow_draw);
