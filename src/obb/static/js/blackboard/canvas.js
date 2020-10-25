@@ -3,6 +3,7 @@ var obbSketchCanvas = {
     sketchpad: null,
     mode: 'draw',
     thickness: 2,
+    color: '#000000',
     recordStrokes: false,
     onZ: 3,
     offZ: 1,
@@ -23,11 +24,10 @@ var obbSketchCanvas = {
         this.selector = ele.first();
         this.sketchpad = new Atrament(document.querySelector('#' + this.selector[0].id));
 
-        this.sketchpad.recordStrokes = this.recordStrokes;
-        this.sketchpad.mode = this.mode;
-        this.sketchpad.weight = this.thickness;
         this.sketchpad.width = ele.width;
         this.sketchpad.height = ele.height;
+
+        this.setAllValues();
 
         this.config.contentParent.resize({item: this}, function (event) {
             let item = event.data.item;
@@ -50,6 +50,17 @@ var obbSketchCanvas = {
             }
             obbSocket.emit('room:update:sketch', {stroke: stroke});
         });
+    },
+
+    setAllValues: function () {
+        this.sketchpad.recordStrokes = this.recordStrokes;
+        this.sketchpad.mode = this.mode;
+        this.sketchpad.weight = this.thickness;
+        this.sketchpad.color = this.color;
+    },
+
+    changeColor: function (color='#000000'){
+        this.sketchpad.color = this.color = color;
     },
 
     changeThickness: function (thickness) {
@@ -119,8 +130,7 @@ var obbSketchCanvas = {
         // endStroke closes the path
         this.sketchpad.endStroke(prevPoint.x, prevPoint.y);
 
-        this.sketchpad.recordStrokes = this.recordStrokes;
-        this.sketchpad.mode = this.mode;
+        this.setAllValues();
     }
 
 };
@@ -230,6 +240,10 @@ var obbSketchContent = {
 
     setThickness: function (thickness) {
         obbSketchContent.sketchCanvases.forEach(e => e.changeThickness(thickness));
+    },
+
+    setColor: function (color){
+        obbSketchContent.sketchCanvases.forEach(e => e.changeColor(color));
     },
 
     showAll: function () {
@@ -401,6 +415,16 @@ var obbSketchToolbox = {
                 let thickness = parseFloat(this.value);
                 obbSketchContent.setThickness(thickness);
             });
+
+        // Todo: obbSketchToolBoxColorPicker
+        $('#cmdChangeColor').colorPick({
+            'initialColor': '#000000',
+            'pos': 'top',
+            'onColorSelected': function () {
+                this.element.css({'backgroundColor': this.color, 'color': this.color});
+                obbSketchContent.setColor(this.color);
+            }
+        });
 
         // socket
         obbSocket.on('room:get:page', function (msg) {

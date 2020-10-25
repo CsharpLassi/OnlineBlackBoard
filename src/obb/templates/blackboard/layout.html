@@ -12,6 +12,8 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/blackboard/blackboard.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/blackboard/blackboard.style.css') }}">
 
+    <link rel="stylesheet" href="{{ url_for('static', filename='colorPicker/colorPick.css') }}">
+
     {% block blackboard_css %}
     {% endblock %}
 {% endblock %}
@@ -25,6 +27,7 @@
 {% block js %}
     <script src="{{ url_for('static', filename='components/marked/marked.min.js') }}"></script>
     <script src="{{ url_for('static', filename='components/atrament/dist/atrament.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='colorPicker/colorPick.js') }}"></script>
 
     {% block blackboard_js %}
         {% assets "js_blackboard" %}
