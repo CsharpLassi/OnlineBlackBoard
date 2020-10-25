@@ -327,6 +327,7 @@ var obbSketchToolboxButton = {
 var obbSketchToolbox = {
     cmdGetLeftPage: null,
     cmdGetRightPage: null,
+    cmdCreateRightPage: null,
     cmdEnable: null,
     cmdModeDraw: null,
 
@@ -357,6 +358,15 @@ var obbSketchToolbox = {
             cmd: $('#cmdGetRightPage'),
         });
         obbSketchToolbox.cmdGetRightPage.disable()
+
+        obbSketchToolbox.cmdCreateRightPage = obbSketchToolboxButton.init({
+            onClick: function () {
+                obbSocket.emit('room:get:page:right', {insert: true})
+            },
+            onlyOn: true,
+            cmd: $('#cmdCreateRightPage'),
+        });
+        obbSketchToolbox.cmdCreateRightPage.disable()
 
         obbSketchToolbox.cmdEnable = obbSketchToolboxButton.init({
             onClick: obbSketchContent.showAll,
@@ -392,8 +402,12 @@ var obbSketchToolbox = {
 
         // socket
         obbSocket.on('room:get:page', function (msg) {
-            obbSketchToolbox.cmdGetLeftPage.setEnable(msg.has_left_page)
-            obbSketchToolbox.cmdGetRightPage.setEnable(msg.has_right_page)
+            obbSketchToolbox.cmdGetLeftPage.setEnable(msg.has_left_page);
+            obbSketchToolbox.cmdGetRightPage.setEnable(msg.has_right_page);
+        })
+
+        obbSocket.on('room:join', function (msg) {
+            obbSketchToolbox.cmdCreateRightPage.setEnable(msg.user.allow_new_page);
         })
     }
 }

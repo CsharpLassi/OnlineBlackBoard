@@ -97,17 +97,24 @@ def room_get_page_right(msg: RoomGetPageRequest,
 
     if page_session and (page := LecturePage.get(page_session.page_id)):
         right_page = page.right_page
-        if right_page is None and msg.insert and session.session_user_data.allow_new_page:
-            right_page = LecturePage()
-            right_page.draw_height = room.draw_height
-            right_page.draw_width = room.draw_width
-            right_page.lecture = page.lecture
-            right_page.creator = current_user
+        if (right_page is None or msg.insert) and \
+                session.session_user_data.allow_new_page:
+            new_page = LecturePage()
+            new_page.draw_height = room.draw_height
+            new_page.draw_width = room.draw_width
+            new_page.lecture = page.lecture
+            new_page.creator = current_user
 
-            page.right_page = right_page
-            right_page.left_page = page
+            page.right_page = new_page
+            new_page.left_page = page
+
+            if right_page:
+                right_page.left_page = new_page
+                new_page.right_page = right_page
 
             db.session.commit()
+
+            right_page = new_page
 
         session.page_id = right_page.id
 
