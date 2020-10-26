@@ -14,6 +14,7 @@ class MemoryBlackboardRoomData:
 class MemoryBlackboardRoom:
     def __init__(self, id: str):
         self.id = id
+        self.users = set()
 
     def get_data(self) -> MemoryBlackboardRoomData:
         return MemoryBlackboardRoomData(

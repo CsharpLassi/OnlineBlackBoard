@@ -93,7 +93,7 @@ var obbSocket = {
         });
 
         obbSocket.on('self:update', function (msg) {
-            obbSocket.user = obbUser.init(msg);
+            obbSocket.user = obbUser.init(msg.user);
         });
 
         $(this).trigger('socket:ready')

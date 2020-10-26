@@ -1,8 +1,8 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from dataclasses_json import dataclass_json, LetterCase
 
-from obb.blackboard.memory import MemoryLecturePageData
+from obb.blackboard.memory import MemoryLecturePageData, MemoryUserData
 from obb.blackboard.messages.base_messages import BaseResponseMessage
 
 
@@ -20,3 +20,11 @@ class RoomUpdatedMessage(BaseResponseMessage):
 @dataclass
 class NewLecturePageEvent:
     page: MemoryLecturePageData
+
+
+@dataclass_json(letter_case=LetterCase.CAMEL)
+@dataclass
+class UserUpdatedEvent:
+    user: MemoryUserData
+    all: bool
+    changes: list = field(default_factory=list)

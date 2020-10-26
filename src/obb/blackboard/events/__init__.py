@@ -3,6 +3,9 @@ from . import connect_disconnect
 # General
 from . import room_join
 
+# room
+from . import room_get_users
+
 # User
 from . import room_update_user
 from . import room_moveto_page

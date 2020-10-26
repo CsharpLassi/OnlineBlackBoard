@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
 from dataclasses_json import dataclass_json, LetterCase
+from flask import request
 from flask_socketio import join_room
 
 from obb.api import convert_from_socket, emit_error, emit_success
@@ -18,7 +19,7 @@ class RoomJoinRequestData:
     room_id: str
 
 
-@dataclass_json
+@dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
 class RoomJoinSelfResponseData:
     sid: str
@@ -53,6 +54,10 @@ def join(msg: RoomJoinRequestData, user: User = None, sid: str = None, **kwargs)
     memory_user.current_page = lecture.current_page_id or lecture.current_page_id or 0
 
     join_room(room.id)
+    memory_user.current_room = room.id
+    memory_user.socket_id = request.sid
+
+    memory_room.users.add(memory_user.session_id)
 
     emit_success('room:join:self', RoomJoinSelfResponseData(
         sid=sid,

@@ -1,18 +1,18 @@
 from dataclasses import dataclass
 
+from dataclasses_json import dataclass_json, LetterCase
 from flask import request, current_app
-from flask_socketio import emit
 
 from obb.ext import socket
-from ..ext import namespace, bb_session_manager
-from ..messages.base_messages import BaseResponseMessage
-from ..messages.datas import UserData, RoomData
+from ..ext import namespace
+from ..memory import user_memory, MemoryUser, room_memory, MemoryBlackboardRoom
+from ...api import emit_success
 
 
+@dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
-class UserLeaveResponse(BaseResponseMessage):
-    user: UserData
-    room: RoomData
+class UserLeaveResponseData:
+    session_id: str
 
 
 @socket.on('connect', namespace=namespace)
@@ -25,12 +25,16 @@ def blackboard_connect():
 def blackboard_disconnect():
     sid = request.sid
     current_app.logger.debug(f'Disconnect Socket: {sid}')
+    user: MemoryUser = user_memory.find(lambda k, u: u.socket_id == sid)
 
-    session = bb_session_manager.leave(sid)
-    if session:
-        leave_data = UserLeaveResponse(
-            user=session.session_user_data,
-            room=session.session_room_data
-        )
+    if user is None:
+        return
 
-        emit('room:leave:user', leave_data.to_dict(), room=session.room_id)
+    room: MemoryBlackboardRoom = room_memory.get(user.current_room)
+
+    if room:
+        room.users.remove(user.session_id)
+
+    emit_success('room:leave:user', UserLeaveResponseData(
+        session_id=user.session_id
+    ), room=user.current_room)

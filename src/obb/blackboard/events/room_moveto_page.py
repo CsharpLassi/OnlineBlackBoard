@@ -27,4 +27,4 @@ def room_moveto_page(msg: RoomMoveToPageRequestData,
     page: MemoryLecturePage = lecture_page_memory.get(msg.page_id)
     session.current_page = page.id
 
-    session.emit_self()
+    session.emit_self(changes=['currentPage'])
