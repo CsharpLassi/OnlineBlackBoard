@@ -1,7 +1,5 @@
-import flask
-
-from .components.session_manager import BlackBoardSessionManager
 from .components.page_manager import PageManager
+from .components.session_manager import BlackBoardSessionManager
 
 namespace = '/blackboard'
 
