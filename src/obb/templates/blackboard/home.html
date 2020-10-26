@@ -21,7 +21,7 @@
                 <tr>
                     <th scope="row">{{ loop.index }}</th>
                     <td>
-                        <a href="{{ url_for('blackboard.link_blackboard',room_id=l_session.room.id,mode='blackboard') }}">
+                        <a href="{{ url_for('blackboard.link_blackboard',r=l_session.room.id) }}">
                             {{ l_session.name }}</a></td>
                     <td>{{ l_session.lecture.name }} </td>
                     <td>{{ l_session.maintainer.username }} </td>

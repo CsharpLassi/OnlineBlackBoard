@@ -1,4 +1,4 @@
-#ContentBox {
+.PageContent {
     border: 2px solid lightgrey;
     position: relative;
     background: transparent;
@@ -6,13 +6,13 @@
     width: 100%;
 }
 
-#ContentText {
+.ContentText {
     position: absolute;
     height: 256px;
     width: 1024px;
 }
 
-.contentSketchpad, #ContentBlocker {
+.contentSketchpad, .ContentBlocker {
     background: transparent;
     width: 100%;
     height: 100%;

@@ -1,11 +1,20 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Optional
 
+from dataclasses_json import dataclass_json, LetterCase
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from ..ext import db, login
+
+
+@dataclass_json(letter_case=LetterCase.CAMEL)
+@dataclass
+class UserData:
+    name: str = 'Anonymous'
+    is_admin: bool = False
 
 
 class User(UserMixin, db.Model):
@@ -17,6 +26,12 @@ class User(UserMixin, db.Model):
                          nullable=False)
 
     lectures = db.relationship('Lecture', lazy=True)
+
+    def get_data(self) -> UserData:
+        return UserData(
+            name=self.username,
+            is_admin=self.is_admin,
+        )
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)

@@ -5,6 +5,7 @@ from . import room_join
 
 # User
 from . import room_update_user
+from . import room_moveto_page
 
 # Pages
 from . import room_get_page

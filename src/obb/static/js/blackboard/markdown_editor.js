@@ -1,6 +1,4 @@
 var obbMarkdownEditor = {
-    currentValue: '',
-
     init: function (settings) {
         obbMarkdownEditor.config = {
             items: $('#MarkdownEditor'),
@@ -13,30 +11,24 @@ var obbMarkdownEditor = {
     setup: function () {
         obbMarkdownEditor.config.items.on("change keyup paste", function () {
             let currentVal = $(this).val();
-            if (currentVal === obbMarkdownEditor.currentValue)
-                return
-
-            obbMarkdownEditor.currentValue = currentVal;
-            obbSocket.emit('room:update:content', {page_id: obbSocket.current_page.page_id, 'raw_text': currentVal})
+            obbSocket.emit('room:update:content', {
+                room_id: obbSocket.room.base.id,
+                page_id: obbSocket.user.currentPage,
+                text: currentVal
+            })
         });
 
         obbSocket.on('room:update:content', function (msg) {
-            let creator = obbUser.init(msg.creator);
-            if (obbSocket.isUser(creator))
-                return
+            if (obbSocket.user.isUser(msg.creatorId))
+                return;
 
-            if (msg.page_id !== obbSocket.current_page.page)
-                return
-
-            obbMarkdownEditor.config.items.val(msg.raw_text);
-
+            if (msg.pageId === obbSocket.user.currentPage)
+                obbMarkdownEditor.config.items.val(msg.text);
         });
 
         obbSocket.on('room:get:content', function (msg) {
-            if (msg.page_id !== obbSocket.current_page.page)
-                return
-
-            obbMarkdownEditor.config.items.val(msg.raw_text)
+            if (msg.pageId === obbSocket.user.currentPage)
+                obbMarkdownEditor.config.items.val(msg.text);
         });
     },
 }

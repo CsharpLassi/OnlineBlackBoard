@@ -1,9 +1,8 @@
 var obbContentBox = {
     init: function (settings) {
         obbContentBox.config = {
-            item: $('#Content'),
-            textItem: $('#ContentText'),
-            boxItem: $('#ContentBox'),
+            item: $('.PageContent'),
+
         };
 
         $.extend(obbContentBox.config, settings);
@@ -11,66 +10,98 @@ var obbContentBox = {
     },
 
     setup: function () {
-        obbSocket.on('room:get:page', function (msg) {
-            obbSocket.emit('room:get:content', {page_id: msg.page_id})
+        //Create Content Blocker
+        $('<div />', {
+            class: 'ContentBlocker',
+        }).css('z-index', 2).appendTo(obbContentBox.config.item)
+
+        //ContentText
+        $('<div />', {
+            class: 'ContentText',
+        }).css('z-index', 0).appendTo(obbContentBox.config.item)
+
+        obbSocket.on('room:join:self', function (msg) {
+            let room = obbRoom.init(msg.room);
+            obbContentBox.updateLayout(room.base.drawHeight, room.base.drawWidth);
+            obbContentBox.loadContent();
         });
 
-        obbSocket.on('room:update:content', function (msg) {
-            if (msg.page_id !== obbSocket.current_page.page)
-                return
-
-            obbContentBox.config.textItem.html(marked(msg.markdown));
-        });
-
-        obbSocket.on('room:update:settings', function (msg) {
-            obbContentBox.config.textItem
-                .css('height', `${msg.content_draw_height}px`)
-                .css('width', `${msg.content_draw_width}px`)
-
-            obbContentBox.updateLayout();
-        });
-
-        obbSocket.on('room:get:page', function (msg) {
-            obbContentBox.config.textItem
-                .css('height', `${msg.height}px`)
-                .css('width', `${msg.width}px`)
-
-            obbContentBox.updateLayout();
+        obbSocket.on('self:update', function (msg) {
+            // Todo: ChangeList
+            obbContentBox.loadContent(msg.currentPage);
         });
 
         obbSocket.on('room:get:content', function (msg) {
-            if (obbSocket.current_page.page_id !== msg.page_id)
-                return
-
-            obbContentBox.config.textItem.html(marked(msg.markdown));
+            obbContentBox.updateContent(msg.markdown, msg.page_id);
         });
 
-        obbContentBox.updateLayout();
+        obbSocket.on('room:update:content', function (msg) {
+            obbContentBox.updateContent(msg.markdown, msg.page_id);
+        });
+
+        obbSocket.on('room:update:settings', function (msg) {
+            return
+        });
+
+        obbSocket.on('room:get:page', function (msg) {
+            return
+        });
     },
 
-    updateLayout: function () {
-        let contentSelector = obbContentBox.config.item;
-        let contentText = obbContentBox.config.textItem;
+    loadContent: function (page_id = null) {
+        if (page_id) {
+            obbSocket.emit('room:get:content', [
+                {
+                    page_id: page_id,
+                }
+            ]);
+        }
 
-        let contentWidth = contentSelector.width();
+        let pageIds = [];
+        let idMessage = [];
+        obbContentBox.config.item.each(function () {
+            let dataPage = parseInt($(this).data('pageId'));
+            if (!dataPage)
+                dataPage = obbSocket.user.currentPage;
 
-        let textWidth = contentText.width();
-        let textHeight = contentText.height();
+            if (!pageIds.includes(dataPage)) {
+                pageIds.push(dataPage)
+                idMessage.push({
+                    page_id: dataPage,
+                });
+            }
+        })
 
+        obbSocket.emit('room:get:content', idMessage);
+    },
+    updateContent: function (markdown, pageId = obbSocket.user.currentPage) {
+        obbContentBox.config.item.filter(function () {
+                let divPageId = $(this).data("pageId")
+                return (!divPageId && pageId === obbSocket.user.currentPage) || divPageId === pageId;
+            }
+        ).children('.ContentText').html(marked(markdown))
+    },
 
-        let factorMin = contentWidth / textWidth;
+    updateLayout: function (height, width, pageId = obbSocket.user.currentPage) {
+        obbContentBox.config.item.filter(function () {
+                let divPageId = $(this).data("pageId")
+                return (!divPageId && pageId === obbSocket.user.currentPage) || divPageId === pageId;
+            }
+        ).children('.ContentText').each(function () {
+            let maxWidth = $(this).parent().width();
 
-        let translateX = textWidth * (factorMin - 1) / 2;
-        let translateY = textHeight * (factorMin - 1) / 2;
+            let factorMin = maxWidth / width;
 
-        contentText.css('transform',
-            'translateX(' + translateX + 'px) ' +
-            'translateY(' + translateY + 'px) ' +
-            'scale(' + factorMin + ') ');
+            let translateX = width * (factorMin - 1) / 2;
+            let translateY = height * (factorMin - 1) / 2;
 
-        contentSelector.height(textHeight * factorMin);
-
-        obbContentBox.config.boxItem.trigger('resize');
+            $(this).css('width', width + 'px').css('height', height + 'px')
+                .css('transform',
+                    'translateX(' + translateX + 'px) ' +
+                    'translateY(' + translateY + 'px) ' +
+                    'scale(' + factorMin + ') ');
+            $(this).parent().height(height * factorMin)
+        });
     },
 }
 

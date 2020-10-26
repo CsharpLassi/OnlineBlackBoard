@@ -1,45 +1,51 @@
 from dataclasses import dataclass
+from typing import List
+
+from dataclasses_json import LetterCase, dataclass_json
 
 from flask import escape
-from flask_socketio import emit
 
+from obb.api import convert_from_socket, emit_success, emit_error
 from obb.ext import socket
-from .functions import get_page_session
-from ..decorators import convert, event_login_required
-from ..ext import namespace, bb_session_manager
-from ..messages.base_messages import BaseRequestMessage, BaseResponseMessage
-from ..messages.datas import UserData
-from ..models import BlackboardRoom
+from ..ext import namespace
+from ..memory import lecture_page_memory, MemoryLecturePage
+from ..models import LecturePage
 
 
+@dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
-class RoomGetContentRequest(BaseRequestMessage):
+class RoomGetContentRequest:
     page_id: int
 
 
+@dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
-class RoomGetContentResponse(BaseResponseMessage):
+class RoomGetContentResponse:
     page_id: int
-    raw_text: str
+    text: str
     markdown: str
-    creator: UserData = None
 
 
 @socket.on('room:get:content', namespace=namespace)
-@convert(RoomGetContentRequest)
-@event_login_required
-def room_get_content(msg: RoomGetContentRequest,
-                     room: BlackboardRoom = None):
-    session = bb_session_manager.get(msg.session.session_id)
+@convert_from_socket(RoomGetContentRequest)
+def room_get_content(msg_list: List[RoomGetContentRequest], **kwargs):
+    result = list()
+    for msg in msg_list:
+        page = LecturePage.get(msg.page_id)
+        if not page:
+            emit_error('page not found')
+            continue
 
-    page_session = get_page_session(session, room, msg.page_id)
+        mem_page: MemoryLecturePage = lecture_page_memory.get(msg.page_id,
+                                                              MemoryLecturePage(
+                                                                  page.id))
 
-    if page_session:
-        markdown = page_session.get_markdown()
-        data = RoomGetContentResponse(
-            page_id=msg.page_id,
-            raw_text=markdown,
-            markdown=escape(markdown),
-        )
+        # Todo: Continue
+        result.append(RoomGetContentResponse(
+            page_id=mem_page.id,
+            text=mem_page.markdown,
+            markdown=escape(mem_page.markdown)
 
-        emit('room:get:content', data.to_dict())
+        ))
+
+    emit_success('room:get:content', result)
