@@ -113,6 +113,8 @@ var obbToolBox = {
 
             forId = '#' + forId;
 
+            let currentMode = 'user';
+
             $(this).addClass('row');
 
             let leftDiv = $('<div class="col-auto">').appendTo($(this));
@@ -209,9 +211,14 @@ var obbToolBox = {
                 }).append('<i class="fas fa-eraser"></i>').appendTo(mainDiv),
             });
 
-            obbSketchToolboxButton.init({
+            let cmdClearPage = obbSketchToolboxButton.init({
                 onClick: function () {
                     obbContentSketchCanvas.clear(forId);
+                    obbSocket.emit('room:clear:sketch', {
+                        mode: currentMode,
+                        roomId: obbSocket.room.base.id,
+                        page_id: cmdClearPage.value,
+                    })
                 },
                 onlyOn: true,
                 default: true,
@@ -222,7 +229,8 @@ var obbToolBox = {
 
             let cmdChangeMode = obbSketchToolboxButton.init({
                 onClick: function () {
-                    obbContentSketchCanvas.changeMode('global', forId)
+                    currentMode = 'global'
+                    obbContentSketchCanvas.changeMode(currentMode, forId)
 
                     cmdDrawMode.setOff()
                     cmdEraseMode.setOff()
@@ -230,7 +238,8 @@ var obbToolBox = {
                     divUserModeControl.addClass('globalMode');
                 },
                 offClick: function () {
-                    obbContentSketchCanvas.changeMode('user', forId)
+                    currentMode = 'user'
+                    obbContentSketchCanvas.changeMode(currentMode, forId)
 
                     cmdDrawMode.setOff()
                     cmdEraseMode.setOff()
@@ -283,6 +292,7 @@ var obbToolBox = {
 
                 cmdMoveToLeftPage.value = page.base.leftPageId;
                 cmdMoveToRightPage.value = page.base.rightPageId;
+                cmdClearPage.value = page.base.id;
 
                 cmdMoveToLeftPage.setEnable(page.base.leftPageId != null);
                 cmdMoveToRightPage.setEnable(page.base.rightPageId != null);

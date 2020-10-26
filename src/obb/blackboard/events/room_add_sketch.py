@@ -2,15 +2,13 @@ from dataclasses import dataclass
 from typing import Optional
 
 from dataclasses_json import dataclass_json, LetterCase
-from flask_socketio import emit
 
 from obb.ext import socket, db
-from .functions import get_page_session
 from .global_message import NewLecturePageEvent
-from ..ext import namespace, bb_session_manager
+from ..datas import StrokeData
+from ..ext import namespace
 from ..memory import MemoryUser, MemoryBlackboardRoom, room_memory, MemoryLecturePage, \
     lecture_page_memory
-from ..datas import StrokeData
 from ..models import LecturePage
 from ...api import convert_from_socket, emit_error, emit_success
 

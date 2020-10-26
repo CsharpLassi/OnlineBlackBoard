@@ -1,44 +1,85 @@
 from dataclasses import dataclass
+from typing import Optional
 
-from flask_socketio import emit
+from dataclasses_json import dataclass_json, LetterCase
 
-from obb.ext import socket
-from .functions import get_page_session
-from ..decorators import convert, event_login_required
-from ..ext import namespace, bb_session_manager, page_manager
-from ..messages.base_messages import BaseRequestMessage, BaseResponseMessage
-from ..messages.datas import StrokeData, UserData
-from ..models import BlackboardRoom
+from obb.ext import socket, db
+from .global_message import NewLecturePageEvent
+from ..ext import namespace
+from ..memory import MemoryUser, MemoryBlackboardRoom, room_memory, MemoryLecturePage, \
+    lecture_page_memory
+from ..models import LecturePage
+from ...api import convert_from_socket, emit_error, emit_success
 
 
+@dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
-class RoomClearSketchRequest(BaseRequestMessage):
-    pass
+class RoomClearSketchRequestData:
+    room_id: int
+    mode: str
+
+    page_id: Optional[int] = None
 
 
+@dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
-class RoomClearSketchResponse(BaseResponseMessage):
-    creator: UserData = None
+class RoomClearSketchResponseData:
+    room_id: str
+    page_id: int
+    creator_id: int
 
 
 @socket.on('room:clear:sketch', namespace=namespace)
-@convert(RoomClearSketchRequest)
-@event_login_required
-def room_update_sketch(msg: RoomClearSketchRequest,
-                       room: BlackboardRoom = None):
-    session = bb_session_manager.get(msg.session.session_id)
+@convert_from_socket(RoomClearSketchRequestData)
+def room_clear_sketch(msg: RoomClearSketchRequestData, session: MemoryUser, **kwargs):
+    assert session
 
-    if not session.session_user_data.allow_draw:
-        # Todo: Msg
+    # Todo: Add User Function
+    if msg.mode != 'global':
         return
 
-    data = RoomClearSketchResponse(
-        creator=session.session_user_data,
-    )
+    if not session.allow_draw:
+        return
 
-    emit('room:clear:sketch', data.to_dict(), room=room.id)
+    room: Optional[MemoryBlackboardRoom] = room_memory.get(msg.room_id)
+    if not room:
+        emit_error('room not found')
+        return
 
-    # Save History
-    page_session = get_page_session(session, room)
-    if page_session:
-        page_session.clear_stroke()
+    l_session = room.model.get_current_lecture_session()
+    if not l_session:
+        emit_error('room is closed')
+        return
+    lecture = l_session.lecture
+
+    page_id = msg.page_id or lecture.current_page_id or lecture.start_page_id
+
+    # Create New Page
+    if page_id is None:
+        new_page = LecturePage.create(lecture)
+        new_page.draw_width = room.model.draw_width
+        new_page.draw_height = room.model.draw_height
+
+        lecture.start_page = new_page
+        lecture.current_page = new_page
+        db.session.add(new_page)
+        db.session.commit()
+
+        new_mem_page = MemoryLecturePage(new_page.id)
+        emit_success('room:new:page', NewLecturePageEvent(
+            page=new_mem_page.get_data()
+        ))
+
+        page_id = new_page.id
+
+    page = lecture_page_memory.get(page_id, MemoryLecturePage(page_id))
+    page.strokes.clear()
+
+    emit_success('room:clear:sketch', RoomClearSketchResponseData(
+        room_id=room.id,
+        page_id=page.id,
+        creator_id=session.session_id,
+
+    ), room=room.id)
+
+    page.save_strokes()

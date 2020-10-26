@@ -37,6 +37,10 @@ var obbContentSketchCanvas = {
             });
         });
 
+        obbSocket.on('room:clear:sketch', function (msg) {
+            obbContentSketchCanvas.clearPage(msg.pageId);
+        });
+
         obbSocket.on('room:add:sketch', function (msg) {
             obbContentSketchCanvas.updateSketch(msg.stroke, msg.pageId);
         });
