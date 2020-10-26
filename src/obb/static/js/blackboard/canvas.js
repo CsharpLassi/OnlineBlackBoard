@@ -27,10 +27,11 @@ var obbContentSketchCanvas = {
 
         obbSocket.on('self:update', function (msg) {
             // Todo: ChangeList
-            obbContentSketchCanvas.loadSketch(msg.currentPage);
+            obbContentSketchCanvas.loadSketch(msg.user.currentPage);
         });
 
         obbSocket.on('room:get:sketch', function (msg) {
+            obbContentSketchCanvas.clearPage(msg.pageId);
             msg.strokes.forEach(stroke => {
                 obbContentSketchCanvas.updateSketch(stroke, msg.pageId);
             });
@@ -49,6 +50,7 @@ var obbContentSketchCanvas = {
                 }
             ]);
         }
+        obbContentSketchCanvas.clear();
 
         let pageIds = [];
         let idMessage = [];
@@ -122,6 +124,20 @@ var obbContentSketchCanvas = {
                 atrament.smoothing = oldValues.smoothing;
                 atrament.color = oldValues.color;
                 atrament.adaptiveStroke = oldValues.adaptiveStroke;
+
+            });
+        })
+    },
+    clearPage: function (pageId = null) {
+        obbContentBox.config.item.filter(function () {
+                let divPageId = $(this).data("pageid")
+                return (divPageId === 'current' && (!pageId || pageId === obbSocket.user.currentPage)) || divPageId === pageId;
+            }
+        ).each(function () {
+            $(this).children('.contentSketchpad').each(function () {
+                let atrament = $(this).data('atrament')
+
+                atrament.clear();
 
             });
         })
@@ -252,220 +268,3 @@ var obbContentSketchCanvas = {
 $(obbSocket).on('socket:ready', function () {
     obbContentSketchCanvas.init();
 });
-
-/*
-var obbSketchCanvas = {
-
-    setup: function (ele) {
-        this.selector = ele.first();
-        this.sketchpad = new Atrament(document.querySelector('#' + this.selector[0].id));
-
-
-        this.setAllValues();
-
-        this.hide();
-
-        this.sketchpad.addEventListener('strokerecorded', ({stroke}) => {
-            for (let i = 0; i < stroke.points.length; i++) {
-                stroke.points[i].x /= this.sketchpad.width
-                stroke.points[i].y /= this.sketchpad.height
-            }
-
-            obbSocket.emit('room:update:sketch', {page_id: obbSocket.current_page.page_id, stroke: stroke});
-        });
-    },
-
-
-    draw: function (stroke) {
-        this.sketchpad.recordStrokes = false;
-
-        this.sketchpad.mode = stroke.mode;
-        this.sketchpad.weight = stroke.weight;
-        this.sketchpad.smoothing = stroke.smoothing;
-        this.sketchpad.color = stroke.color;
-        this.sketchpad.adaptiveStroke = stroke.adaptiveStroke;
-
-        // don't want to modify original data
-        const points = stroke.points.slice();
-
-        let firstPoint = points.shift();
-        firstPoint.x *= this.sketchpad.width;
-        firstPoint.y *= this.sketchpad.height;
-        // beginStroke moves the "pen" to the given position and starts the path
-        this.sketchpad.beginStroke(firstPoint.x, firstPoint.y);
-
-        let prevPoint = firstPoint;
-        while (points.length > 0) {
-            let point = points.shift();
-            point.x *= this.sketchpad.width;
-            point.y *= this.sketchpad.height;
-
-            // the `draw` method accepts the current real coordinates
-            // (i. e. actual cursor position), and the previous processed (filtered)
-            // position. It returns an object with the current processed position.
-            const {x, y} = this.sketchpad.draw(point.x, point.y, prevPoint.x, prevPoint.y);
-
-            // the processed position is the one where the line is actually drawn to
-            // so we have to store it and pass it to `draw` in the next step
-            prevPoint = {x, y};
-        }
-
-        // endStroke closes the path
-        this.sketchpad.endStroke(prevPoint.x, prevPoint.y);
-
-        this.setAllValues();
-    }
-
-};
-
-var obbSketchContent = {
-    sketchCanvases: [],
-    globalSketchPad: null,
-    userSketchPad: null,
-
-    mode: 'user',
-
-    init: function (settings) {
-        obbSketchContent.config = {
-            globalCanvas: $('#ContentSketchpadGlobal'),
-            userCanvas: $('#ContentSketchpadUser'),
-        };
-
-        $.extend(obbSketchContent.config, settings);
-
-        obbSketchContent.setup();
-    },
-
-    setup: function () {
-        obbSketchContent.globalSketchPad = obbSketchCanvas.init(obbSketchContent.config.globalCanvas);
-        obbSketchContent.sketchCanvases.push(obbSketchContent.globalSketchPad);
-
-        obbSketchContent.userSketchPad = obbSketchCanvas.init(obbSketchContent.config.userCanvas);
-        obbSketchContent.sketchCanvases.push(obbSketchContent.userSketchPad);
-
-        obbSocket.on('room:join', function (msg) {
-
-        });
-
-        obbSocket.on('room:get:page', function (msg) {
-            obbSocket.emit('room:get:sketch', {page: msg.page_id});
-        });
-
-        obbSocket.on('room:update:user', function (msg) {
-            let user = msg.user;
-
-            if (!obbSocket.isUser(user))
-                return
-            return;
-        });
-
-        obbSocket.on('room:update:sketch', function (msg) {
-            let creator = msg.creator;
-            if (obbSocket.isUser(creator))
-                return
-
-            if (obbSocket.current_page.page_id !== msg.page_id)
-                return
-
-            obbSketchContent.globalSketchPad.draw(msg.stroke);
-        });
-
-        obbSocket.on('room:clear:sketch', function (msg) {
-            let creator = msg.creator;
-            if (obbSocket.isUser(creator))
-                return
-
-            obbSketchContent.globalSketchPad.clear();
-        });
-
-        obbSocket.on('room:get:sketch', function (msg) {
-            obbSketchContent.globalSketchPad.clear()
-            msg.strokes.forEach(s => {
-                obbSketchContent.globalSketchPad.draw(s);
-            });
-        });
-    },
-
-};
-
-var obbSketchToolbox = {
-    cmdGetLeftPage: null,
-    cmdGetRightPage: null,
-    cmdCreateRightPage: null,
-    cmdModeDraw: null,
-    cmdChangeMode: null,
-
-    cmdClear: null,
-
-    init: function (settings) {
-        obbSketchToolbox.config = {};
-
-        $.extend(obbSketchToolbox.config, settings);
-
-        this.setup();
-    },
-
-    setup: function () {
-
-
-        obbSketchToolbox.cmdGetRightPage = obbSketchToolboxButton.init({
-            onClick: function () {
-                obbSocket.emit('room:get:page:right')
-            },
-            onlyOn: true,
-            cmd: $('#cmdGetRightPage'),
-        });
-        obbSketchToolbox.cmdGetRightPage.disable()
-
-        obbSketchToolbox.cmdCreateRightPage = obbSketchToolboxButton.init({
-            onClick: function () {
-                obbSocket.emit('room:get:page:right', {insert: true})
-            },
-            onlyOn: true,
-            cmd: $('#cmdCreateRightPage'),
-        });
-        obbSketchToolbox.cmdCreateRightPage.disable()
-
-        // socket
-        obbSocket.on('room:get:page', function (msg) {
-            obbSketchToolbox.cmdGetLeftPage.setEnable(msg.has_left_page);
-            obbSketchToolbox.cmdGetRightPage.setEnable(msg.has_right_page);
-        });
-
-        obbSocket.on('room:join', function (msg) {
-            obbSketchToolbox.cmdCreateRightPage.setEnable(msg.user.allow_new_page);
-            if (msg.user.mode === 'blackboard') {
-                $('.sketchToolboxControl svg').addClass('fa-2x')
-                $('.colorPickSelector').addClass('fa-2x');
-            }
-
-            obbSketchToolbox.cmdChangeMode.setEnable(msg.user.allow_draw);
-            obbSketchContent.globalSketchPad.changeRecordStroke(msg.user.allow_draw)
-        });
-
-        obbSocket.on('disconnect', function () {
-            obbSketchToolbox.cmdChangeMode.setEnable(false);
-            obbSketchToolbox.cmdChangeMode.setOff();
-
-            obbSketchContent.globalSketchPad.changeRecordStroke(false)
-        });
-
-        obbSocket.on('room:update:user', function (msg) {
-            if (!obbSocket.isUser(msg.user))
-                return
-
-            obbSketchToolbox.cmdChangeMode.setEnable(msg.user.allow_draw);
-            if (!msg.user.allow_draw)
-                obbSketchToolbox.cmdChangeMode.setOff();
-
-            obbSketchToolbox.cmdCreateRightPage.setEnable(msg.user.allow_new_page);
-            obbSketchContent.globalSketchPad.changeRecordStroke(msg.user.allow_draw)
-        });
-    }
-}
-
-$(obbSocket).on('socket:ready', function () {
-    obbSketchContent.init();
-    obbSketchToolbox.init();
-});
-*/

@@ -246,7 +246,7 @@ class LecturePageData:
 
 class LecturePage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Integer)  # Todo Change to string
+    name = db.Column(db.String)  # Todo Change to string
 
     draw_height = db.Column(db.Integer, default=default_draw_height)
     draw_width = db.Column(db.Integer, default=default_draw_width)
@@ -259,19 +259,19 @@ class LecturePage(db.Model):
 
     left_page_id = db.Column(db.Integer, db.ForeignKey('lecture_page.id'))
     left_page = db.relationship('LecturePage', uselist=False, post_update=True,
-                                foreign_keys=[left_page_id])
+                                foreign_keys=left_page_id)
 
     right_page_id = db.Column(db.Integer, db.ForeignKey('lecture_page.id'))
     right_page = db.relationship('LecturePage', uselist=False, post_update=True,
-                                 foreign_keys=[right_page_id])
+                                 foreign_keys=right_page_id)
 
     top_page_id = db.Column(db.Integer, db.ForeignKey('lecture_page.id'))
     top_page = db.relationship('LecturePage', uselist=False, post_update=True,
-                               foreign_keys=[top_page_id])
+                               foreign_keys=top_page_id)
 
     bottom_page_id = db.Column(db.Integer, db.ForeignKey('lecture_page.id'))
     bottom_page = db.relationship('LecturePage', uselist=False, post_update=True,
-                                  foreign_keys=[bottom_page_id])
+                                  foreign_keys=bottom_page_id)
 
     def get_data(self) -> LecturePageData:
         return LecturePageData(

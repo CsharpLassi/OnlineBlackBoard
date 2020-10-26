@@ -43,6 +43,9 @@ def room_update_sketch(msg: RoomAddSketchRequestData, session: MemoryUser, **kwa
     if msg.mode != 'global':
         return
 
+    if not session.allow_draw:
+        return
+
     room: Optional[MemoryBlackboardRoom] = room_memory.get(msg.room_id)
     if not room:
         emit_error('room not found')

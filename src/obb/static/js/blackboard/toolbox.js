@@ -9,7 +9,7 @@ var obbSketchToolboxButton = {
     offClasses: ['disabled'],
     symbolOnClasses: [],
     symbolOffClasses: [],
-
+    value: null,
 
     init: function (settings) {
         let item = {}
@@ -121,21 +121,29 @@ var obbToolBox = {
             let paddingDiv = $('<div class="col">').appendTo($(this));
             let rightDiv = $('<div class="col-auto">').appendTo($(this));
 
-            let cmdGetLeftPage = obbSketchToolboxButton.init({
+            let cmdMoveToLeftPage = obbSketchToolboxButton.init({
                 onClick: function () {
-                    obbSocket.emit('room:get:page:left')
+                    obbSocket.emit('room:moveTo:page', {
+                        pageId: cmdMoveToLeftPage.value,
+
+                    })
                 },
                 onlyOn: true,
                 cmd: $('<button />', {
                     class: 'btn sketchToolboxControl',
                 }).append('<i class="fas fa-arrow-left"></i>').appendTo(leftDiv),
             });
-            cmdGetLeftPage.disable();
+            cmdMoveToLeftPage.disable();
 
 
             let cmdCreateRightPage = obbSketchToolboxButton.init({
                 onClick: function () {
-                    obbSocket.emit('room:get:page:right', {insert: true})
+                    obbSocket.emit('room:create:page', {
+                        roomId: obbSocket.room.base.id,
+                        parent_page_id: cmdCreateRightPage.value,
+                        direction: 'right',
+                        moveTo: true,
+                    })
                 },
                 onlyOn: true,
                 cmd: $('<button />', {
@@ -144,16 +152,18 @@ var obbToolBox = {
             });
             cmdCreateRightPage.disable()
 
-            let cmdGetRightPage = obbSketchToolboxButton.init({
+            let cmdMoveToRightPage = obbSketchToolboxButton.init({
                 onClick: function () {
-                    obbSocket.emit('room:get:page:right')
+                    obbSocket.emit('room:moveTo:page', {
+                        pageId: cmdMoveToRightPage.value,
+                    })
                 },
                 onlyOn: true,
                 cmd: $('<button />', {
                     class: 'btn sketchToolboxControl',
                 }).append('<i class="fas fa-arrow-right"></i>').appendTo(rightDiv),
             });
-            cmdGetRightPage.disable()
+            cmdMoveToRightPage.disable()
 
 
             let cmdDrawMode = obbSketchToolboxButton.init({
@@ -210,7 +220,7 @@ var obbToolBox = {
                 }).append('<i class="fas fa-bacon"></i>').appendTo(divUserModeControl),
             });
 
-            obbSketchToolboxButton.init({
+            let cmdChangeMode = obbSketchToolboxButton.init({
                 onClick: function () {
                     obbContentSketchCanvas.changeMode('global', forId)
 
@@ -232,6 +242,7 @@ var obbToolBox = {
                     class: 'btn sketchToolboxControl',
                 }).append('<i class="fas fa-chalkboard-teacher"></i>').appendTo(divUserModeControl)
             });
+            cmdChangeMode.disable();
 
             $('<input />', {
                 type: 'range',
@@ -244,7 +255,41 @@ var obbToolBox = {
                 obbContentSketchCanvas.setWeight(weight, forId)
             }).appendTo(mainDiv);
 
+            // socket
+            obbSocket.on('room:join:self', function (msg) {
+                cmdCreateRightPage.enable(msg.user.allowNewPage)
+                cmdCreateRightPage.value = obbSocket.user.currentPage
+
+                cmdChangeMode.setEnable(msg.user.allowDraw);
+
+                obbSocket.emit('room:get:page', {
+                    pageId: obbSocket.user.currentPage
+                });
+            });
+
+            obbSocket.on('self:update', function (msg) {
+                cmdCreateRightPage.enable(msg.user.allowNewPage)
+                cmdCreateRightPage.value = obbSocket.user.currentPage
+
+                cmdChangeMode.setEnable(msg.user.allowDraw);
+
+                obbSocket.emit('room:get:page', {
+                    pageId: obbSocket.user.currentPage
+                });
+            });
+
+            obbSocket.on('room:get:page', function (msg) {
+                let page = msg.page;
+
+                cmdMoveToLeftPage.value = page.base.leftPageId;
+                cmdMoveToRightPage.value = page.base.rightPageId;
+
+                cmdMoveToLeftPage.setEnable(page.base.leftPageId != null);
+                cmdMoveToRightPage.setEnable(page.base.rightPageId != null);
+            });
+
         });
+
 
     }
 };

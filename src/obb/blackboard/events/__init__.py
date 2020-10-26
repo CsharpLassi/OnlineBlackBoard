@@ -12,6 +12,7 @@ from . import room_moveto_page
 
 # Pages
 from . import room_get_page
+from . import room_create_page
 
 # Content
 from . import room_update_content

@@ -28,7 +28,7 @@ var obbContentBox = {
 
         obbSocket.on('self:update', function (msg) {
             // Todo: ChangeList
-            obbContentBox.loadContent(msg.currentPage);
+            obbContentBox.loadContent(msg.user.currentPage);
         });
 
         obbSocket.on('room:get:content', function (msg) {

@@ -24,7 +24,13 @@ class RoomMoveToPageResponseData:
 @convert_from_socket(RoomMoveToPageRequestData)
 def room_moveto_page(msg: RoomMoveToPageRequestData,
                      session: MemoryUser = None, **kwargs):
-    page: MemoryLecturePage = lecture_page_memory.get(msg.page_id)
+    if not msg.page_id:
+        return
+
+    page: MemoryLecturePage = lecture_page_memory.get(msg.page_id,
+                                                      MemoryLecturePage(msg.page_id))
+    if page is None:
+        return
     session.current_page = page.id
 
     session.emit_self(changes=['currentPage'])
