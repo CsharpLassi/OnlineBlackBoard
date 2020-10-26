@@ -8,10 +8,17 @@ var obbRoomSettings = {
         obbRoomSettings.setup();
     },
     setup: function () {
-        $('form#roomEdit').submit(function (event) {
-            obbSocket.emit('room:update:settings',
+        obbSocket.on('room:update', function (msg) {
+            let room = obbRoom.init(msg.room);
+            // Todo: set
+        });
+
+        obbRoomSettings.config.items.submit(function (event) {
+            obbSocket.emit('room:update',
                 {
-                    'form_data': $(this).serializeArray()
+                    room_id: obbSocket.room.base.id,
+                    data: $(this).serializeArray(),
+                    page_id: obbSocket.user.currentPage,
                 });
             return false;
         });

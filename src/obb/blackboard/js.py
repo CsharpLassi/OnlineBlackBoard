@@ -6,7 +6,7 @@ assets.register('js_blackboard', js_blackboard)
 
 js_blackboard_user = Bundle('js/socket.js',
                             'js/blackboard/admin_user_list.js',
-                            # 'js/blackboard/room_settings.js',
+                            'js/blackboard/room_settings.js',
                             'js/blackboard/markdown_editor.js',
                             # 'js/blackboard/canvas.js',
                             'js/blackboard/content.js')

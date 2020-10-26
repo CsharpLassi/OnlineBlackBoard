@@ -28,3 +28,11 @@ class UserUpdatedEvent:
     user: MemoryUserData
     all: bool
     changes: list = field(default_factory=list)
+
+
+@dataclass_json(letter_case=LetterCase.CAMEL)
+@dataclass
+class PageUpdatedEvent:
+    page: MemoryLecturePageData
+    all: bool
+    changes: list = field(default_factory=list)

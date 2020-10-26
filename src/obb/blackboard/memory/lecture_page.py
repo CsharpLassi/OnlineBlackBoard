@@ -29,6 +29,16 @@ class MemoryLecturePage:
             base=self.model.get_data()
         )
 
+    def emit_update(self, room_id, changes=None):
+        from obb.api import emit_success
+        from ..events.global_message import PageUpdatedEvent
+
+        emit_success('room:update:page', PageUpdatedEvent(
+            page=self.get_data(),
+            all=not list,
+            changes=list() if changes is None else changes
+        ), room=room_id)
+
     @property
     def model(self) -> LecturePage:
         return LecturePage.get(self.id)

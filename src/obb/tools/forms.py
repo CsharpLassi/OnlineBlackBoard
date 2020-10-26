@@ -1,5 +1,18 @@
 import datetime
 
+from werkzeug.datastructures import ImmutableMultiDict
+
+
+def get_form_data_from_dict(data):
+    dict_values = dict()
+
+    for item in data:
+        name = item['name']
+        value = item['value']
+        dict_values[name] = value
+
+    return ImmutableMultiDict(dict_values)
+
 
 class BaseDataForm:
     def read_data(self, model):

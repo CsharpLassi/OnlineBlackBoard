@@ -23,4 +23,4 @@ from . import room_update_sketch
 from . import room_clear_sketch
 
 # Settings
-from . import room_update_settings
+from . import room_update

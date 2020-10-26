@@ -38,16 +38,7 @@ def to_form_dict(item: str = 'form_data'):
             if item:
                 msg = msg[item]
 
-            dict_values = dict()
 
-            for value_item in msg:
-                name = value_item['name']
-                value = value_item['value']
-                dict_values[name] = value
-            if item:
-                args.append(ImmutableMultiDict(dict_values))
-
-            return func(*args, **kwargs)
 
         return wrapper
 

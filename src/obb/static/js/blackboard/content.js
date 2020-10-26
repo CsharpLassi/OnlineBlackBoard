@@ -32,15 +32,21 @@ var obbContentBox = {
         });
 
         obbSocket.on('room:get:content', function (msg) {
-            obbContentBox.updateContent(msg.markdown, msg.page_id);
+            obbContentBox.updateContent(msg.markdown, msg.pageId);
         });
 
         obbSocket.on('room:update:content', function (msg) {
-            obbContentBox.updateContent(msg.markdown, msg.page_id);
+            obbContentBox.updateContent(msg.markdown, msg.pageId);
         });
 
-        obbSocket.on('room:update:settings', function (msg) {
-            return
+        obbSocket.on('room:update', function (msg) {
+            let room = obbRoom.init(msg.room);
+            obbContentBox.updateLayout(room.base.drawHeight, room.base.drawWidth);
+        });
+
+        obbSocket.on('room:update:page', function (msg) {
+            let page = msg.page;
+            obbContentBox.updateLayout(page.base.drawHeight, page.base.drawWidth, page.base.id);
         });
 
         obbSocket.on('room:get:page', function (msg) {
@@ -74,18 +80,18 @@ var obbContentBox = {
 
         obbSocket.emit('room:get:content', idMessage);
     },
-    updateContent: function (markdown, pageId = obbSocket.user.currentPage) {
+    updateContent: function (markdown, pageId = null) {
         obbContentBox.config.item.filter(function () {
-                let divPageId = $(this).data("pageId")
-                return (!divPageId && pageId === obbSocket.user.currentPage) || divPageId === pageId;
+                let divPageId = $(this).data("pageid")
+                return (divPageId === 'current' && (!pageId || pageId === obbSocket.user.currentPage)) || divPageId === pageId;
             }
         ).children('.ContentText').html(marked(markdown))
     },
 
-    updateLayout: function (height, width, pageId = obbSocket.user.currentPage) {
+    updateLayout: function (height, width, pageId = null) {
         obbContentBox.config.item.filter(function () {
-                let divPageId = $(this).data("pageId")
-                return (!divPageId && pageId === obbSocket.user.currentPage) || divPageId === pageId;
+                let divPageId = $(this).data("pageid")
+                return (divPageId === 'current' && (!pageId || pageId === obbSocket.user.currentPage)) || divPageId === pageId;
             }
         ).children('.ContentText').each(function () {
             let maxWidth = $(this).parent().width();
