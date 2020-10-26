@@ -1,6 +1,6 @@
 __all__ = ['room_memory', 'MemoryBlackboardRoom', 'MemoryBlackboardRoomData',
            'user_memory', 'MemoryUser', 'MemoryUserData',
-           'MemoryLecturePage', 'MemoryLecturePageData']
+           'lecture_page_memory', 'MemoryLecturePage', 'MemoryLecturePageData']
 
 from obb.tools.MemDb import MemDb
 

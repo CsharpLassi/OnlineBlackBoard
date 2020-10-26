@@ -14,7 +14,7 @@ from ..models import LecturePage
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
-class RoomGetContentRequest:
+class RoomGetContentRequestData:
     page_id: int
 
 
@@ -27,20 +27,17 @@ class RoomGetContentResponse:
 
 
 @socket.on('room:get:content', namespace=namespace)
-@convert_from_socket(RoomGetContentRequest)
-def room_get_content(msg_list: List[RoomGetContentRequest], **kwargs):
+@convert_from_socket(RoomGetContentRequestData)
+def room_get_content(msg_list: List[RoomGetContentRequestData], **kwargs):
     result = list()
     for msg in msg_list:
         page = LecturePage.get(msg.page_id)
         if not page:
             emit_error('page not found')
             continue
+        new_page = MemoryLecturePage(page.id)
+        mem_page: MemoryLecturePage = lecture_page_memory.get(msg.page_id, new_page)
 
-        mem_page: MemoryLecturePage = lecture_page_memory.get(msg.page_id,
-                                                              MemoryLecturePage(
-                                                                  page.id))
-
-        # Todo: Continue
         result.append(RoomGetContentResponse(
             page_id=mem_page.id,
             text=mem_page.markdown,

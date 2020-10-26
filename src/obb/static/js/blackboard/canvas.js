@@ -1,49 +1,269 @@
-var obbSketchCanvas = {
-    selector: null,
-    sketchpad: null,
-    mode: 'draw',
-    thickness: 2,
-    color: '#000000',
-    recordStrokes: false,
-    onZ: 3,
-    offZ: 1,
+var obbContentSketchCanvas = {
+    canvasCount: 0,
+    init: function (settings) {
+        obbContentSketchCanvas.config = {
+            item: $('.PageContent'),
+            offZ: 1,
+            onZ: 3,
+        };
 
-    init: function (ele, settings) {
-        obbSketchCanvas.config = {
-            contentParent: $('#ContentBox'),
+        $.extend(obbContentSketchCanvas.config, settings);
+        obbContentSketchCanvas.setup();
+    },
+    setup: function () {
+        obbContentSketchCanvas.config.item.each(function () {
+            // User
+            obbContentSketchCanvas.addCanvas('user', $(this))
+
+            // Global
+            obbContentSketchCanvas.addCanvas('global', $(this))
+
+            $(this).data('mode', 'user');
+        });
+
+        obbSocket.on('room:join:self', function (msg) {
+            obbContentSketchCanvas.loadSketch();
+        });
+
+        obbSocket.on('self:update', function (msg) {
+            // Todo: ChangeList
+            obbContentSketchCanvas.loadSketch(msg.currentPage);
+        });
+
+        obbSocket.on('room:get:sketch', function (msg) {
+            msg.strokes.forEach(stroke => {
+                obbContentSketchCanvas.updateSketch(stroke, msg.pageId);
+            });
+        });
+
+        obbSocket.on('room:add:sketch', function (msg) {
+            obbContentSketchCanvas.updateSketch(msg.stroke, msg.pageId);
+        });
+    },
+
+    loadSketch: function (page_id = null) {
+        if (page_id) {
+            obbSocket.emit('room:get:sketch', [
+                {
+                    page_id: page_id,
+                }
+            ]);
         }
 
-        let item = {}
-        $.extend(item, obbSketchCanvas, settings);
+        let pageIds = [];
+        let idMessage = [];
+        obbContentSketchCanvas.config.item.each(function () {
+            let dataPage = parseInt($(this).data('pageId'));
+            if (!dataPage)
+                dataPage = obbSocket.user.currentPage;
 
-        item.setup(ele);
-        return item
+            if (!pageIds.includes(dataPage)) {
+                pageIds.push(dataPage)
+                idMessage.push({
+                    page_id: dataPage,
+                });
+            }
+        })
+
+        obbSocket.emit('room:get:sketch', idMessage);
     },
+    updateSketch: function (stroke, pageId = null) {
+        obbContentBox.config.item.filter(function () {
+                let divPageId = $(this).data("pageid")
+                return (divPageId === 'current' && (!pageId || pageId === obbSocket.user.currentPage)) || divPageId === pageId;
+            }
+        ).each(function () {
+            let mode = 'global'
+            $(this).children('.contentSketchpad').filter('.' + mode).each(function () {
+                let atrament = $(this).data('atrament')
+
+                let oldValues = {
+                    recordStrokes: atrament.recordStrokes,
+                    mode: atrament.mode,
+                    weight: atrament.weight,
+                    smoothing: atrament.smoothing,
+                    color: atrament.color,
+                    adaptiveStroke: atrament.adaptiveStroke,
+                }
+
+                atrament.recordStrokes = false;
+
+                atrament.mode = stroke.mode;
+                atrament.weight = stroke.weight;
+                atrament.smoothing = stroke.smoothing;
+                atrament.color = stroke.color;
+                atrament.adaptiveStroke = stroke.adaptiveStroke;
+
+                const points = stroke.points.slice();
+
+                let firstPoint = points.shift();
+                firstPoint.x *= atrament.width;
+                firstPoint.y *= atrament.height;
+
+                atrament.beginStroke(firstPoint.x, firstPoint.y);
+
+                let prevPoint = firstPoint;
+                while (points.length > 0) {
+                    let point = points.shift();
+                    point.x *= atrament.width;
+                    point.y *= atrament.height;
+
+
+                    const {x, y} = atrament.draw(point.x, point.y, prevPoint.x, prevPoint.y);
+
+                    prevPoint = {x, y};
+                }
+
+                atrament.endStroke(prevPoint.x, prevPoint.y);
+
+                atrament.recordStrokes = oldValues.recordStrokes;
+                atrament.mode = oldValues.mode;
+                atrament.weight = oldValues.weight;
+                atrament.smoothing = oldValues.smoothing;
+                atrament.color = oldValues.color;
+                atrament.adaptiveStroke = oldValues.adaptiveStroke;
+
+            });
+        })
+    },
+    addCanvas: function (mode, control) {
+
+        let id = 'sketchCanvas-' + obbContentSketchCanvas.canvasCount;
+        obbContentSketchCanvas.canvasCount += 1
+
+        let canvas = $('<canvas />', {
+            id: id,
+            class: 'contentSketchpad ' + mode,
+        }).css('z-index', obbContentSketchCanvas.config.offZ)
+            .attr('width', '10px').attr('height', '10px')
+            .data('mode', {mode})
+            .appendTo(control)
+
+        let atrament = new Atrament(canvas[0], {
+            color: '#000000',
+            weight: 2,
+            mode: 'draw',
+            recordStrokes: false,
+        });
+
+        canvas.data('atrament', atrament);
+
+        control.on('resize', function (event) {
+            let height = $(this).height();
+            let width = $(this).width()
+
+            atrament.height = height;
+            atrament.width = width;
+
+            canvas.attr('width', width + 'px').attr('height', height + 'px');
+
+        });
+
+        atrament.addEventListener('strokerecorded', ({stroke}) => {
+            for (let i = 0; i < stroke.points.length; i++) {
+                stroke.points[i].x /= atrament.width
+                stroke.points[i].y /= atrament.height
+            }
+
+            obbSocket.emit('room:add:sketch',
+                {
+                    roomId: obbSocket.room.base.id,
+                    pageId: obbSocket.user.currentPage,
+                    mode: mode,
+                    stroke: stroke,
+                });
+        });
+    },
+    hide: function (selector = '*') {
+        obbContentSketchCanvas.config.item.filter(selector).each(function () {
+            $(this).children('.contentSketchpad').each(function () {
+                let atrament = $(this).data('atrament')
+                atrament.recordStrokes = false;
+
+                $(this).css('z-index', obbContentSketchCanvas.config.offZ);
+            });
+        });
+    },
+    show: function (selector = '*') {
+
+        obbContentSketchCanvas.hide(selector);
+        obbContentSketchCanvas.config.item.filter(selector).each(function () {
+            let mode = $(this).data('mode')
+            $(this).children('.contentSketchpad').filter('.' + mode).each(function () {
+                let atrament = $(this).data('atrament')
+                atrament.recordStrokes = true;
+
+                $(this).css('z-index', obbContentSketchCanvas.config.onZ);
+            });
+        });
+
+    },
+
+    clear: function (selector = '*') {
+        obbContentSketchCanvas.config.item.filter(selector).each(function () {
+            let mode = $(this).data('mode')
+            $(this).children('.contentSketchpad').filter('.' + mode).each(function () {
+                let atrament = $(this).data('atrament')
+                atrament.clear()
+            });
+        });
+
+
+    },
+
+    changeMode: function (mode, selector = '*') {
+        obbContentSketchCanvas.config.item.filter(selector).each(function () {
+            $(this).data('mode', mode)
+        });
+    },
+
+    setDrawMode: function (drawMode, selector = '*') {
+        obbContentSketchCanvas.config.item.filter(selector).each(function () {
+            $(this).children('.contentSketchpad').each(function () {
+                let atrament = $(this).data('atrament')
+                atrament.mode = drawMode;
+            });
+        });
+
+
+    },
+    setColor: function (color, selector = '*') {
+        obbContentSketchCanvas.config.item.filter(selector).each(function () {
+            $(this).children('.contentSketchpad').each(function () {
+                let atrament = $(this).data('atrament')
+                atrament.color = color;
+            });
+        });
+
+
+    },
+    setWeight: function (weight, selector = '*') {
+        obbContentSketchCanvas.config.item.filter(selector).each(function () {
+            $(this).children('.contentSketchpad').each(function () {
+                let atrament = $(this).data('atrament')
+                atrament.weight = weight;
+            });
+        });
+
+
+    },
+};
+
+$(obbSocket).on('socket:ready', function () {
+    obbContentSketchCanvas.init();
+});
+
+/*
+var obbSketchCanvas = {
 
     setup: function (ele) {
         this.selector = ele.first();
         this.sketchpad = new Atrament(document.querySelector('#' + this.selector[0].id));
 
-        this.sketchpad.width = ele.width;
-        this.sketchpad.height = ele.height;
 
         this.setAllValues();
 
         this.hide();
-
-        this.config.contentParent.resize({item: this}, function (event) {
-            let item = event.data.item;
-            let sel = $(this)
-
-            let new_width = sel.width();
-            let new_height = sel.height();
-
-            item.sketchpad.width = new_width;
-            item.sketchpad.height = new_height;
-
-            item.selector.attr({'width': new_width, 'height': new_height});
-        });
-
 
         this.sketchpad.addEventListener('strokerecorded', ({stroke}) => {
             for (let i = 0; i < stroke.points.length; i++) {
@@ -55,46 +275,6 @@ var obbSketchCanvas = {
         });
     },
 
-    setAllValues: function () {
-        this.sketchpad.recordStrokes = this.recordStrokes;
-        this.sketchpad.mode = this.mode;
-        this.sketchpad.weight = this.thickness;
-        this.sketchpad.color = this.color;
-    },
-
-    changeColor: function (color = '#000000') {
-        this.sketchpad.color = this.color = color;
-    },
-
-    changeThickness: function (thickness) {
-        this.thickness = thickness;
-        this.sketchpad.weight = thickness;
-    },
-
-    changeMode: function (mode = 'draw') {
-        this.mode = mode;
-        this.sketchpad.mode = mode;
-    },
-
-    changeRecordStroke: function (record) {
-        if (!record)
-            record = !this.recordStrokes;
-
-        this.recordStrokes = record;
-        this.sketchpad.recordStrokes = this.recordStrokes;
-    },
-
-    hide: function () {
-        this.selector.css('z-index', this.offZ)
-    },
-
-    show: function () {
-        this.selector.css('z-index', this.onZ)
-    },
-
-    clear: function () {
-        this.sketchpad.clear();
-    },
 
     draw: function (stroke) {
         this.sketchpad.recordStrokes = false;
@@ -206,148 +386,7 @@ var obbSketchContent = {
         });
     },
 
-    setDraw: function () {
-        obbSketchContent.setMode('draw')
-    },
-
-    setErase: function () {
-        obbSketchContent.setMode('erase')
-    },
-
-    setMode: function (mode) {
-        obbSketchContent.sketchCanvases.forEach(e => e.changeMode(mode));
-    },
-
-    setThickness: function (thickness) {
-        obbSketchContent.sketchCanvases.forEach(e => e.changeThickness(thickness));
-    },
-
-    setColor: function (color) {
-        obbSketchContent.sketchCanvases.forEach(e => e.changeColor(color));
-    },
-
-    changeModeToGlobal: function () {
-        obbSketchContent.mode = 'global'
-    },
-
-    changeModeToUser: function () {
-        obbSketchContent.mode = 'user'
-    },
-
-    show: function () {
-        if (obbSketchContent.mode === 'global') {
-            obbSketchContent.globalSketchPad.show()
-        } else {
-            obbSketchContent.userSketchPad.show()
-        }
-
-    },
-
-    clear: function () {
-        if (obbSketchContent.mode === 'global') {
-            obbSketchContent.globalSketchPad.clear();
-            obbSocket.emit('room:clear:sketch');
-        } else {
-            obbSketchContent.userSketchPad.clear();
-        }
-    },
-
-    hide: function () {
-        obbSketchContent.sketchCanvases.forEach(e => e.hide());
-    }
 };
-
-var obbSketchToolboxButton = {
-    default: true,
-    cmd: null,
-    group: null,
-    groupOn: true,
-    groupOff: true,
-    onlyOn: false,
-    onClasses: ['enabled'],
-    offClasses: ['disabled'],
-    symbolOnClasses: [],
-    symbolOffClasses: [],
-
-
-    init: function (settings) {
-        let item = {}
-        $.extend(item, obbSketchToolboxButton, settings);
-        item.setup()
-
-        return item;
-    },
-
-    setup: function () {
-        if (!this.cmd)
-            return
-
-        this.cmd.click({item: this}, function (event) {
-            let item = event.data.item;
-            item.click()
-        });
-
-        if (this.default)
-            this.setOn(false)
-        else
-            this.setOff(false)
-    },
-
-    click: function () {
-        let enabled = this.cmd.hasClass(this.onClasses)
-
-        if (!enabled || this.onlyOn)
-            this.setOn()
-        else
-            this.setOff()
-    },
-
-    setOn: function (call = true) {
-        if (call) {
-            if (!this.checkOnClick())
-                return
-            this.onClick()
-        }
-
-        if (this.group && this.groupOff)
-            this.group.removeClass(this.onClasses).addClass(this.offClasses);
-
-        this.cmd.addClass(this.onClasses).removeClass(this.offClasses);
-
-        this.cmd.children().addClass(this.symbolOnClasses).removeClass(this.symbolOffClasses);
-    },
-    setOff: function (call = true) {
-        if (call)
-            this.offClick();
-
-        if (this.group && this.groupOn)
-            this.group.addClass(this.onClasses).removeClass(this.offClasses);
-
-        this.cmd.removeClass(this.onClasses).addClass(this.offClasses);
-
-        this.cmd.children().removeClass(this.symbolOnClasses).addClass(this.symbolOffClasses);
-    },
-
-    checkOnClick: function () {
-        return true
-    },
-
-    onClick: function () {
-    },
-    offClick: function () {
-    },
-
-    disable: function () {
-        this.setEnable(false);
-    },
-    enable: function () {
-        this.setEnable(true);
-    },
-
-    setEnable: function (val) {
-        this.cmd.prop('disabled', !val);
-    },
-}
 
 var obbSketchToolbox = {
     cmdGetLeftPage: null,
@@ -367,14 +406,7 @@ var obbSketchToolbox = {
     },
 
     setup: function () {
-        obbSketchToolbox.cmdGetLeftPage = obbSketchToolboxButton.init({
-            onClick: function () {
-                obbSocket.emit('room:get:page:left')
-            },
-            onlyOn: true,
-            cmd: $('#cmdGetLeftPage'),
-        });
-        obbSketchToolbox.cmdGetLeftPage.disable();
+
 
         obbSketchToolbox.cmdGetRightPage = obbSketchToolboxButton.init({
             onClick: function () {
@@ -393,79 +425,6 @@ var obbSketchToolbox = {
             cmd: $('#cmdCreateRightPage'),
         });
         obbSketchToolbox.cmdCreateRightPage.disable()
-
-
-        obbSketchToolbox.cmdModeDraw = obbSketchToolboxButton.init({
-            onClick: function () {
-                obbSketchContent.show();
-                obbSketchContent.setDraw();
-            },
-            offClick: obbSketchContent.hide,
-            default: false,
-            cmd: $('#cmdModeDraw'),
-            group: $('.sketchToolboxControl.modeControl'),
-            groupOn: false,
-        });
-
-        obbSketchToolbox.cmdModeErease = obbSketchToolboxButton.init({
-            onClick: function () {
-                obbSketchContent.show();
-                obbSketchContent.setErase();
-            },
-            offClick: obbSketchContent.hide,
-            default: false,
-            cmd: $('#cmdModeEraser'),
-            group: $('.sketchToolboxControl.modeControl'),
-            groupOn: false,
-        });
-
-        // Todo: obbSketchToolboxRange
-        $('#rangeThickness')
-            .attr('value', 2)
-            .on('change', function () {
-                let thickness = parseFloat(this.value);
-                obbSketchContent.setThickness(thickness);
-            });
-
-        // Todo: obbSketchToolBoxColorPicker
-        $('#cmdChangeColor').colorPick({
-            'initialColor': '#000000',
-            'pos': 'top',
-            'onColorSelected': function () {
-                this.element.css({'backgroundColor': this.color, 'color': this.color});
-                obbSketchContent.setColor(this.color);
-            }
-        });
-
-        obbSketchToolbox.cmdcmdClear = obbSketchToolboxButton.init({
-            onClick: function () {
-                obbSketchContent.clear()
-            },
-            onlyOn: true,
-            default: true,
-            cmd: $('#cmdClear'),
-        });
-
-        obbSketchToolbox.cmdChangeMode = obbSketchToolboxButton.init({
-            onClick: function () {
-                obbSketchContent.changeModeToGlobal();
-
-                obbSketchToolbox.cmdModeDraw.setOff();
-                obbSketchToolbox.cmdModeErease.setOff();
-                $('.sketchToolboxControl.userModeControl').addClass('globalMode');
-            },
-            offClick: function () {
-                obbSketchContent.changeModeToUser()
-
-                obbSketchToolbox.cmdModeDraw.setOff();
-                obbSketchToolbox.cmdModeErease.setOff();
-                $('.sketchToolboxControl.userModeControl').removeClass('globalMode');
-            },
-            default: false,
-            cmd: $('#cmdChangeMode'),
-            groupOn: false,
-        });
-
 
         // socket
         obbSocket.on('room:get:page', function (msg) {
@@ -509,3 +468,4 @@ $(obbSocket).on('socket:ready', function () {
     obbSketchContent.init();
     obbSketchToolbox.init();
 });
+*/

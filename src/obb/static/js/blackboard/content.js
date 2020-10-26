@@ -106,7 +106,9 @@ var obbContentBox = {
                     'translateX(' + translateX + 'px) ' +
                     'translateY(' + translateY + 'px) ' +
                     'scale(' + factorMin + ') ');
-            $(this).parent().height(height * factorMin)
+
+            $(this).parent().height(height * factorMin);
+            $(this).parent().trigger('resize');
         });
     },
 }

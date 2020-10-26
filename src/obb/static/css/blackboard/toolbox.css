@@ -7,8 +7,6 @@
 
 .sketchToolboxControl.userModeControl {
     border: 2px solid transparent;
-    margin: 0.1em;
-    padding: 0.2em;
 }
 
 .sketchToolboxControl.userModeControl.globalMode {

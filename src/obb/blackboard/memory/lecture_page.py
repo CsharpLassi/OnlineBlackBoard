@@ -23,6 +23,7 @@ class MemoryLecturePage:
         self.strokes = list()
 
         self.read_markdown()
+        self.read_strokes()
 
     def get_data(self) -> MemoryLecturePageData:
         return MemoryLecturePageData(
