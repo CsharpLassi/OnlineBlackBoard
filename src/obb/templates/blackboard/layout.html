@@ -3,12 +3,7 @@
 {% block meta %}
     {% if token %}
         <meta content="{{ token.encode() }}" name="session-token"/>
-    {% elif bb_session %}
-        <meta content="{{ bb_session.to_token_string() }}" name="session-token"/>
     {% endif %}
-
-
-
 {% endblock %}
 
 {% block css %}
