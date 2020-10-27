@@ -143,7 +143,6 @@ var obbToolBox = {
                     obbSocket.emit('room:create:page', {
                         roomId: obbSocket.room.base.id,
                         parent_page_id: cmdCreateRightPage.value,
-                        direction: 'right',
                         moveTo: true,
                     })
                 },
@@ -290,12 +289,16 @@ var obbToolBox = {
             obbSocket.on('room:get:page', function (msg) {
                 let page = msg.page;
 
-                cmdMoveToLeftPage.value = page.base.leftPageId;
-                cmdMoveToRightPage.value = page.base.rightPageId;
+                cmdMoveToLeftPage.value = page.base.prevPageId;
+                if (page.base.nextPages)
+                    cmdMoveToRightPage.value = page.base.nextPages[0];
+                else
+                    cmdMoveToRightPage.value = null;
+
                 cmdClearPage.value = page.base.id;
 
-                cmdMoveToLeftPage.setEnable(page.base.leftPageId != null);
-                cmdMoveToRightPage.setEnable(page.base.rightPageId != null);
+                cmdMoveToLeftPage.setEnable(cmdMoveToLeftPage.value != null);
+                cmdMoveToRightPage.setEnable(cmdMoveToRightPage.value != null);
             });
 
         });

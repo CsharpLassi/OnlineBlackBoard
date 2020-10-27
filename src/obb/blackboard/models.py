@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import datetime
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from operator import or_
-from typing import Optional, Iterator
+from typing import Optional, Iterator, List
 
 from dataclasses_json import dataclass_json, LetterCase
 from flask_login import current_user
@@ -214,10 +214,8 @@ class LecturePageData:
     draw_width: int
     lecture_id: int
 
-    left_page_id: int
-    right_page_id: int
-    top_page_id: int
-    bottom_page_id: int
+    prev_page_id: int = None
+    next_pages: List[int] = field(default_factory=list)
 
 
 class LecturePage(db.Model):
@@ -228,30 +226,15 @@ class LecturePage(db.Model):
     draw_width = db.Column(db.Integer, default=default_draw_width)
 
     lecture_id = db.Column(db.Integer, db.ForeignKey("lecture.id"), nullable=False)
-    lecture = db.relationship("Lecture", uselist=False, foreign_keys=[lecture_id])
+    lecture = db.relationship("Lecture")
 
     creator_id = db.Column(db.Integer, db.ForeignKey("user.id"))
-    creator = db.relationship("User", uselist=False, foreign_keys=[creator_id])
+    creator = db.relationship("User")
 
-    left_page_id = db.Column(db.Integer, db.ForeignKey("lecture_page.id"))
-    left_page = db.relationship(
-        "LecturePage", uselist=False, post_update=True, foreign_keys=left_page_id
-    )
+    prev_page_id = db.Column(db.Integer, db.ForeignKey("lecture_page.id"))
+    prev_page = db.relationship("LecturePage", remote_side=[id])
 
-    right_page_id = db.Column(db.Integer, db.ForeignKey("lecture_page.id"))
-    right_page = db.relationship(
-        "LecturePage", uselist=False, post_update=True, foreign_keys=right_page_id
-    )
-
-    top_page_id = db.Column(db.Integer, db.ForeignKey("lecture_page.id"))
-    top_page = db.relationship(
-        "LecturePage", uselist=False, post_update=True, foreign_keys=top_page_id
-    )
-
-    bottom_page_id = db.Column(db.Integer, db.ForeignKey("lecture_page.id"))
-    bottom_page = db.relationship(
-        "LecturePage", uselist=False, post_update=True, foreign_keys=bottom_page_id
-    )
+    next_pages = db.relationship("LecturePage", foreign_keys=[prev_page_id])
 
     def get_data(self) -> LecturePageData:
         return LecturePageData(
@@ -259,10 +242,8 @@ class LecturePage(db.Model):
             draw_height=self.draw_height,
             draw_width=self.draw_width,
             lecture_id=self.lecture_id,
-            left_page_id=self.left_page_id,
-            right_page_id=self.right_page_id,
-            top_page_id=self.top_page_id,
-            bottom_page_id=self.bottom_page_id,
+            prev_page_id=self.prev_page_id,
+            next_pages=[page.id for page in self.next_pages],
         )
 
     @staticmethod
