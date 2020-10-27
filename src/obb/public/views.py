@@ -3,56 +3,58 @@ from flask_login import current_user, login_user, logout_user
 
 from ..ext import db
 
-bp = Blueprint("usable", __name__)
+bp = Blueprint("public", __name__)
 
 
-@bp.route("/", methods=['GET', 'POST'])
+@bp.route("/", methods=["GET", "POST"])
 def home():
-    return render_template('public/home.html')
+    return render_template("public/home.html")
 
 
-@bp.route("/login", methods=['GET', 'POST'])
+@bp.route("/login", methods=["GET", "POST"])
 def login():
     from ..users.forms import LoginForm
     from ..users.models import User
 
     if current_user.is_authenticated:
-        return redirect(url_for('usable.home'))
+        return redirect(url_for("usable.home"))
 
     login_form = LoginForm()
 
     if login_form.validate_on_submit():
         user = User.query.filter_by(username=login_form.username.data).first()
         if user is None or not user.check_password(login_form.password.data):
-            flash('Invalid username or password')
-            return redirect(url_for('usable.login'))
+            flash("Invalid username or password")
+            return redirect(url_for("usable.login"))
         login_user(user, remember=login_form.remember_me.data)
-        return redirect(url_for('usable.login'))
+        return redirect(url_for("usable.login"))
 
-    return render_template('public/login.html', login_form=login_form)
+    return render_template("public/login.html", login_form=login_form)
 
 
-@bp.route('/logout')
+@bp.route("/logout")
 def logout():
     logout_user()
-    return redirect(url_for('usable.home'))
+    return redirect(url_for("usable.home"))
 
 
-@bp.route('/register', methods=['GET', 'POST'])
+@bp.route("/register", methods=["GET", "POST"])
 def register():
     from ..users.forms import RegistrationForm
     from ..users.models import User
 
     if current_user.is_authenticated:
-        return redirect(url_for('public_home'))
+        return redirect(url_for("public_home"))
     register_form = RegistrationForm()
     if register_form.validate_on_submit():
-        user = User(username=register_form.username.data,
-                    email=register_form.email.data)
+        user = User(
+            username=register_form.username.data, email=register_form.email.data
+        )
         user.set_password(register_form.password.data)
         db.session.add(user)
         db.session.commit()
-        flash('Congratulations, you are now a registered user!')
-        return redirect(url_for('usable.login'))
-    return render_template('public/register.html', title='Register',
-                           register_form=register_form)
+        flash("Congratulations, you are now a registered user!")
+        return redirect(url_for("usable.login"))
+    return render_template(
+        "public/register.html", title="Register", register_form=register_form
+    )

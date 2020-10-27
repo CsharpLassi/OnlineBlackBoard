@@ -33,6 +33,7 @@ def room_list():
 
     rooms = BlackboardRoom.get_rooms()
 
+    # Todo: Query ?
     lecture_sessions = [
         l_session
         for l_session in LectureSession.get_lectures(current_user.id)
