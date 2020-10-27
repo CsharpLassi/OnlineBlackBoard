@@ -6,6 +6,7 @@ from flask_login import login_required, current_user
 from . import bp
 from ..forms.lecture import ShortCreateLectureForm
 from ..forms.room import ShortCreateRoomForm, CreateRoomForm
+from ..forms.session import CreateSessionForm
 from ..models import BlackboardRoom, LectureSession, Lecture
 from ...ext import db
 
@@ -15,6 +16,7 @@ from ...ext import db
 def room_list():
     create_room_form = ShortCreateRoomForm()
     create_lecture_form = ShortCreateLectureForm()
+    create_session_form = CreateSessionForm()
 
     rooms = BlackboardRoom.get_rooms()
     lectures = Lecture.get_lectures()
@@ -30,6 +32,7 @@ def room_list():
         "blackboard/rooms.html",
         create_room_form=create_room_form,
         create_lecture_form=create_lecture_form,
+        create_session_form=create_session_form,
         rooms=rooms,
         lectures=lectures,
         lecture_sessions=lecture_sessions,

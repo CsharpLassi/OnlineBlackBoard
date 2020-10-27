@@ -5,13 +5,12 @@
     <div class="col mt-3">
         <div class="card">
             <div class="card-header">Rooms</div>
-            <div class="card-bod">
+            <div class="card-body">
                 <table class="table">
                     <thead>
                     <tr>
                         <th scope="col">#</th>
                         <th scope="col">Name</th>
-                        <th scope="col">User</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -19,10 +18,10 @@
                         <tr>
                             <th scope="row">{{ loop.index }}</th>
                             <td>
-                                <a href="#" onclick="$('#room_name').val('{{ room.name }}')">{{ room.name }}</a>
-                            </td>
-                            <td>
-                                <a>{{ room.creator.username }}</a>
+                                <button class="btn btn-link p-0"
+                                        onclick="$('#room_name').val('{{ room.name }}')">
+                                    {{ room.name }}
+                                </button>
                             </td>
                         </tr>
                     {% endfor %}
@@ -42,7 +41,7 @@
     <div class="col mt-3">
         <div class="card">
             <div class="card-header">Lectures</div>
-            <div class="card-bod">
+            <div class="card-body">
                 <table class="table">
                     <thead>
                     <tr>
@@ -55,7 +54,10 @@
                         <tr>
                             <th scope="row">{{ loop.index }}</th>
                             <td>
-                                <a href="#" onclick="$('#lecture_name').val('{{ lecture.name }}')">{{ lecture.name }}</a>
+                                <button
+                                        class="btn btn-link p-0"
+                                        onclick="$('#lecture_name').val('{{ lecture.name }}')">{{ lecture.name }}
+                                </button>
                             </td>
                         </tr>
                     {% endfor %}

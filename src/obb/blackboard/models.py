@@ -124,7 +124,7 @@ class BlackboardRoom(db.Model, BlackboardRoomWrapper):
         return query.first()
 
     @staticmethod
-    def get_rooms(user=None, usable=False) -> Iterator[BlackboardRoom]:
+    def get_rooms(user=None) -> Iterator[BlackboardRoom]:
         from flask_login import current_user
         from ..users.models import User
 
@@ -139,15 +139,7 @@ class BlackboardRoom(db.Model, BlackboardRoomWrapper):
         f_query = BlackboardRoom.query
         f_query = f_query.filter_by(is_invisible=False)
 
-        if not usable:
-            f_query = f_query.filter(BlackboardRoom.creator_id == user_id)
-        else:
-            f_query = f_query.filter(
-                or_(
-                    BlackboardRoom.creator_id == user_id,
-                    BlackboardRoom.visibility == "public",
-                )
-            )
+        f_query = f_query.filter(BlackboardRoom.creator_id == user_id)
 
         return f_query.all()
 

@@ -25,7 +25,10 @@
                             <tr>
                                 <th scope="row">{{ loop.index }}</th>
                                 <td>
-                                    <a href="#" onclick="$('#room_name').val('{{ room.name }}')">{{ room.name }}</a>
+                                    <button class="btn btn-link p-0"
+                                            onclick="$('#CreateLecture #room_name').val('{{ room.name }}')">
+                                        {{ room.name }}
+                                    </button>
                                 </td>
                             </tr>
                         {% endfor %}
@@ -36,10 +39,9 @@
         </div>
         <div class="col mt-3">
             <div class="card">
-                <div class="card-header">Rooms</div>
+                <div class="card-header">Create Session</div>
                 <div class="card-body">
-
-
+                    {{ show_form(create_session_form,id='CreateLecture',action=url_for('blackboard.session_create')) }}
                 </div>
             </div>
         </div>
@@ -64,8 +66,10 @@
                             <tr>
                                 <th scope="row">{{ loop.index }}</th>
                                 <td>
-                                    <a href="#"
-                                       onclick="$('#lecture_name').val('{{ lecture.name }}')">{{ lecture.name }}</a>
+                                    <button class="btn btn-link p-0"
+                                            onclick="$('#CreateLecture #lecture_name').val('{{ lecture.name }}')">
+                                        {{ lecture.name }}
+                                    </button>
                                 </td>
                             </tr>
                         {% endfor %}
