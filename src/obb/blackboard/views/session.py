@@ -56,7 +56,6 @@ def session_create():
         elif form.new_lecture.data:
             lecture = Lecture()
             lecture.name = form.lecture_name.data
-            lecture.full_name = f"{current_user.username}.{lecture.name}"
             lecture.creator = current_user
 
             start_page = LecturePage.create(lecture)

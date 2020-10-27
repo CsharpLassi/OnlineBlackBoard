@@ -44,7 +44,7 @@ class BlackboardRoom(db.Model, BlackboardRoomWrapper):
     creator_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     creator = db.relationship("User")
 
-    creator_room_name = db.UniqueConstraint(creator_id, name)
+    constraint_creator_name = db.UniqueConstraint(creator_id, name)
 
     draw_height = db.Column(
         db.Integer,
@@ -155,13 +155,14 @@ class BlackboardRoom(db.Model, BlackboardRoomWrapper):
 class Lecture(db.Model, LectureWrapper):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
-    full_name = db.Column(db.String, nullable=False, index=True, unique=True)
-
-    edit_room_id = db.Column(db.Integer, db.ForeignKey("blackboard_room.id"))
-    edit_room = db.relationship("BlackboardRoom", foreign_keys=[edit_room_id])
 
     creator_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     creator = db.relationship("User")
+
+    constraint_creator_name = db.UniqueConstraint(creator_id, name)
+
+    edit_room_id = db.Column(db.Integer, db.ForeignKey("blackboard_room.id"))
+    edit_room = db.relationship("BlackboardRoom", foreign_keys=[edit_room_id])
 
     pages = db.relationship("LecturePage", lazy=True)
 
