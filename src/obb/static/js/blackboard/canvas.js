@@ -42,7 +42,8 @@ var obbContentSketchCanvas = {
         });
 
         obbSocket.on('room:add:sketch', function (msg) {
-            obbContentSketchCanvas.updateSketch(msg.stroke, msg.pageId);
+            if (msg.creatorId !== obbSocket.user.sessionId)
+                obbContentSketchCanvas.updateSketch(msg.stroke, msg.pageId);
         });
     },
 

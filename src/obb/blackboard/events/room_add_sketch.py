@@ -78,6 +78,7 @@ def room_update_sketch(msg: RoomAddSketchRequestData, session: MemoryUser, **kwa
             stroke=msg.stroke,
         ),
         room=room.id,
+        include_self=False,
     )
 
     page.save_strokes()
