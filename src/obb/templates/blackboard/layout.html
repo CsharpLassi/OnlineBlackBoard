@@ -19,8 +19,14 @@
 {% endblock %}
 
 {% block navbar_right %}
+    {% if l_session %}
+        <li class="nav-item">
+            <span class="nav-link status-session-name active">{{ l_session.name }}</span>
+        </li>
+    {% endif %}
+
     <li class="nav-item">
-        <span class="nav-link" id="status">Not Connected</span>
+        <span class="nav-link status-connection" id="status">Not Connected</span>
     </li>
 {% endblock %}
 

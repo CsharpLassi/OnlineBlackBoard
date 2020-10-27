@@ -7,8 +7,15 @@ from flask_socketio import join_room
 from obb.api import convert_from_socket, emit_error, emit_success
 from obb.ext import socket
 from ..ext import namespace
-from ..memory import room_memory, MemoryBlackboardRoom, MemoryBlackboardRoomData, \
-    user_memory, MemoryUser, MemoryUserData
+from ..functions import get_current_lecture_session
+from ..memory import (
+    room_memory,
+    MemoryBlackboardRoom,
+    MemoryBlackboardRoomData,
+    user_memory,
+    MemoryUser,
+    MemoryUserData,
+)
 from ..models import BlackboardRoom
 from ...users.models import User
 
@@ -34,18 +41,18 @@ class RoomJoinUserResponseData:
     user: MemoryUserData
 
 
-@socket.on('room:join', namespace=namespace)
+@socket.on("room:join", namespace=namespace)
 @convert_from_socket(RoomJoinRequestData)
 def join(msg: RoomJoinRequestData, user: User = None, sid: str = None, **kwargs):
     assert sid
 
     room = BlackboardRoom.get(msg.room_id)
     if not room:
-        return emit_error('you cannot join this room')
+        return emit_error("you cannot join this room")
 
-    l_session = room.get_current_lecture_session()
+    l_session = get_current_lecture_session(room)
     if not l_session:
-        return emit_error('room is closed')
+        return emit_error("room is closed")
 
     lecture = l_session.lecture
 
@@ -59,13 +66,15 @@ def join(msg: RoomJoinRequestData, user: User = None, sid: str = None, **kwargs)
 
     memory_room.users.add(memory_user.session_id)
 
-    emit_success('room:join:self', RoomJoinSelfResponseData(
-        sid=sid,
-        room=memory_room.get_data(),
-        user=memory_user.get_data(),
-    ))
+    emit_success(
+        "room:join:self",
+        RoomJoinSelfResponseData(
+            sid=sid, room=memory_room.get_data(), user=memory_user.get_data()
+        ),
+    )
 
-    emit_success('room:join:user', RoomJoinUserResponseData(
-        room_id=room.id,
-        user=memory_user.get_data(),
-    ), room=room.id)
+    emit_success(
+        "room:join:user",
+        RoomJoinUserResponseData(room_id=room.id, user=memory_user.get_data()),
+        room=room.id,
+    )

@@ -6,8 +6,14 @@ from dataclasses_json import dataclass_json, LetterCase
 from obb.ext import socket, db
 from .global_message import NewLecturePageEvent
 from ..ext import namespace
-from ..memory import MemoryUser, MemoryBlackboardRoom, room_memory, MemoryLecturePage, \
-    lecture_page_memory
+from ..functions import get_current_lecture_session
+from ..memory import (
+    MemoryUser,
+    MemoryBlackboardRoom,
+    room_memory,
+    MemoryLecturePage,
+    lecture_page_memory,
+)
 from ..models import LecturePage
 from ...api import convert_from_socket, emit_error, emit_success
 
@@ -29,13 +35,13 @@ class RoomClearSketchResponseData:
     creator_id: int
 
 
-@socket.on('room:clear:sketch', namespace=namespace)
+@socket.on("room:clear:sketch", namespace=namespace)
 @convert_from_socket(RoomClearSketchRequestData)
 def room_clear_sketch(msg: RoomClearSketchRequestData, session: MemoryUser, **kwargs):
     assert session
 
     # Todo: Add User Function
-    if msg.mode != 'global':
+    if msg.mode != "global":
         return
 
     if not session.allow_draw:
@@ -43,12 +49,12 @@ def room_clear_sketch(msg: RoomClearSketchRequestData, session: MemoryUser, **kw
 
     room: Optional[MemoryBlackboardRoom] = room_memory.get(msg.room_id)
     if not room:
-        emit_error('room not found')
+        emit_error("room not found")
         return
 
-    l_session = room.model.get_current_lecture_session()
+    l_session = get_current_lecture_session(room.model)
     if not l_session:
-        emit_error('room is closed')
+        emit_error("room is closed")
         return
     lecture = l_session.lecture
 
@@ -66,20 +72,19 @@ def room_clear_sketch(msg: RoomClearSketchRequestData, session: MemoryUser, **kw
         db.session.commit()
 
         new_mem_page = MemoryLecturePage(new_page.id)
-        emit_success('room:new:page', NewLecturePageEvent(
-            page=new_mem_page.get_data()
-        ))
+        emit_success("room:new:page", NewLecturePageEvent(page=new_mem_page.get_data()))
 
         page_id = new_page.id
 
     page = lecture_page_memory.get(page_id, MemoryLecturePage(page_id))
     page.strokes.clear()
 
-    emit_success('room:clear:sketch', RoomClearSketchResponseData(
-        room_id=room.id,
-        page_id=page.id,
-        creator_id=session.session_id,
-
-    ), room=room.id)
+    emit_success(
+        "room:clear:sketch",
+        RoomClearSketchResponseData(
+            room_id=room.id, page_id=page.id, creator_id=session.session_id
+        ),
+        room=room.id,
+    )
 
     page.save_strokes()

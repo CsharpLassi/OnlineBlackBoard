@@ -7,8 +7,14 @@ from obb.ext import socket, db
 from .global_message import NewLecturePageEvent
 from ..datas import StrokeData
 from ..ext import namespace
-from ..memory import MemoryUser, MemoryBlackboardRoom, room_memory, MemoryLecturePage, \
-    lecture_page_memory
+from ..functions import get_current_lecture_session
+from ..memory import (
+    MemoryUser,
+    MemoryBlackboardRoom,
+    room_memory,
+    MemoryLecturePage,
+    lecture_page_memory,
+)
 from ..models import LecturePage
 from ...api import convert_from_socket, emit_error, emit_success
 
@@ -32,13 +38,13 @@ class RoomAddSketchResponseData:
     stroke: StrokeData
 
 
-@socket.on('room:add:sketch', namespace=namespace)
+@socket.on("room:add:sketch", namespace=namespace)
 @convert_from_socket(RoomAddSketchRequestData)
 def room_update_sketch(msg: RoomAddSketchRequestData, session: MemoryUser, **kwargs):
     assert session
 
     # Todo: Add User Function
-    if msg.mode != 'global':
+    if msg.mode != "global":
         return
 
     if not session.allow_draw:
@@ -46,12 +52,12 @@ def room_update_sketch(msg: RoomAddSketchRequestData, session: MemoryUser, **kwa
 
     room: Optional[MemoryBlackboardRoom] = room_memory.get(msg.room_id)
     if not room:
-        emit_error('room not found')
+        emit_error("room not found")
         return
 
-    l_session = room.model.get_current_lecture_session()
+    l_session = get_current_lecture_session(room.model)
     if not l_session:
-        emit_error('room is closed')
+        emit_error("room is closed")
         return
     lecture = l_session.lecture
 
@@ -69,21 +75,22 @@ def room_update_sketch(msg: RoomAddSketchRequestData, session: MemoryUser, **kwa
         db.session.commit()
 
         new_mem_page = MemoryLecturePage(new_page.id)
-        emit_success('room:new:page', NewLecturePageEvent(
-            page=new_mem_page.get_data()
-        ))
+        emit_success("room:new:page", NewLecturePageEvent(page=new_mem_page.get_data()))
 
         page_id = new_page.id
 
     page = lecture_page_memory.get(page_id, MemoryLecturePage(page_id))
     page.strokes.append(msg.stroke)
 
-    emit_success('room:add:sketch', RoomAddSketchResponseData(
-        room_id=room.id,
-        page_id=page.id,
-        creator_id=session.session_id,
-        stroke=msg.stroke,
-
-    ), room=room.id)
+    emit_success(
+        "room:add:sketch",
+        RoomAddSketchResponseData(
+            room_id=room.id,
+            page_id=page.id,
+            creator_id=session.session_id,
+            stroke=msg.stroke,
+        ),
+        room=room.id,
+    )
 
     page.save_strokes()

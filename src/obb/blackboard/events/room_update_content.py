@@ -7,8 +7,14 @@ from flask import escape
 from obb.ext import socket, db
 from .global_message import NewLecturePageEvent
 from ..ext import namespace
-from ..memory import room_memory, MemoryBlackboardRoom, \
-    lecture_page_memory, MemoryLecturePage, MemoryUser
+from ..functions import get_current_lecture_session
+from ..memory import (
+    room_memory,
+    MemoryBlackboardRoom,
+    lecture_page_memory,
+    MemoryLecturePage,
+    MemoryUser,
+)
 from ..models import LecturePage
 from ...api import convert_from_socket, emit_error, emit_success
 
@@ -32,19 +38,19 @@ class RoomUpdateContentResponse:
     markdown: str
 
 
-@socket.on('room:update:content', namespace=namespace)
+@socket.on("room:update:content", namespace=namespace)
 @convert_from_socket(RoomUpdateContentRequest)
 def room_update_content(msg: RoomUpdateContentRequest, session: MemoryUser, **kwargs):
     assert session
 
     room: Optional[MemoryBlackboardRoom] = room_memory.get(msg.room_id)
     if not room:
-        emit_error('room not found')
+        emit_error("room not found")
         return
 
-    l_session = room.model.get_current_lecture_session()
+    l_session = get_current_lecture_session(room.model)
     if not l_session:
-        emit_error('room is closed')
+        emit_error("room is closed")
         return
     lecture = l_session.lecture
 
@@ -62,22 +68,24 @@ def room_update_content(msg: RoomUpdateContentRequest, session: MemoryUser, **kw
         db.session.commit()
 
         new_mem_page = MemoryLecturePage(new_page.id)
-        emit_success('room:new:page', NewLecturePageEvent(
-            page=new_mem_page.get_data()
-        ))
+        emit_success("room:new:page", NewLecturePageEvent(page=new_mem_page.get_data()))
 
         page_id = new_page.id
 
     page = lecture_page_memory.get(page_id, MemoryLecturePage(page_id))
     page.markdown = msg.text
 
-    emit_success('room:update:content', RoomUpdateContentResponse(
-        room_id=room.id,
-        page_id=page.id,
-        creator_id=session.session_id,
-        text=page.markdown,
-        markdown=escape(page.markdown)
-    ), room=room.id)
+    emit_success(
+        "room:update:content",
+        RoomUpdateContentResponse(
+            room_id=room.id,
+            page_id=page.id,
+            creator_id=session.session_id,
+            text=page.markdown,
+            markdown=escape(page.markdown),
+        ),
+        room=room.id,
+    )
 
     # Save
     page.save_markdown()
