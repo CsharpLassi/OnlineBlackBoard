@@ -3,7 +3,6 @@ from flask_login import current_user, login_required
 
 from . import bp
 from ..forms import RoomSettings
-from ..functions import get_current_lecture_session
 from ..models import BlackboardRoom
 from ..memory import user_memory, MemoryUser
 from ...api import ApiToken
@@ -20,7 +19,7 @@ def link_blackboard():
         flash("room does not exist")
         return redirect("blackboard.home")
 
-    l_session = get_current_lecture_session(room)
+    l_session = room.get_current_lecture_session()
     if not l_session:
         flash("room is closed")
         return redirect("blackboard.home")
@@ -42,7 +41,7 @@ def link_user():
         flash("Room does not exist")
         return redirect(url_for("blackboard.room_list"))
 
-    l_session = get_current_lecture_session(room)
+    l_session = room.get_current_lecture_session()
     if not l_session:
         flash("room is closed")
         return redirect("blackboard.home")

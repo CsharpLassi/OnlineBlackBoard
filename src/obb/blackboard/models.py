@@ -1,14 +1,15 @@
 from __future__ import annotations
 
+import datetime
 from dataclasses import dataclass
 from operator import or_
 from typing import Optional, Iterator
 
-import datetime
-
 from dataclasses_json import dataclass_json, LetterCase
 from flask_login import current_user
 from sqlalchemy.sql import func
+
+from .wrapper import BlackboardRoomWrapper
 
 from ..ext import db
 
@@ -37,7 +38,7 @@ class BlackBoardRoomData:
     draw_width: int
 
 
-class BlackboardRoom(db.Model):
+class BlackboardRoom(db.Model, BlackboardRoomWrapper):
     id = db.Column(db.String, primary_key=True, default=create_default_id)
     name = db.Column(db.String, nullable=False, index=True)
 
@@ -166,12 +167,16 @@ class Lecture(db.Model):
     creator_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     creator = db.relationship("User")
 
-    start_page_id = db.Column(db.Integer, db.ForeignKey("lecture_page.id"))
+    start_page_id = db.Column(
+        db.Integer, db.ForeignKey("lecture_page.id"), nullable=False
+    )
     start_page = db.relationship(
         "LecturePage", post_update=True, foreign_keys=[start_page_id]
     )
 
-    current_page_id = db.Column(db.Integer, db.ForeignKey("lecture_page.id"))
+    current_page_id = db.Column(
+        db.Integer, db.ForeignKey("lecture_page.id"), nullable=False
+    )
     current_page = db.relationship(
         "LecturePage", post_update=True, foreign_keys=[current_page_id]
     )

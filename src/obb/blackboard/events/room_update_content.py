@@ -7,7 +7,6 @@ from flask import escape
 from obb.ext import socket, db
 from .global_message import NewLecturePageEvent
 from ..ext import namespace
-from ..functions import get_current_lecture_session
 from ..memory import (
     room_memory,
     MemoryBlackboardRoom,
@@ -48,7 +47,7 @@ def room_update_content(msg: RoomUpdateContentRequest, session: MemoryUser, **kw
         emit_error("room not found")
         return
 
-    l_session = get_current_lecture_session(room.model)
+    l_session = room.model.get_current_lecture_session()
     if not l_session:
         emit_error("room is closed")
         return

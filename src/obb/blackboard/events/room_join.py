@@ -7,7 +7,6 @@ from flask_socketio import join_room
 from obb.api import convert_from_socket, emit_error, emit_success
 from obb.ext import socket
 from ..ext import namespace
-from ..functions import get_current_lecture_session
 from ..memory import (
     room_memory,
     MemoryBlackboardRoom,
@@ -50,7 +49,7 @@ def join(msg: RoomJoinRequestData, user: User = None, sid: str = None, **kwargs)
     if not room:
         return emit_error("you cannot join this room")
 
-    l_session = get_current_lecture_session(room)
+    l_session = room.get_current_lecture_session()
     if not l_session:
         return emit_error("room is closed")
 
