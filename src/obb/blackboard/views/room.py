@@ -4,17 +4,20 @@ from flask import flash, redirect, url_for, render_template, request
 from flask_login import login_required, current_user
 
 from . import bp
+from ..forms.lecture import ShortCreateLectureForm
 from ..forms.room import ShortCreateRoomForm, CreateRoomForm
-from ..models import BlackboardRoom, LectureSession
+from ..models import BlackboardRoom, LectureSession, Lecture
 from ...ext import db
 
 
 @bp.route("/room", methods=["GET", "POST"])
 @login_required
 def room_list():
-    create_form = ShortCreateRoomForm()
+    create_room_form = ShortCreateRoomForm()
+    create_lecture_form = ShortCreateLectureForm()
 
     rooms = BlackboardRoom.get_rooms()
+    lectures = Lecture.get_lectures()
 
     # Todo: Query ?
     lecture_sessions = [
@@ -25,8 +28,10 @@ def room_list():
 
     return render_template(
         "blackboard/rooms.html",
-        create_form=create_form,
+        create_room_form=create_room_form,
+        create_lecture_form=create_lecture_form,
         rooms=rooms,
+        lectures=lectures,
         lecture_sessions=lecture_sessions,
     )
 

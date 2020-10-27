@@ -2,10 +2,40 @@ from flask import flash, redirect, url_for, render_template
 from flask_login import login_required, current_user
 
 from . import bp
+from ..forms.lecture import CreateLectureForm
 from ..memory import user_memory, MemoryUser
 from ..models import Lecture, BlackboardRoom
 from ...api import ApiToken
 from ...ext import db
+
+
+@bp.route("/lecture/create", methods=["GET", "POSt"])
+@login_required
+def lecture_create():
+    def render(create_form):
+        return render_template(
+            "blackboard/lecture/create.html", create_form=create_form
+        )
+
+    create_form = CreateLectureForm()
+
+    if create_form.validate_on_submit():
+        lecture_name = create_form.lecture_name.data
+
+        lecture = Lecture.get_by_name(lecture_name)
+        if lecture:
+            flash("Lecture already exist")
+            return render(create_form)
+
+        lecture = Lecture()
+        lecture.name = lecture_name
+        lecture.creator = current_user
+        db.session.add(lecture)
+        db.session.commit()
+
+        return redirect(url_for("blackboard.room_list"))
+
+    return render(create_form)
 
 
 @bp.route("/lecture/<lecture_id>", methods=["GET", "POSt"])

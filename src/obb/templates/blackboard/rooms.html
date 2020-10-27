@@ -9,35 +9,30 @@
                     Create
                 </div>
                 <div class="card-body">
-                    {{ show_form(create_form,id='CreateRoom',action=url_for('blackboard.room_create')) }}
-                </div>
+                    {{ show_form(create_room_form,id='CreateRoom',action=url_for('blackboard.room_create')) }}
 
-                <hr/>
+                    <hr/>
 
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Name</th>
-                        <th scope="col">User</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for room in rooms %}
+                    <table class="table">
+                        <thead>
                         <tr>
-                            <th scope="row">{{ loop.index }}</th>
-                            <td>
-                                <a href="#" onclick="$('#room_name').val('{{ room.name }}')">{{ room.name }}</a>
-                            </td>
-                            <td>
-                                <a>{{ room.creator.username }}</a>
-                            </td>
+                            <th scope="col">#</th>
+                            <th scope="col">Name</th>
                         </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                        {% for room in rooms %}
+                            <tr>
+                                <th scope="row">{{ loop.index }}</th>
+                                <td>
+                                    <a href="#" onclick="$('#room_name').val('{{ room.name }}')">{{ room.name }}</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
-
         </div>
         <div class="col mt-3">
             <div class="card">
@@ -52,17 +47,34 @@
             <div class="card">
                 <div class="card-header">Lectures</div>
                 <div class="card-body">
-                    <ul class="nav flex-column">
-                        {% for lecture in current_user.lectures %}
-                            <li class="nav-item">
-                                <a class="nav-link"
-                                   href="{{ url_for('blackboard.lecture_show',lecture_id= lecture.id) }}">{{ lecture.name }}</a>
-                            </li>
+
+                    {{ show_form(create_lecture_form,id='CreateLecture',action=url_for('blackboard.lecture_create')) }}
+
+                    <hr/>
+
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Name</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for lecture in lectures %}
+                            <tr>
+                                <th scope="row">{{ loop.index }}</th>
+                                <td>
+                                    <a href="#"
+                                       onclick="$('#lecture_name').val('{{ lecture.name }}')">{{ lecture.name }}</a>
+                                </td>
+                            </tr>
                         {% endfor %}
-                    </ul>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
+    </div>
     </div>
     <div class="row">
         <div class="col mt-3">
