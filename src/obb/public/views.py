@@ -17,17 +17,17 @@ def login():
     from ..users.models import User
 
     if current_user.is_authenticated:
-        return redirect(url_for("usable.home"))
+        return redirect(url_for("public.home"))
 
     login_form = LoginForm()
 
     if login_form.validate_on_submit():
         user = User.query.filter_by(username=login_form.username.data).first()
         if user is None or not user.check_password(login_form.password.data):
-            flash("Invalid username or password")
-            return redirect(url_for("usable.login"))
+            flash("Invalid username or password", "error")
+            return redirect(url_for("public.login"))
         login_user(user, remember=login_form.remember_me.data)
-        return redirect(url_for("usable.login"))
+        return redirect(url_for("public.login"))
 
     return render_template("public/login.html", login_form=login_form)
 
@@ -35,7 +35,7 @@ def login():
 @bp.route("/logout")
 def logout():
     logout_user()
-    return redirect(url_for("usable.home"))
+    return redirect(url_for("public.home"))
 
 
 @bp.route("/register", methods=["GET", "POST"])
@@ -53,8 +53,9 @@ def register():
         user.set_password(register_form.password.data)
         db.session.add(user)
         db.session.commit()
-        flash("Congratulations, you are now a registered user!")
-        return redirect(url_for("usable.login"))
+        flash("Congratulations, you are now a registered user!", "success")
+        return redirect(url_for("public.login"))
+
     return render_template(
         "public/register.html", title="Register", register_form=register_form
     )

@@ -29,11 +29,11 @@ def session_create():
         fail_count = 0
 
         if not room:
-            flash("room does not exist")
+            flash("room does not exist", "error")
             fail_count += 1
 
         if not lecture:
-            flash("lecture does not exist")
+            flash("lecture does not exist", "error")
             fail_count += 1
 
         if fail_count:
@@ -49,7 +49,7 @@ def session_create():
         db.session.add(lecture_session)
 
         if room.intersect_lecture(lecture_session.start_time, lecture_session.duration):
-            flash("Session intersects")
+            flash("Session intersects", "error")
             return render(form, rooms, lectures)
 
         room.sessions.append(lecture_session)
