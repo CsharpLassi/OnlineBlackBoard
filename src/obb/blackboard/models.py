@@ -9,7 +9,7 @@ from dataclasses_json import dataclass_json, LetterCase
 from flask_login import current_user
 from sqlalchemy.sql import func
 
-from .wrapper import BlackboardRoomWrapper
+from .wrapper import BlackboardRoomWrapper, LectureWrapper
 
 from ..ext import db
 
@@ -72,7 +72,7 @@ class BlackboardRoom(db.Model, BlackboardRoomWrapper):
     creator_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     creator = db.relationship("User")
 
-    lecture_sessions = db.relationship("LectureSession", lazy=True)
+    sessions = db.relationship("LectureSession", lazy=True)
 
     def get_data(self) -> BlackBoardRoomData:
         return BlackBoardRoomData(
@@ -87,7 +87,7 @@ class BlackboardRoom(db.Model, BlackboardRoomWrapper):
         end_time: datetime.datetime = start_time + datetime.timedelta(minutes=duration)
         lecture: LectureSession
 
-        for lecture in self.lecture_sessions:
+        for lecture in self.sessions:
             if lecture.start_time < start_time < lecture.end_time:
                 return True
 
@@ -156,7 +156,7 @@ class BlackboardRoom(db.Model, BlackboardRoomWrapper):
         return f_query.all()
 
 
-class Lecture(db.Model):
+class Lecture(db.Model, LectureWrapper):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
     full_name = db.Column(db.String, nullable=False, index=True, unique=True)
@@ -167,23 +167,7 @@ class Lecture(db.Model):
     creator_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     creator = db.relationship("User")
 
-    start_page_id = db.Column(
-        db.Integer, db.ForeignKey("lecture_page.id"), nullable=False
-    )
-    start_page = db.relationship(
-        "LecturePage", post_update=True, foreign_keys=[start_page_id]
-    )
-
-    current_page_id = db.Column(
-        db.Integer, db.ForeignKey("lecture_page.id"), nullable=False
-    )
-    current_page = db.relationship(
-        "LecturePage", post_update=True, foreign_keys=[current_page_id]
-    )
-
-    pages = db.relationship(
-        "LecturePage", primaryjoin="Lecture.id == LecturePage.lecture_id"
-    )
+    pages = db.relationship("LecturePage", lazy=True)
 
     @staticmethod
     def get_lectures(user=None) -> Iterator[Lecture]:

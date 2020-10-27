@@ -13,7 +13,7 @@ from ..ext import db, login
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
 class UserData:
-    name: str = 'Anonymous'
+    name: str = "Anonymous"
     is_admin: bool = False
 
 
@@ -22,16 +22,12 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(64), index=True, unique=True)
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
-    is_admin = db.Column(db.BOOLEAN, server_default='0', default=False,
-                         nullable=False)
+    is_admin = db.Column(db.BOOLEAN, server_default="0", default=False, nullable=False)
 
-    lectures = db.relationship('Lecture', lazy=True)
+    lectures = db.relationship("Lecture", lazy=True)
 
     def get_data(self) -> UserData:
-        return UserData(
-            name=self.username,
-            is_admin=self.is_admin,
-        )
+        return UserData(name=self.username, is_admin=self.is_admin)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -44,9 +40,9 @@ class User(UserMixin, db.Model):
         return User.query.get(id)
 
     def __repr__(self):
-        return '<User {}>'.format(self.username)
+        return "<User {}>".format(self.username)
 
 
 @login.user_loader
 def load_user(user_id) -> Optional[User]:
-    return User.query.get(int(user_id))
+    return User.query.get(user_id)

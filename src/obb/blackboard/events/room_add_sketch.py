@@ -60,23 +60,11 @@ def room_update_sketch(msg: RoomAddSketchRequestData, session: MemoryUser, **kwa
         return
     lecture = l_session.lecture
 
-    page_id = msg.page_id or lecture.current_page_id or lecture.start_page_id
+    page_id = msg.page_id or lecture.current_page.id
 
     # Create New Page
     if page_id is None:
-        new_page = LecturePage.create(lecture)
-        new_page.draw_width = room.model.draw_width
-        new_page.draw_height = room.model.draw_height
-
-        lecture.start_page = new_page
-        lecture.current_page = new_page
-        db.session.add(new_page)
-        db.session.commit()
-
-        new_mem_page = MemoryLecturePage(new_page.id)
-        emit_success("room:new:page", NewLecturePageEvent(page=new_mem_page.get_data()))
-
-        page_id = new_page.id
+        pass  # Todo: Exception
 
     page = lecture_page_memory.get(page_id, MemoryLecturePage(page_id))
     page.strokes.append(msg.stroke)

@@ -15,7 +15,7 @@ from ..memory import (
     MemoryUser,
     MemoryUserData,
 )
-from ..models import BlackboardRoom
+from ..models import BlackboardRoom, LectureSession
 from ...users.models import User
 
 
@@ -49,19 +49,17 @@ def join(msg: RoomJoinRequestData, user: User = None, sid: str = None, **kwargs)
     if not room:
         return emit_error("you cannot join this room")
 
-    l_session = room.get_current_lecture_session()
+    l_session: LectureSession = room.get_current_lecture_session()
     if not l_session:
         return emit_error("room is closed")
 
-    lecture = l_session.lecture
-
     memory_room = room_memory.get(room.id, MemoryBlackboardRoom(room.id))
     memory_user = user_memory.get(sid, MemoryUser(sid, 0 if not user else user.id))
-    memory_user.current_page = lecture.current_page_id or lecture.current_page_id or 0
 
     join_room(room.id)
     memory_user.current_room = room.id
     memory_user.socket_id = request.sid
+    memory_user.current_page = l_session.lecture.current_page.id
 
     memory_room.users.add(memory_user.session_id)
 

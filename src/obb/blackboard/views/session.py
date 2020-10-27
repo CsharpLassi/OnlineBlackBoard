@@ -62,7 +62,8 @@ def session_create():
 
             start_page = LecturePage.create(lecture)
 
-            lecture.start_page = lecture.current_page = start_page
+            lecture.pages.append(start_page)
+
             db.session.add(lecture)
             db.session.add(start_page)
         elif not lecture:
@@ -82,7 +83,7 @@ def session_create():
             flash("Session intersects")
             return render(form, rooms, lectures)
 
-        room.lecture_sessions.append(lecture_session)
+        room.sessions.append(lecture_session)
 
         db.session.commit()
 
