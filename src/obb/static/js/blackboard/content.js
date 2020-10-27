@@ -23,7 +23,7 @@ var obbContentBox = {
         obbSocket.on('room:join:self', function (msg) {
             let room = obbRoom.init(msg.room);
             obbContentBox.updateLayout(room.base.drawHeight, room.base.drawWidth);
-            obbContentBox.loadContent();
+            obbContentBox.loadContent(msg.user.currentPage);
         });
 
         obbSocket.on('self:update', function (msg) {

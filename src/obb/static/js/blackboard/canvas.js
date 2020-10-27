@@ -22,7 +22,7 @@ var obbContentSketchCanvas = {
         });
 
         obbSocket.on('room:join:self', function (msg) {
-            obbContentSketchCanvas.loadSketch();
+            obbContentSketchCanvas.loadSketch(msg.user.currentPage);
         });
 
         obbSocket.on('self:update', function (msg) {
