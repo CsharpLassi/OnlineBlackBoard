@@ -5,9 +5,14 @@ from dataclasses_json import dataclass_json, LetterCase
 
 from obb.ext import socket, db
 from ..ext import namespace
-from ..forms import RoomSettings
-from ..memory import MemoryBlackboardRoomData, room_memory, MemoryBlackboardRoom, \
-    lecture_page_memory, MemoryLecturePage
+from ..forms import RoomSettingsForm
+from ..memory import (
+    MemoryBlackboardRoomData,
+    room_memory,
+    MemoryBlackboardRoom,
+    lecture_page_memory,
+    MemoryLecturePage,
+)
 from ...api import convert_from_socket, emit_success
 from ...tools.forms import get_form_data_from_dict
 
@@ -26,22 +31,22 @@ class RoomUpdateResponseData:
     room: MemoryBlackboardRoomData
 
 
-@socket.on('room:update', namespace=namespace)
+@socket.on("room:update", namespace=namespace)
 @convert_from_socket(RoomUpdateRequestData)
 def room_update(msg: RoomUpdateRequestData, **kwargs):
     form_data = get_form_data_from_dict(msg.data)
     room: MemoryBlackboardRoom = room_memory.get(msg.room_id)
 
-    room_settings = RoomSettings(form_data)
+    room_settings = RoomSettingsForm(form_data)
     if room_settings.validate() and room:
 
         room_settings.write_data(room.model)
 
         db.session.commit()
 
-        emit_success('room:update', RoomUpdateResponseData(
-            room=room.get_data(),
-        ), room=room.id)
+        emit_success(
+            "room:update", RoomUpdateResponseData(room=room.get_data()), room=room.id
+        )
 
         page: MemoryLecturePage = lecture_page_memory.get(msg.page_id)
 
@@ -50,9 +55,6 @@ def room_update(msg: RoomUpdateRequestData, **kwargs):
             page.model.draw_height = room_settings.draw_height.data
             db.session.commit()
 
-            page.emit_update(room.id, [
-                'drawWidth',
-                'drawHeight'
-            ])
+            page.emit_update(room.id, ["drawWidth", "drawHeight"])
 
     return

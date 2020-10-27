@@ -2,7 +2,7 @@ from flask import flash, redirect, url_for, render_template, request
 from flask_login import current_user, login_required
 
 from . import bp
-from ..forms import RoomSettings
+from ..forms import RoomSettingsForm
 from ..models import BlackboardRoom
 from ..memory import user_memory, MemoryUser
 from ...api import ApiToken
@@ -50,7 +50,7 @@ def link_user():
         flash("you have no access to the page")
         return redirect(url_for("blackboard.room_list"))
 
-    edit_form = RoomSettings()
+    edit_form = RoomSettingsForm()
 
     if edit_form.validate_on_submit():
         edit_form.write_data(room)

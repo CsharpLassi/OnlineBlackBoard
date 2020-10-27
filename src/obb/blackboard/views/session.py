@@ -4,7 +4,7 @@ from flask import flash, redirect, url_for, render_template, request
 from flask_login import login_required, current_user
 
 from . import bp
-from ..forms import CreateSession
+from ..forms import CreateSessionForm
 from ..models import BlackboardRoom, LectureSession, Lecture, LecturePage
 from ...ext import db
 
@@ -32,7 +32,7 @@ def session_create():
     rooms = BlackboardRoom.get_rooms(usable=True)
     lectures = Lecture.get_lectures()
 
-    form = CreateSession()
+    form = CreateSessionForm()
     if form.validate_on_submit():
 
         room = BlackboardRoom.get_by_name(form.room_name.data)
