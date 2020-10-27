@@ -4,7 +4,7 @@ from flask_login import login_required, current_user
 from . import bp
 from ..forms.lecture import CreateLectureForm
 from ..memory import user_memory, MemoryUser
-from ..models import Lecture, BlackboardRoom
+from ..models import Lecture, BlackboardRoom, LecturePage
 from ...api import ApiToken
 from ...ext import db
 
@@ -24,13 +24,17 @@ def lecture_create():
 
         lecture = Lecture.get_by_name(lecture_name)
         if lecture:
-            flash("Lecture already exist")
+            flash("Lecture already exist", "error")
             return render(create_form)
 
         lecture = Lecture()
         lecture.name = lecture_name
         lecture.creator = current_user
+
+        lecture_page = LecturePage.create(lecture)
+
         db.session.add(lecture)
+        db.session.add(lecture_page)
         db.session.commit()
 
         return redirect(url_for("blackboard.room_list"))
