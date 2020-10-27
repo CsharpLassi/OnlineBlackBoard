@@ -1,16 +1,73 @@
-.contentSketchpad.user{
+.contentSketchpad.user {
     opacity: 50%;
 }
 
-#ContentText h1 {
+.ContentText {
+    font-size: 28px;
+}
+
+
+.ContentText h1 {
     margin-bottom: 0.25rem;
+    font-weight: bold;
+    text-decoration: underline
 }
 
-#ContentText p {
-    font-size: 24px;
-    margin: 0px;
+.ContentText h2 {
+    margin-bottom: 0.25rem;
+    text-decoration: underline
 }
 
-#ContentText li {
-    font-size: 24px;
+.ContentText p {
+    margin-bottom: 0px;
+    width: 100%;
+}
+
+
+.ContentText p img {
+    alignment: left;
+    max-height: 90%;
+    max-width: 90%;
+    position: absolute;
+    display: block;
+}
+
+.ContentText p:first-child img {
+    margin-top: 10px;
+}
+
+
+.ContentText table {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.ContentText th, .ContentText td {
+    border-right: 1px solid #ddd;
+}
+
+.ContentText th:last-child, .ContentText td:last-child {
+    border-right: none;
+}
+
+.ContentText thead > tr {
+    border-bottom: 2px solid #ccc;
+}
+
+.ContentText tbody > tr {
+    border-top: 1px solid #ddd;
+}
+
+.ContentText th, .ContentText td {
+    padding-left: 8px;
+    padding-right: 8px;
+    text-align: left;
+}
+
+/* Margin */
+.ContentText p {
+    margin-left: 0.5em;
+}
+
+.ContentText p:first-child {
 }
