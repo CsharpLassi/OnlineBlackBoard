@@ -80,7 +80,7 @@
                         <td><span
                                 class="{{ 'is-open' if l_session.is_open() else 'is-close' }}">{{ 'Open' if l_session.is_open() else 'Closed' }}</span>
                         </td>
-                        <td><a href="#">{{ l_session.room.full_name }}</a></td>
+                        <td><a href="#">{{ l_session.room.name }}</a></td>
                         <td>{{ l_session.start_time | df }} </td>
                         <td>{{ l_session.end_time | df }} </td>
                         <td>{{ l_session.duration }} min</td>

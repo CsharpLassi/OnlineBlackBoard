@@ -44,7 +44,6 @@ def session_create():
         elif form.new_room.data:
             room = BlackboardRoom()
             room.name = form.name.data
-            room.full_name = f"{current_user.username}.{room.name}"
             room.creator = current_user
             db.session.add(room)
         elif not room:
@@ -90,7 +89,7 @@ def session_create():
         return redirect(url_for("blackboard.room_list"))
 
     if room:
-        form.room_name.data = room.full_name
+        form.room_name.data = room.name
 
     if lecture:
         form.lecture_name.data = lecture.name

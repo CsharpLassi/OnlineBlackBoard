@@ -32,7 +32,6 @@ def create_default_id() -> str:
 class BlackBoardRoomData:
     id: str
     name: str
-    full_name: str
 
     draw_height: int
     draw_width: int
@@ -42,7 +41,10 @@ class BlackboardRoom(db.Model, BlackboardRoomWrapper):
     id = db.Column(db.String, primary_key=True, default=create_default_id)
     name = db.Column(db.String, nullable=False, index=True)
 
-    full_name = db.Column(db.String, nullable=False, index=True, unique=True)
+    creator_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    creator = db.relationship("User")
+
+    creator_room_name = db.UniqueConstraint(creator_id, name)
 
     draw_height = db.Column(
         db.Integer,
@@ -69,16 +71,12 @@ class BlackboardRoom(db.Model, BlackboardRoomWrapper):
         db.Boolean, nullable=False, server_default="0", default=False
     )
 
-    creator_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    creator = db.relationship("User")
-
     sessions = db.relationship("LectureSession", lazy=True)
 
     def get_data(self) -> BlackBoardRoomData:
         return BlackBoardRoomData(
             id=self.id,
             name=self.name,
-            full_name=self.full_name,
             draw_height=self.draw_height,
             draw_width=self.draw_width,
         )
@@ -118,9 +116,7 @@ class BlackboardRoom(db.Model, BlackboardRoomWrapper):
 
         query = query.filter_by(creator_id=user.id, is_invisible=False)
 
-        query = query.filter(
-            or_(BlackboardRoom.full_name == name, BlackboardRoom.name == name)
-        )
+        query = query.filter_by(name=name)
 
         if query.count() != 1:
             return None
@@ -192,9 +188,7 @@ class Lecture(db.Model, LectureWrapper):
 
         query = query.filter_by(creator_id=user.id)
 
-        query = query.filter(
-            or_(BlackboardRoom.full_name == name, BlackboardRoom.name == name)
-        )
+        query = query.filter_by(name=name)
 
         if query.count() != 1:
             return None
