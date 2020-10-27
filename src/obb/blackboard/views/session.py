@@ -4,7 +4,7 @@ from flask import flash, redirect, url_for, render_template, request
 from flask_login import login_required, current_user
 
 from . import bp
-from ..forms import CreateSessionForm
+from ..forms.session import CreateSessionForm
 from ..models import BlackboardRoom, LectureSession, Lecture, LecturePage
 from ...ext import db
 

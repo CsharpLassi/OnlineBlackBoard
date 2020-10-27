@@ -9,8 +9,33 @@
                     Create
                 </div>
                 <div class="card-body">
-                    {{ show_form(create_form) }}
+                    {{ show_form(create_form,id='CreateRoom',action=url_for('blackboard.room_create')) }}
                 </div>
+
+                <hr/>
+
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">User</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for room in rooms %}
+                        <tr>
+                            <th scope="row">{{ loop.index }}</th>
+                            <td>
+                                <a href="#" onclick="$('#room_name').val('{{ room.name }}')">{{ room.name }}</a>
+                            </td>
+                            <td>
+                                <a>{{ room.creator.username }}</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
             </div>
 
         </div>
@@ -18,16 +43,8 @@
             <div class="card">
                 <div class="card-header">Rooms</div>
                 <div class="card-body">
-                    <ul class="nav flex-column">
-                        {% for room in rooms %}
-                            {% if True %}
-                                <li class="nav-item">
-                                    <a class="nav-link"
-                                       href="{{ url_for('blackboard.session_create',room_id=room.id) }}">{{ room.name }}</a>
-                                </li>
-                            {% endif %}
-                        {% endfor %}
-                    </ul>
+
+
                 </div>
             </div>
         </div>

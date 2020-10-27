@@ -5,7 +5,7 @@ from dataclasses_json import dataclass_json, LetterCase
 
 from obb.ext import socket, db
 from ..ext import namespace
-from ..forms import RoomSettingsForm
+from ..forms.room import RoomSettingsForm
 from ..memory import (
     MemoryBlackboardRoomData,
     room_memory,

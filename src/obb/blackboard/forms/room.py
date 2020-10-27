@@ -6,6 +6,11 @@ from obb.blackboard.models import default_visibility, blackboardRoom_visibilitie
 from obb.tools.forms import BaseDataForm
 
 
+class ShortCreateRoomForm(FlaskForm, BaseDataForm):
+    room_name = StringField("Room", validators=[DataRequired(), Length(max=16)])
+    submit = SubmitField("Create")
+
+
 class CreateRoomForm(FlaskForm, BaseDataForm):
     room_name = StringField("Room", validators=[DataRequired(), Length(max=16)])
     visibility = SelectField(

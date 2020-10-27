@@ -2,7 +2,7 @@ from flask import flash, redirect, url_for, render_template, request
 from flask_login import current_user, login_required
 
 from . import bp
-from ..forms import RoomSettingsForm
+from ..forms.room import RoomSettingsForm
 from ..models import BlackboardRoom
 from ..memory import user_memory, MemoryUser
 from ...api import ApiToken
