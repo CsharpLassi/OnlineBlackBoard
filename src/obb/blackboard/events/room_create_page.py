@@ -12,7 +12,7 @@ from ..memory import (
     MemoryBlackboardRoom,
 )
 from ..models import LecturePage
-from ...api import convert_from_socket
+from ...api import convert_from_socket, emit_error
 from ...ext import socket, db
 
 
@@ -37,6 +37,10 @@ def room_create_page(
     msg: RoomCreatePageRequestData, session: MemoryUser = None, **kwargs
 ):
     room: MemoryBlackboardRoom = room_memory.get(msg.room_id)
+
+    if not session.allow_new_page:
+        emit_error("you cannot create new pages")
+        return
 
     if not room:
         return

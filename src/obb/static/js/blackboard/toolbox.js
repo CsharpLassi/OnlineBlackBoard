@@ -265,7 +265,7 @@ var obbToolBox = {
 
             // socket
             obbSocket.on('room:join:self', function (msg) {
-                cmdCreateRightPage.enable(msg.user.allowNewPage)
+                cmdCreateRightPage.setEnable(msg.user.allowNewPage)
                 cmdCreateRightPage.value = obbSocket.user.currentPage
 
                 cmdChangeMode.setEnable(msg.user.allowDraw);
@@ -276,7 +276,7 @@ var obbToolBox = {
             });
 
             obbSocket.on('self:update', function (msg) {
-                cmdCreateRightPage.enable(msg.user.allowNewPage)
+                cmdCreateRightPage.setEnable(msg.user.allowNewPage)
                 cmdCreateRightPage.value = obbSocket.user.currentPage
 
                 cmdChangeMode.setEnable(msg.user.allowDraw);
@@ -288,6 +288,24 @@ var obbToolBox = {
 
             obbSocket.on('room:get:page', function (msg) {
                 let page = msg.page;
+
+                cmdMoveToLeftPage.value = page.base.prevPageId;
+                if (page.base.nextPages)
+                    cmdMoveToRightPage.value = page.base.nextPages[0];
+                else
+                    cmdMoveToRightPage.value = null;
+
+                cmdClearPage.value = page.base.id;
+
+                cmdMoveToLeftPage.setEnable(cmdMoveToLeftPage.value != null);
+                cmdMoveToRightPage.setEnable(cmdMoveToRightPage.value != null);
+            });
+
+            obbSocket.on('room:update:page', function (msg) {
+                let page = msg.page;
+
+                if (page.base.id !== obbSocket.user.currentPage)
+                    return
 
                 cmdMoveToLeftPage.value = page.base.prevPageId;
                 if (page.base.nextPages)
