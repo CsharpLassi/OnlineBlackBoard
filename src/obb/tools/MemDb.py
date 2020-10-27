@@ -1,5 +1,5 @@
 import datetime
-from typing import TypeVar, Generic, Dict, Optional, Tuple, List
+from typing import TypeVar, Generic, Dict, Optional, Tuple, List, Callable
 from gevent.thread import allocate_lock
 
 P = TypeVar('P')
@@ -30,7 +30,7 @@ class MemDb(Generic[P, T]):
     def items(self) -> List[Tuple[P, T]]:
         items = list()
         for item_id in self._db:
-            items[item_id] = self.get(item_id)
+            items.append((item_id, self.get(item_id)))
         return items
 
     def add(self, key: P, value: T) -> T:
@@ -39,6 +39,12 @@ class MemDb(Generic[P, T]):
         self._expired[key] = self._calc_exp()
         self.release()
         return value
+
+    def find(self, func: Callable[[P, T], bool]) -> Optional[T]:
+        for key, item in self.items():
+            if func(key, item):
+                return item
+        return None
 
     def get(self, key: P, add_item: Optional[T] = None, **kwargs) -> Optional[T]:
         self.lock()

@@ -2,40 +2,47 @@ from dataclasses import dataclass
 from typing import Optional
 
 from dataclasses_json import dataclass_json, LetterCase
-from flask import escape
 
 from obb.ext import socket, db
 from .global_message import NewLecturePageEvent
+from ..datas import StrokeData
 from ..ext import namespace
-from ..memory import room_memory, MemoryBlackboardRoom, \
-    lecture_page_memory, MemoryLecturePage, MemoryUser
+from ..memory import MemoryUser, MemoryBlackboardRoom, room_memory, MemoryLecturePage, \
+    lecture_page_memory
 from ..models import LecturePage
 from ...api import convert_from_socket, emit_error, emit_success
 
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
-class RoomUpdateContentRequest:
+class RoomAddSketchRequestData:
     room_id: int
-    text: str
+    mode: str
+    stroke: StrokeData
 
     page_id: Optional[int] = None
 
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
-class RoomUpdateContentResponse:
+class RoomAddSketchResponseData:
     room_id: str
     page_id: int
     creator_id: int
-    text: str
-    markdown: str
+    stroke: StrokeData
 
 
-@socket.on('room:update:content', namespace=namespace)
-@convert_from_socket(RoomUpdateContentRequest)
-def room_update_content(msg: RoomUpdateContentRequest, session: MemoryUser, **kwargs):
+@socket.on('room:add:sketch', namespace=namespace)
+@convert_from_socket(RoomAddSketchRequestData)
+def room_update_sketch(msg: RoomAddSketchRequestData, session: MemoryUser, **kwargs):
     assert session
+
+    # Todo: Add User Function
+    if msg.mode != 'global':
+        return
+
+    if not session.allow_draw:
+        return
 
     room: Optional[MemoryBlackboardRoom] = room_memory.get(msg.room_id)
     if not room:
@@ -69,15 +76,14 @@ def room_update_content(msg: RoomUpdateContentRequest, session: MemoryUser, **kw
         page_id = new_page.id
 
     page = lecture_page_memory.get(page_id, MemoryLecturePage(page_id))
-    page.markdown = msg.text
+    page.strokes.append(msg.stroke)
 
-    emit_success('room:update:content', RoomUpdateContentResponse(
+    emit_success('room:add:sketch', RoomAddSketchResponseData(
         room_id=room.id,
         page_id=page.id,
         creator_id=session.session_id,
-        text=page.markdown,
-        markdown=escape(page.markdown)
+        stroke=msg.stroke,
+
     ), room=room.id)
 
-    # Save
-    page.save_markdown()
+    page.save_strokes()

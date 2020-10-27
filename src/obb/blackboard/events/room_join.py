@@ -1,47 +1,71 @@
 from dataclasses import dataclass
 
+from dataclasses_json import dataclass_json, LetterCase
 from flask import request
-from flask_socketio import join_room, emit
+from flask_socketio import join_room
 
+from obb.api import convert_from_socket, emit_error, emit_success
 from obb.ext import socket
-from obb.users.models import User
-
-from ..components.session_manager import BlackBoardSession
-from ..decorators import convert, event_login_required
-from ..ext import namespace, bb_session_manager
-from ..messages.base_messages import BaseRequestMessage, BaseResponseMessage
-from ..messages.datas import UserData, RoomData
+from ..ext import namespace
+from ..memory import room_memory, MemoryBlackboardRoom, MemoryBlackboardRoomData, \
+    user_memory, MemoryUser, MemoryUserData
 from ..models import BlackboardRoom
+from ...users.models import User
 
 
+@dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
-class JoinRequestMessage(BaseRequestMessage):
-    pass
+class RoomJoinRequestData:
+    room_id: str
 
 
+@dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
-class UserJoinedResponse(BaseResponseMessage):
-    user: UserData
-    room: RoomData
+class RoomJoinSelfResponseData:
+    sid: str
+    room: MemoryBlackboardRoomData
+    user: MemoryUserData
+
+
+@dataclass_json(letter_case=LetterCase.CAMEL)
+@dataclass
+class RoomJoinUserResponseData:
+    room_id: str
+    user: MemoryUserData
 
 
 @socket.on('room:join', namespace=namespace)
-@convert(JoinRequestMessage)
-@event_login_required
-def join(msg: JoinRequestMessage,
-         room: BlackboardRoom = None):
-    sid = request.sid
-    session: BlackBoardSession = bb_session_manager.get(msg.session.session_id)
+@convert_from_socket(RoomJoinRequestData)
+def join(msg: RoomJoinRequestData, user: User = None, sid: str = None, **kwargs):
+    assert sid
 
-    user: User = session.get_user()
+    room = BlackboardRoom.get(msg.room_id)
+    if not room:
+        return emit_error('you cannot join this room')
+
+    l_session = room.get_current_lecture_session()
+    if not l_session:
+        return emit_error('room is closed')
+
+    lecture = l_session.lecture
+
+    memory_room = room_memory.get(room.id, MemoryBlackboardRoom(room.id))
+    memory_user = user_memory.get(sid, MemoryUser(sid, 0 if not user else user.id))
+    memory_user.current_page = lecture.current_page_id or lecture.current_page_id or 0
 
     join_room(room.id)
-    bb_session_manager.join(sid, msg.session.session_id)
+    memory_user.current_room = room.id
+    memory_user.socket_id = request.sid
 
-    response_data = UserJoinedResponse(
-        user=session.session_user_data,
-        room=session.session_room_data)
-    response_data_dict = response_data.to_dict()
+    memory_room.users.add(memory_user.session_id)
 
-    emit('room:join:user', response_data_dict, room=room.id)
-    emit('room:join', response_data_dict)
+    emit_success('room:join:self', RoomJoinSelfResponseData(
+        sid=sid,
+        room=memory_room.get_data(),
+        user=memory_user.get_data(),
+    ))
+
+    emit_success('room:join:user', RoomJoinUserResponseData(
+        room_id=room.id,
+        user=memory_user.get_data(),
+    ), room=room.id)

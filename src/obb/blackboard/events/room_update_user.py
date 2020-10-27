@@ -1,51 +1,53 @@
 from dataclasses import dataclass
 
-from flask_socketio import emit
+from dataclasses_json import dataclass_json, LetterCase
 
 from obb.ext import socket
-from ..decorators import convert, event_login_required
-from ..ext import namespace, bb_session_manager
-from ..messages.base_messages import BaseRequestMessage, BaseResponseMessage
-from ..messages.datas import UserData
-from ..models import BlackboardRoom
+from ..ext import namespace
+from ..memory import user_memory, MemoryUser, MemoryUserData
+from ...api import convert_from_socket, emit_error, emit_success
 
 
+@dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
-class RoomUpdateUserRequestMessage(BaseRequestMessage):
-    user_id: str
+class RoomUpdateUserRequest:
+    session_id: str
     allow_draw: bool = None
     allow_new_page: bool = None
 
 
-@dataclass()
-class RoomUpdateUserResponseMessage(BaseResponseMessage):
-    user: UserData
+@dataclass_json(letter_case=LetterCase.CAMEL)
+@dataclass
+class RoomUpdateUserResponse:
+    user: MemoryUserData
 
 
-@socket.on('room:update:user', namespace=namespace)
-@convert(RoomUpdateUserRequestMessage)
-@event_login_required
-def blackboard_room_update_user(msg: RoomUpdateUserRequestMessage,
-                                room: BlackboardRoom = None):
-    session = bb_session_manager.get(msg.session.session_id)
-    updated_user = bb_session_manager.get_user(msg.user_id)
+@socket.on("room:update:user", namespace=namespace)
+@convert_from_socket(RoomUpdateUserRequest)
+def room_update_user(msg: RoomUpdateUserRequest, session: MemoryUser, **kwargs):
+    assert session
 
-    update_counter = 0
-
-    allow_change = session.session_user_data.creator
-    if allow_change and updated_user:
-        if msg.allow_draw is not None:
-            updated_user.allow_draw = msg.allow_draw
-            update_counter += 1
-
-        if msg.allow_new_page is not None:
-            updated_user.allow_new_page = msg.allow_new_page
-            update_counter += 1
-
-    response_data = RoomUpdateUserResponseMessage(
-        user=updated_user,
+    update_user: MemoryUser = user_memory.find(
+        lambda k, u: u.session_id == msg.session_id
     )
-    if update_counter > 0:
-        emit('room:update:user', response_data.to_dict(), room=room.id)
+
+    if not update_user:
+        emit_error("not allowed")
+
+    change_list = []
+
+    if msg.allow_draw is not None:
+        update_user.allow_draw = msg.allow_draw
+        change_list.append("allowDraw")
+
+    if msg.allow_new_page is not None:
+        update_user.allow_new_page = msg.allow_new_page
+        change_list.append("allowNewPage")
+
+    response = RoomUpdateUserResponse(user=update_user.get_data())
+
+    if len(change_list) > 0:
+        update_user.emit_self(changes=change_list)
+        emit_success("room:update:user", response, room=session.current_room)
     else:
-        emit('room:update:user', response_data.to_dict())
+        emit_success("room:update:user", response)

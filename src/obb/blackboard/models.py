@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 from operator import or_
 from typing import Optional, Iterator
 
 import datetime
 
+from dataclasses_json import dataclass_json, LetterCase
 from flask_login import current_user
 from sqlalchemy.sql import func
 
@@ -19,18 +21,26 @@ blackboardRoom_visibilities = ('creator_only', 'public')
 
 def create_default_id() -> str:
     from obb.tools import id_generator
+    # Todo: test exist
     return id_generator(12)
+
+
+@dataclass_json(letter_case=LetterCase.CAMEL)
+@dataclass
+class BlackBoardRoomData:
+    id: str
+    name: str
+    full_name: str
+
+    draw_height: int
+    draw_width: int
 
 
 class BlackboardRoom(db.Model):
     id = db.Column(db.String, primary_key=True, default=create_default_id)
-    name = db.Column(db.String,
-                     nullable=False,
-                     index=True)
-    full_name = db.Column(db.String,
-                          nullable=False,
-                          index=True,
-                          unique=True)
+    name = db.Column(db.String, nullable=False, index=True)
+
+    full_name = db.Column(db.String, nullable=False, index=True, unique=True)
 
     draw_height = db.Column(db.Integer,
                             nullable=False,
@@ -55,13 +65,14 @@ class BlackboardRoom(db.Model):
 
     lecture_sessions = db.relationship('LectureSession', lazy=True)
 
-    def get_style(self) -> str:
-        style = ''
-        if self.draw_height > 0:
-            style += f'height:{self.draw_height}px;'
-        if self.draw_width > 0:
-            style += f'width:{self.draw_width}px;'
-        return style
+    def get_data(self) -> BlackBoardRoomData:
+        return BlackBoardRoomData(
+            id=self.id,
+            name=self.name,
+            full_name=self.full_name,
+            draw_height=self.draw_height,
+            draw_width=self.draw_width,
+        )
 
     def get_current_lecture_session(self) -> Optional[LectureSession]:
         lecture: LectureSession
@@ -151,10 +162,12 @@ class Lecture(db.Model):
     creator = db.relationship('User')
 
     start_page_id = db.Column(db.Integer, db.ForeignKey('lecture_page.id'))
-    start_page = db.relationship('LecturePage', foreign_keys=[start_page_id])
+    start_page = db.relationship('LecturePage', post_update=True,
+                                 foreign_keys=[start_page_id])
 
     current_page_id = db.Column(db.Integer, db.ForeignKey('lecture_page.id'))
-    current_page = db.relationship('LecturePage', foreign_keys=[current_page_id])
+    current_page = db.relationship('LecturePage', post_update=True,
+                                   foreign_keys=[current_page_id])
 
     pages = db.relationship('LecturePage',
                             primaryjoin="Lecture.id == LecturePage.lecture_id")
@@ -217,9 +230,23 @@ class Lecture(db.Model):
         return Lecture.query.get(lecture_id)
 
 
+@dataclass_json(letter_case=LetterCase.CAMEL)
+@dataclass
+class LecturePageData:
+    id: int
+    draw_height: int
+    draw_width: int
+    lecture_id: int
+
+    left_page_id: int
+    right_page_id: int
+    top_page_id: int
+    bottom_page_id: int
+
+
 class LecturePage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Integer)
+    name = db.Column(db.String)  # Todo Change to string
 
     draw_height = db.Column(db.Integer, default=default_draw_height)
     draw_width = db.Column(db.Integer, default=default_draw_width)
@@ -232,25 +259,49 @@ class LecturePage(db.Model):
 
     left_page_id = db.Column(db.Integer, db.ForeignKey('lecture_page.id'))
     left_page = db.relationship('LecturePage', uselist=False, post_update=True,
-                                foreign_keys=[left_page_id])
+                                foreign_keys=left_page_id)
 
     right_page_id = db.Column(db.Integer, db.ForeignKey('lecture_page.id'))
     right_page = db.relationship('LecturePage', uselist=False, post_update=True,
-                                 foreign_keys=[right_page_id])
+                                 foreign_keys=right_page_id)
 
     top_page_id = db.Column(db.Integer, db.ForeignKey('lecture_page.id'))
     top_page = db.relationship('LecturePage', uselist=False, post_update=True,
-                               foreign_keys=[top_page_id])
+                               foreign_keys=top_page_id)
 
     bottom_page_id = db.Column(db.Integer, db.ForeignKey('lecture_page.id'))
     bottom_page = db.relationship('LecturePage', uselist=False, post_update=True,
-                                  foreign_keys=[bottom_page_id])
+                                  foreign_keys=bottom_page_id)
+
+    def get_data(self) -> LecturePageData:
+        return LecturePageData(
+            id=self.id,
+            draw_height=self.draw_height,
+            draw_width=self.draw_width,
+            lecture_id=self.lecture_id,
+
+            left_page_id=self.left_page_id,
+            right_page_id=self.right_page_id,
+            top_page_id=self.top_page_id,
+            bottom_page_id=self.bottom_page_id,
+        )
 
     @staticmethod
-    def get(page_id: int) -> Optional[LecturePage]:
-        if page_id is None:
+    def create(lecture: Lecture, creator=None) -> LecturePage:
+        if current_user and current_user.is_authenticated:
+            creator = current_user
+
+        new_page = LecturePage()
+        new_page.lecture = lecture
+        new_page.creator = creator
+
+        return new_page
+
+    @staticmethod
+    def get(id) -> Optional[LecturePage]:
+        if id is None:
             return None
-        return LecturePage.query.get(page_id)
+        return LecturePage.query.get(id)
 
 
 class LectureSession(db.Model):

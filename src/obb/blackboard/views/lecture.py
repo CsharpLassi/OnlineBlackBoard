@@ -2,17 +2,18 @@ from flask import flash, redirect, url_for, render_template
 from flask_login import login_required, current_user
 
 from . import bp
-from ..ext import bb_session_manager
+from ..memory import user_memory, MemoryUser
 from ..models import Lecture, BlackboardRoom
+from ...api import ApiToken
 from ...ext import db
 
 
 @bp.route('/lecture/<lecture_id>', methods=['GET', 'POSt'])
 @login_required
 def lecture_show(lecture_id):
-    def render(lecture, bb_session):
+    def render(lecture, token):
         return render_template('blackboard/lecture/show.html',
-                               bb_session=bb_session,
+                               token=token,
                                lecture=lecture)
 
     lecture = Lecture.get(lecture_id)
@@ -31,8 +32,11 @@ def lecture_show(lecture_id):
         lecture.edit_room = room
         db.session.commit()
 
-    bb_session = bb_session_manager.create_session(room_id=room.id)
-    bb_session.session_user_data.mode = 'viewer'
-    bb_session.lecture_id = lecture.id
+    token = ApiToken.create_token()
 
-    return render(lecture, bb_session)
+    memory_user = user_memory.add(token.sid, MemoryUser(token.sid, token.user_id))
+    memory_user.mode = 'user'
+    memory_user.allow_draw = True
+    memory_user.allow_new_page = True
+
+    return render(lecture, token)

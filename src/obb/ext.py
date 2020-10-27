@@ -1,3 +1,5 @@
+from typing import Any
+
 from engineio.payload import Payload
 
 from flask_migrate import Migrate
@@ -16,4 +18,5 @@ socket = SocketIO()
 session = Session()
 assets = Environment()
 
-login.login_view = 'usable.login'
+
+login.login_view = 'public.login'

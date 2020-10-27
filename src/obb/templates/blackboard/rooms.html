@@ -68,7 +68,7 @@
                         <th scope="row">{{ loop.index }}</th>
                         <td>
                             {%- if l_session.is_open() -%}
-                                <a href="{{ url_for('blackboard.link_user',room_id=l_session.room_id) }}">{{ l_session.name }}</a>
+                                <a href="{{ url_for('blackboard.link_user',r=l_session.room_id) }}">{{ l_session.name }}</a>
                             {%- else -%}
                                 {{ l_session.name }}
                             {%- endif -%}

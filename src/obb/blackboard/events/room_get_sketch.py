@@ -1,39 +1,44 @@
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import List
 
-from flask_socketio import emit
+from dataclasses_json import dataclass_json, LetterCase
 
 from obb.ext import socket
-from .functions import get_page_session
-from ..decorators import convert, event_login_required
-from ..ext import namespace, bb_session_manager, page_manager
-from ..messages.base_messages import BaseRequestMessage, BaseResponseMessage
-from ..messages.datas import StrokeData, UserData
-from ..models import BlackboardRoom, Lecture
+from ..datas import StrokeData
+from ..ext import namespace
+from ..memory import MemoryLecturePage, lecture_page_memory
+from ..models import LecturePage
+from ...api import convert_from_socket, emit_error, emit_success
 
 
+@dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
-class RoomGetSketchRequest(BaseRequestMessage):
-    page: int = 0
+class RoomGetSketchRequestData:
+    page_id: int = 0
 
 
+@dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
-class RoomGetSketchResponse(BaseResponseMessage):
+class RoomGetSketchResponseData:
+    page_id: int
     strokes: List[StrokeData] = field(default_factory=list)
 
 
-@socket.on('room:get:sketch', namespace=namespace)
-@convert(RoomGetSketchRequest)
-@event_login_required
-def room_get_sketch(msg: RoomGetSketchRequest,
-                    room: BlackboardRoom = None):
-    session = bb_session_manager.get(msg.session.session_id)
+@socket.on("room:get:sketch", namespace=namespace)
+@convert_from_socket(RoomGetSketchRequestData)
+def room_get_sketch(msg_list: List[RoomGetSketchRequestData], **kwargs):
+    result = list()
+    for msg in msg_list:
+        page = LecturePage.get(msg.page_id)
+        if not page:
+            emit_error("page not found")
+            continue
 
-    page_session = get_page_session(session, room, msg.page)
+        new_page = MemoryLecturePage(page.id)
+        mem_page: MemoryLecturePage = lecture_page_memory.get(msg.page_id, new_page)
 
-    if page_session:
-        data = RoomGetSketchResponse(
-            strokes=list(page_session.get_strokes()),
+        result.append(
+            RoomGetSketchResponseData(page_id=mem_page.id, strokes=mem_page.strokes)
         )
 
-        emit('room:get:sketch', data.to_dict())
+    emit_success("room:get:sketch", result)
