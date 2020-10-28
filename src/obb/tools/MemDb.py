@@ -7,7 +7,7 @@ T = TypeVar("T")
 
 
 class MemDb(Generic[P, T]):
-    def __init__(self, expired_minutes: int = 1):
+    def __init__(self, expired_minutes: int = 120):
         assert expired_minutes > 0, f"'expired_minutes' must be greater than 0"
 
         self._db_lock = allocate_lock()
