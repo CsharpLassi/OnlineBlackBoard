@@ -180,10 +180,27 @@ var obbContentSketchCanvas = {
         });
 
         atrament.addEventListener('strokerecorded', ({stroke}) => {
+            let points = []
+
+            let last_point = {}
+
             for (let i = 0; i < stroke.points.length; i++) {
-                stroke.points[i].x /= atrament.width
-                stroke.points[i].y /= atrament.height
+                let newX = Math.round(stroke.points[i].x / atrament.width * 100) / 100;
+                let newY = Math.round(stroke.points[i].y / atrament.height * 100) / 100;
+
+                if (last_point && last_point.x === newX && last_point.y === newY)
+                    continue
+
+                last_point['x'] = newX;
+                last_point['y'] = newY;
+
+                points.push({
+                    x: newX,
+                    y: newY,
+                });
             }
+
+            stroke.points = points
 
             obbSocket.emit('room:add:sketch',
                 {
