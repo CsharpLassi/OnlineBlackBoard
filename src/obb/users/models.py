@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from dataclasses_json import dataclass_json, LetterCase
-from flask_login import UserMixin
+from flask_login import UserMixin, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from ..ext import db, login
@@ -38,6 +38,12 @@ class User(UserMixin, db.Model):
     @staticmethod
     def get(id) -> Optional[User]:
         return User.query.get(id)
+
+    @staticmethod
+    def get_current_id() -> Optional[int]:
+        if current_user and current_user.is_authenticated:
+            return current_user.id
+        return None
 
     def __repr__(self):
         return "<User {}>".format(self.username)

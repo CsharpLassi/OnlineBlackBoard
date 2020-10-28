@@ -7,7 +7,7 @@ from obb.ext import socket, db
 from .global_message import NewLecturePageEvent
 from ..ext import namespace
 from ..memory import (
-    MemoryUser,
+    MemorySessionUser,
     MemoryBlackboardRoom,
     room_memory,
     MemoryLecturePage,
@@ -36,7 +36,9 @@ class RoomClearSketchResponseData:
 
 @socket.on("room:clear:sketch", namespace=namespace)
 @convert_from_socket(RoomClearSketchRequestData)
-def room_clear_sketch(msg: RoomClearSketchRequestData, session: MemoryUser, **kwargs):
+def room_clear_sketch(
+    msg: RoomClearSketchRequestData, session: MemorySessionUser, **kwargs
+):
     assert session
 
     # Todo: Add User Function

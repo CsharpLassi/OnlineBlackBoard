@@ -4,7 +4,7 @@ from dataclasses_json import dataclass_json, LetterCase
 
 from obb.ext import socket
 from ..ext import namespace
-from ..memory import user_memory, MemoryUser, MemoryUserData
+from ..memory import user_session_memory, MemorySessionUser, MemorySessionUserData
 from ...api import convert_from_socket, emit_error, emit_success
 
 
@@ -19,15 +19,17 @@ class RoomUpdateUserRequest:
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
 class RoomUpdateUserResponse:
-    user: MemoryUserData
+    user: MemorySessionUserData
 
 
 @socket.on("room:update:user", namespace=namespace)
 @convert_from_socket(RoomUpdateUserRequest)
-def room_update_user(msg: RoomUpdateUserRequest, session: MemoryUser, **kwargs):
+def room_update_user(msg: RoomUpdateUserRequest, session: MemorySessionUser, **kwargs):
     assert session
 
-    update_user: MemoryUser = user_memory.find(lambda k, u: u.sid == msg.session_id)
+    update_user: MemorySessionUser = user_session_memory.find(
+        lambda k, u: u.sid == msg.session_id
+    )
 
     if not update_user:
         emit_error("not allowed")

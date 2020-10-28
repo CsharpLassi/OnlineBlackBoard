@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 
 from dataclasses_json import dataclass_json, LetterCase
 
-from obb.blackboard.memory import MemoryLecturePageData, MemoryUserData
+from obb.blackboard.memory import MemoryLecturePageData, MemorySessionUserData
 
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
@@ -14,7 +14,7 @@ class NewLecturePageEvent:
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
 class UserUpdatedEvent:
-    user: MemoryUserData
+    user: MemorySessionUserData
     all: bool
     changes: list = field(default_factory=list)
 

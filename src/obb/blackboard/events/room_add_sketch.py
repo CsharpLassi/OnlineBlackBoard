@@ -8,7 +8,7 @@ from .global_message import NewLecturePageEvent
 from ..datas import StrokeData
 from ..ext import namespace
 from ..memory import (
-    MemoryUser,
+    MemorySessionUser,
     MemoryBlackboardRoom,
     room_memory,
     MemoryLecturePage,
@@ -39,7 +39,9 @@ class RoomAddSketchResponseData:
 
 @socket.on("room:add:sketch", namespace=namespace)
 @convert_from_socket(RoomAddSketchRequestData)
-def room_update_sketch(msg: RoomAddSketchRequestData, session: MemoryUser, **kwargs):
+def room_update_sketch(
+    msg: RoomAddSketchRequestData, session: MemorySessionUser, **kwargs
+):
     assert session
 
     # Todo: Add User Function

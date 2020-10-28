@@ -1,12 +1,33 @@
-from flask import flash, redirect, url_for, render_template, request
+from flask import flash, redirect, url_for, render_template, request, session
 from flask_login import current_user, login_required
 
 from . import bp
 from ..forms.room import RoomSettingsForm
 from ..models import BlackboardRoom
-from ..memory import user_memory, MemoryUser
+from ..memory import user_session_memory, MemorySessionUser, MemoryUser, user_memory
 from ...api import ApiToken
 from ...ext import db
+from ...tools import id_generator
+from ...users.models import User
+
+
+def get_mem_user_session(room: BlackboardRoom):
+    mem_user: MemoryUser = user_memory.get(session.get("user_id", None))
+    if not mem_user:
+        mem_user = MemoryUser()
+        user_memory.add(mem_user.id, mem_user)
+        session["user_id"] = mem_user.id
+
+    mem_user_session_id = mem_user.sessions.get(room.id)
+    mem_user_session = user_session_memory.get(mem_user_session_id)
+
+    sid = mem_user_session_id or id_generator(24)
+    if not mem_user_session:
+        mem_user_session = MemorySessionUser(sid, User.get_current_id())
+        user_session_memory.add(sid, mem_user_session)
+        mem_user.sessions[room.id] = sid
+
+    return mem_user_session
 
 
 @bp.route("/link/", methods=["GET", "POST"])
@@ -24,7 +45,9 @@ def link_blackboard():
         flash("room is closed")
         return redirect("blackboard.home")
 
-    token = ApiToken.create_token()
+    mem_user_session = get_mem_user_session(room)
+
+    token = ApiToken.create_token(sid=mem_user_session.sid)
 
     return render_template(
         "blackboard/mode_blackboard.html", l_session=l_session, room=room, token=token
@@ -59,12 +82,13 @@ def link_user():
 
     edit_form.read_data(room)
 
-    token = ApiToken.create_token()
+    mem_user_session = get_mem_user_session(room)
 
-    memory_user = user_memory.add(token.sid, MemoryUser(token.sid, token.user_id))
-    memory_user.mode = "user"
-    memory_user.allow_draw = True
-    memory_user.allow_new_page = True
+    mem_user_session.mode = "user"
+    mem_user_session.allow_draw = True
+    mem_user_session.allow_new_page = True
+
+    token = ApiToken.create_token(sid=mem_user_session.sid)
 
     return render_template(
         "blackboard/mode_user.html",

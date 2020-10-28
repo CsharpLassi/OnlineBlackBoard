@@ -5,7 +5,12 @@ from flask import request, current_app
 
 from obb.ext import socket
 from ..ext import namespace
-from ..memory import user_memory, MemoryUser, room_memory, MemoryBlackboardRoom
+from ..memory import (
+    user_session_memory,
+    MemorySessionUser,
+    room_memory,
+    MemoryBlackboardRoom,
+)
 from ...api import emit_success
 
 
@@ -25,7 +30,7 @@ def blackboard_connect():
 def blackboard_disconnect():
     sid = request.sid
     current_app.logger.debug(f"Disconnect Socket: {sid}")
-    user: MemoryUser = user_memory.find(lambda k, u: u.socket_id == sid)
+    user: MemorySessionUser = user_session_memory.find(lambda k, u: u.socket_id == sid)
 
     if user is None:
         return

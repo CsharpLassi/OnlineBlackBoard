@@ -12,7 +12,7 @@ from ..memory import (
     MemoryBlackboardRoom,
     lecture_page_memory,
     MemoryLecturePage,
-    MemoryUser,
+    MemorySessionUser,
 )
 from ..models import LecturePage
 from ...api import convert_from_socket, emit_error, emit_success
@@ -39,7 +39,9 @@ class RoomUpdateContentResponse:
 
 @socket.on("room:update:content", namespace=namespace)
 @convert_from_socket(RoomUpdateContentRequest)
-def room_update_content(msg: RoomUpdateContentRequest, session: MemoryUser, **kwargs):
+def room_update_content(
+    msg: RoomUpdateContentRequest, session: MemorySessionUser, **kwargs
+):
     assert session
 
     room: Optional[MemoryBlackboardRoom] = room_memory.get(msg.room_id)

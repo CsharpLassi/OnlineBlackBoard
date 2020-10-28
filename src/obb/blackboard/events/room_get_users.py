@@ -6,10 +6,10 @@ from dataclasses_json import dataclass_json, LetterCase
 from obb.api import convert_from_socket, emit_error, emit_success
 from obb.blackboard.ext import namespace
 from obb.blackboard.memory import (
-    MemoryUser,
+    MemorySessionUser,
     room_memory,
-    user_memory,
-    MemoryUserData,
+    user_session_memory,
+    MemorySessionUserData,
     MemoryBlackboardRoom,
 )
 from obb.ext import socket
@@ -24,7 +24,7 @@ class RoomGetUserRequestData:
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
 class RoomGetUserResponseData:
-    users: List[MemoryUserData]
+    users: List[MemorySessionUserData]
 
 
 @socket.on("room:get:users", namespace=namespace)
@@ -37,8 +37,8 @@ def room_get_users(msg: RoomGetUserRequestData, **kwargs):
         return
 
     joined_user = list()
-    user: MemoryUser
-    for _, user in user_memory.items():
+    user: MemorySessionUser
+    for _, user in user_session_memory.items():
         if user.sid in room.users:
             joined_user.append(user.get_data())
     emit_success("room:get:users", RoomGetUserResponseData(users=joined_user))

@@ -11,9 +11,9 @@ from ..memory import (
     room_memory,
     MemoryBlackboardRoom,
     MemoryBlackboardRoomData,
-    user_memory,
-    MemoryUser,
-    MemoryUserData,
+    user_session_memory,
+    MemorySessionUser,
+    MemorySessionUserData,
 )
 from ..models import BlackboardRoom, LectureSession
 from ...users.models import User
@@ -30,14 +30,14 @@ class RoomJoinRequestData:
 class RoomJoinSelfResponseData:
     sid: str
     room: MemoryBlackboardRoomData
-    user: MemoryUserData
+    user: MemorySessionUserData
 
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
 class RoomJoinUserResponseData:
     room_id: str
-    user: MemoryUserData
+    user: MemorySessionUserData
 
 
 @socket.on("room:join", namespace=namespace)
@@ -54,7 +54,10 @@ def join(msg: RoomJoinRequestData, user: User = None, sid: str = None, **kwargs)
         return emit_error("room is closed")
 
     memory_room = room_memory.get(room.id, MemoryBlackboardRoom(room.id))
-    memory_user = user_memory.get(sid, MemoryUser(sid, 0 if not user else user.id))
+    memory_user = user_session_memory.get(sid)
+
+    if not memory_user:
+        return emit_error("you cannot join this room")
 
     join_room(room.id)
     memory_user.current_room = room.id

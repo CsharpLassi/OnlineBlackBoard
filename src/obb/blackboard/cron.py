@@ -7,9 +7,9 @@ bp = Blueprint("blackboard.cron", __name__)
 
 
 def work_user_memory():
-    from .memory import user_memory
+    from .memory import user_session_memory
 
-    for item in user_memory.pop_expired():
+    for item in user_session_memory.pop_expired():
         continue
 
 

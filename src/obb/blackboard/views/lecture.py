@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 
 from . import bp
 from ..forms.lecture import CreateLectureForm
-from ..memory import user_memory, MemoryUser
+from ..memory import user_session_memory, MemorySessionUser
 from ..models import Lecture, BlackboardRoom, LecturePage
 from ...api import ApiToken
 from ...ext import db
@@ -67,7 +67,9 @@ def lecture_show(lecture_id):
 
     token = ApiToken.create_token()
 
-    memory_user = user_memory.add(token.sid, MemoryUser(token.sid, token.user_id))
+    memory_user = user_session_memory.add(
+        token.sid, MemorySessionUser(token.sid, token.user_id)
+    )
     memory_user.mode = "user"
     memory_user.allow_draw = True
     memory_user.allow_new_page = True

@@ -8,7 +8,7 @@ from ..memory import (
     lecture_page_memory,
     MemoryLecturePageData,
     room_memory,
-    MemoryUser,
+    MemorySessionUser,
     MemoryBlackboardRoom,
 )
 from ..models import LecturePage
@@ -34,7 +34,7 @@ class RoomCreatePageResponseData:
 @socket.on("room:create:page", namespace=namespace)
 @convert_from_socket(RoomCreatePageRequestData)
 def room_create_page(
-    msg: RoomCreatePageRequestData, session: MemoryUser = None, **kwargs
+    msg: RoomCreatePageRequestData, session: MemorySessionUser = None, **kwargs
 ):
     room: MemoryBlackboardRoom = room_memory.get(msg.room_id)
 
