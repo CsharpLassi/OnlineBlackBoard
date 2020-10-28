@@ -17,10 +17,11 @@ class MemoryBlackboardRoom:
         self.users = set()
 
     def get_data(self) -> MemoryBlackboardRoomData:
-        return MemoryBlackboardRoomData(
-            base=self.model.get_data()
-        )
+        return MemoryBlackboardRoomData(base=self.model.get_data())
 
     @property
     def model(self) -> BlackboardRoom:
         return BlackboardRoom.get(self.id)
+
+    def clear_temp_data(self):
+        pass

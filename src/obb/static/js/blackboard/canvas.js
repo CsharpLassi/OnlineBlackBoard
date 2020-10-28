@@ -33,7 +33,7 @@ var obbContentSketchCanvas = {
         obbSocket.on('room:get:sketch', function (msg) {
             obbContentSketchCanvas.clearPage(msg.pageId);
             msg.strokes.forEach(stroke => {
-                obbContentSketchCanvas.updateSketch(stroke, msg.pageId);
+                obbContentSketchCanvas.updateSketch(msg.mode, stroke, msg.pageId);
             });
         });
 
@@ -43,7 +43,7 @@ var obbContentSketchCanvas = {
 
         obbSocket.on('room:add:sketch', function (msg) {
             if (msg.creatorId !== obbSocket.user.sessionId)
-                obbContentSketchCanvas.updateSketch(msg.stroke, msg.pageId);
+                obbContentSketchCanvas.updateSketch(msg.mode, msg.stroke, msg.pageId);
         });
     },
 
@@ -74,13 +74,12 @@ var obbContentSketchCanvas = {
 
         obbSocket.emit('room:get:sketch', idMessage);
     },
-    updateSketch: function (stroke, pageId = null) {
+    updateSketch: function (mode, stroke, pageId = null) {
         obbContentBox.config.item.filter(function () {
                 let divPageId = $(this).data("pageid")
                 return (divPageId === 'current' && (!pageId || pageId === obbSocket.user.currentPage)) || divPageId === pageId;
             }
         ).each(function () {
-            let mode = 'global'
             $(this).children('.contentSketchpad').filter('.' + mode).each(function () {
                 let atrament = $(this).data('atrament')
 

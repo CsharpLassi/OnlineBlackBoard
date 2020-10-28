@@ -38,12 +38,12 @@ def link_blackboard():
     room = BlackboardRoom.get(room_id)
     if not room:
         flash("room does not exist")
-        return redirect("blackboard.home")
+        return redirect(url_for("blackboard.home"))
 
     l_session = room.get_current_lecture_session()
     if not l_session:
         flash("room is closed")
-        return redirect("blackboard.home")
+        return redirect(url_for("blackboard.home"))
 
     mem_user_session = get_mem_user_session(room)
 

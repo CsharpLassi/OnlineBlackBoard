@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Dict, List
 
 from dataclasses_json import LetterCase, dataclass_json
 
+from obb.blackboard.datas import StrokeData
 from obb.users.models import User, UserData
 
 
@@ -31,6 +33,12 @@ class MemorySessionUser:
         self.mode: str = "blackboard"
         self.allow_draw: bool = False
         self.allow_new_page: bool = False
+
+        self.strokes: Dict[int, List[StrokeData]] = dict()
+
+    @property
+    def model(self) -> User:
+        return User.get(self.id)
 
     def get_data(self) -> MemorySessionUserData:
         user = self.model
@@ -63,6 +71,5 @@ class MemorySessionUser:
             room=self.socket_id,
         )
 
-    @property
-    def model(self) -> User:
-        return User.get(self.id)
+    def clear_temp_data(self):
+        pass

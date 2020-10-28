@@ -6,7 +6,7 @@ from dataclasses_json import dataclass_json, LetterCase
 from obb.ext import socket
 from ..datas import StrokeData
 from ..ext import namespace
-from ..memory import MemoryLecturePage, lecture_page_memory
+from ..memory import MemoryLecturePage, lecture_page_memory, MemorySessionUser
 from ..models import LecturePage
 from ...api import convert_from_socket, emit_error, emit_success
 
@@ -21,12 +21,17 @@ class RoomGetSketchRequestData:
 @dataclass
 class RoomGetSketchResponseData:
     page_id: int
+    mode: str
     strokes: List[StrokeData] = field(default_factory=list)
 
 
 @socket.on("room:get:sketch", namespace=namespace)
 @convert_from_socket(RoomGetSketchRequestData)
-def room_get_sketch(msg_list: List[RoomGetSketchRequestData], **kwargs):
+def room_get_sketch(
+    msg_list: List[RoomGetSketchRequestData],
+    session: MemorySessionUser = None,
+    **kwargs
+):
     result = list()
     for msg in msg_list:
         page = LecturePage.get(msg.page_id)
@@ -37,8 +42,19 @@ def room_get_sketch(msg_list: List[RoomGetSketchRequestData], **kwargs):
         new_page = MemoryLecturePage(page.id)
         mem_page: MemoryLecturePage = lecture_page_memory.get(msg.page_id, new_page)
 
-        result.append(
-            RoomGetSketchResponseData(page_id=mem_page.id, strokes=mem_page.strokes)
-        )
+        if mem_page.strokes:
+            result.append(
+                RoomGetSketchResponseData(
+                    mode="global", page_id=mem_page.id, strokes=mem_page.strokes
+                )
+            )
+
+        user_stroke_list = session.strokes.get(mem_page.id)
+        if user_stroke_list:
+            result.append(
+                RoomGetSketchResponseData(
+                    mode="user", page_id=mem_page.id, strokes=user_stroke_list
+                )
+            )
 
     emit_success("room:get:sketch", result)

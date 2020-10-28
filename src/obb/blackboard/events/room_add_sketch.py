@@ -33,6 +33,7 @@ class RoomAddSketchRequestData:
 class RoomAddSketchResponseData:
     room_id: str
     page_id: int
+    mode: str
     creator_id: str
     stroke: StrokeData
 
@@ -44,11 +45,7 @@ def room_update_sketch(
 ):
     assert session
 
-    # Todo: Add User Function
-    if msg.mode != "global":
-        return
-
-    if not session.allow_draw:
+    if len(msg.stroke.points) < 2:
         return
 
     room: Optional[MemoryBlackboardRoom] = room_memory.get(msg.room_id)
@@ -64,20 +61,34 @@ def room_update_sketch(
 
     page_id = msg.page_id or lecture.current_page.id
 
-    # Create New Page
     if page_id is None:
         pass  # Todo: Exception
 
     page = lecture_page_memory.get(page_id, MemoryLecturePage(page_id))
-    page.strokes.append(msg.stroke)
 
-    emit_success(
-        "room:add:sketch",
-        RoomAddSketchResponseData(
-            room_id=room.id, page_id=page.id, creator_id=session.sid, stroke=msg.stroke
-        ),
-        room=room.id,
-        include_self=False,
-    )
+    # Todo: Add User Function
+    if msg.mode == "user":
+        stroke_list = session.strokes.get(page.id)
+        if not stroke_list:
+            stroke_list = list()
+            session.strokes[page.id] = stroke_list
+        stroke_list.append(msg.stroke)
+        return
+    elif msg.mode == "global" and session.allow_draw:
 
-    page.save_strokes()
+        page.strokes.append(msg.stroke)
+
+        emit_success(
+            "room:add:sketch",
+            RoomAddSketchResponseData(
+                room_id=room.id,
+                page_id=page.id,
+                mode=msg.mode,
+                creator_id=session.sid,
+                stroke=msg.stroke,
+            ),
+            room=room.id,
+            include_self=False,
+        )
+
+        page.save_strokes()
