@@ -184,7 +184,7 @@ var obbToolBox = {
             });
 
             $('<button />', {
-                class: 'btn sketchToolboxControl',
+                class: 'btn sketchToolboxControl colorPickSelector',
             }).colorPick({
                 'initialColor': '#000000',
                 'pos': 'top',

@@ -1,5 +1,10 @@
+.ContentToolBox.CTB-2x button.sketchToolboxControl {
+    font-size: 2em;
+}
+
 .sketchToolboxControl {
 }
+
 
 .sketchToolboxControl.modeControl {
     color: black;
@@ -18,10 +23,11 @@
     color: gray;
 }
 
-.colorPickSelector {
+/* Colorpicker */
+.sketchToolboxControl.colorPickSelector {
     border-radius: 5px;
-    width: 16px;
-    height: 16px;
+    width: 1em;
+    height: 1em;
     cursor: pointer;
     -webkit-transition: all linear .2s;
     -moz-transition: all linear .2s;
@@ -30,8 +36,7 @@
     transition: all linear .2s;
 }
 
-.colorPickSelector.fa-2x {
-    width: 32px;
-    height: 32px;
+.sketchToolboxControl.colorPickSelector .colorPickButton {
+    width: 1em;
+    height: 1em;
 }
-

@@ -9,9 +9,11 @@
 {% block row %}
     <div class="row justify-content-center flex-grow-1 mt-2">
         <div class="col align-content-center">
-            {% include 'blackboard/content/contentElement.html' %}
+            <div id="MainContent" class="PageContent" data-pageId="current">
+            </div>
+
+            <div data-for="MainContent" class="ContentToolBox CTB-2x mt-1">
+            </div>
         </div>
     </div>
 {% endblock %}
-
-

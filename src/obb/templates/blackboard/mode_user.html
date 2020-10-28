@@ -14,7 +14,11 @@
 
         </div>
         <div class="col-6">
-            {% include 'blackboard/content/contentElement.html' %}
+            <div id="MainContent" class="PageContent" data-pageId="current">
+            </div>
+
+            <div data-for="MainContent" class="ContentToolBox mt-1">
+            </div>
         </div>
 
     </div>
@@ -53,5 +57,3 @@
         </div>
     </div>
 {% endblock %}
-
-
