@@ -61,7 +61,7 @@ def join(msg: RoomJoinRequestData, user: User = None, sid: str = None, **kwargs)
     memory_user.socket_id = request.sid
     memory_user.current_page = l_session.lecture.current_page.id
 
-    memory_room.users.add(memory_user.session_id)
+    memory_room.users.add(memory_user.sid)
 
     emit_success(
         "room:join:self",

@@ -33,7 +33,7 @@ class RoomAddSketchRequestData:
 class RoomAddSketchResponseData:
     room_id: str
     page_id: int
-    creator_id: int
+    creator_id: str
     stroke: StrokeData
 
 
@@ -72,10 +72,7 @@ def room_update_sketch(msg: RoomAddSketchRequestData, session: MemoryUser, **kwa
     emit_success(
         "room:add:sketch",
         RoomAddSketchResponseData(
-            room_id=room.id,
-            page_id=page.id,
-            creator_id=session.session_id,
-            stroke=msg.stroke,
+            room_id=room.id, page_id=page.id, creator_id=session.sid, stroke=msg.stroke
         ),
         room=room.id,
         include_self=False,

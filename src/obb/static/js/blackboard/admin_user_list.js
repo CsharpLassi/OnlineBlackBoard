@@ -16,7 +16,7 @@ var obbAdminUserList = {
 
         obbSocket.on('room:get:users', function (msg) {
             obbAdminUserList.config.Items.empty();
-            msg.users.forEach(e =>{
+            msg.users.forEach(e => {
                 obbAdminUserList.addUser(e);
             });
         })
@@ -56,9 +56,10 @@ var obbAdminUserList = {
             }).appendTo($(this));
 
             // Id
-            $('<td />', {
-                text: user.sessionId,
-            }).appendTo(trUser);
+            $('<td />').html($('<span />', {
+                title: user.sessionId,
+                text: user.sessionId.slice(0, 6)
+            }).attr({'data-toggle': 'tooltip', 'data-placement': 'bottom'})).appendTo(trUser);
 
             // Name
             let tdName = $('<td />', {

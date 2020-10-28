@@ -26,11 +26,10 @@ class MemoryUser:
         self.id = id
         self.socket_id = None
 
-        self.session_id = id_generator(6)
-        self.current_room: str = ''
+        self.current_room: str = ""
         self.current_page = 0
 
-        self.mode: str = 'blackboard'
+        self.mode: str = "blackboard"
         self.allow_draw: bool = False
         self.allow_new_page: bool = False
 
@@ -40,7 +39,7 @@ class MemoryUser:
         user_data = UserData() if user is None else user.get_data()
         return MemoryUserData(
             base=user_data,
-            session_id=self.session_id,
+            session_id=self.sid,
             current_room=self.current_room,
             current_page=self.current_page,
             mode=self.mode,
@@ -55,11 +54,15 @@ class MemoryUser:
         if not self.socket_id:
             return
 
-        emit_success('self:update', UserUpdatedEvent(
-            user=self.get_data(),
-            all=not list,
-            changes=list() if changes is None else changes
-        ), room=self.socket_id)
+        emit_success(
+            "self:update",
+            UserUpdatedEvent(
+                user=self.get_data(),
+                all=not list,
+                changes=list() if changes is None else changes,
+            ),
+            room=self.socket_id,
+        )
 
     @property
     def model(self) -> User:

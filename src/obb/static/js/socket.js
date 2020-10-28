@@ -84,7 +84,10 @@ var obbSocket = {
 
             // Todo: Check currentPage
 
-            $('#status').text(obbSocket.room.base.name + ':' + obbSocket.user.sessionId);
+            $('#status').html($('<span />', {
+                title: obbSocket.user.sessionId,
+                text: obbSocket.room.base.name + ':' + obbSocket.user.sessionId.slice(0,6)
+            }).attr({'data-toggle': 'tooltip', 'data-placement': 'bottom'}));
         });
 
         obbSocket.on('room:new:page', function (msg) {

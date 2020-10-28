@@ -32,7 +32,7 @@ class RoomUpdateContentRequest:
 class RoomUpdateContentResponse:
     room_id: str
     page_id: int
-    creator_id: int
+    creator_id: str
     text: str
     markdown: str
 
@@ -67,7 +67,7 @@ def room_update_content(msg: RoomUpdateContentRequest, session: MemoryUser, **kw
         RoomUpdateContentResponse(
             room_id=room.id,
             page_id=page.id,
-            creator_id=session.session_id,
+            creator_id=session.sid,
             text=page.markdown,
             markdown=escape(page.markdown),
         ),

@@ -31,7 +31,7 @@ class RoomClearSketchRequestData:
 class RoomClearSketchResponseData:
     room_id: str
     page_id: int
-    creator_id: int
+    creator_id: str
 
 
 @socket.on("room:clear:sketch", namespace=namespace)
@@ -69,7 +69,7 @@ def room_clear_sketch(msg: RoomClearSketchRequestData, session: MemoryUser, **kw
     emit_success(
         "room:clear:sketch",
         RoomClearSketchResponseData(
-            room_id=room.id, page_id=page.id, creator_id=session.session_id
+            room_id=room.id, page_id=page.id, creator_id=session.sid
         ),
         room=room.id,
     )

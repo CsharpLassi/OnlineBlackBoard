@@ -27,9 +27,7 @@ class RoomUpdateUserResponse:
 def room_update_user(msg: RoomUpdateUserRequest, session: MemoryUser, **kwargs):
     assert session
 
-    update_user: MemoryUser = user_memory.find(
-        lambda k, u: u.session_id == msg.session_id
-    )
+    update_user: MemoryUser = user_memory.find(lambda k, u: u.sid == msg.session_id)
 
     if not update_user:
         emit_error("not allowed")
