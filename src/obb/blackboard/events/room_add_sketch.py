@@ -73,6 +73,7 @@ def room_update_sketch(
             stroke_list = list()
             session.strokes[page.id] = stroke_list
         stroke_list.append(msg.stroke)
+        session.save_strokes()
         return
     elif msg.mode == "global" and session.allow_draw:
 
