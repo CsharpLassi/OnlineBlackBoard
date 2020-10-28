@@ -1,14 +1,14 @@
 import datetime
-from typing import TypeVar, Generic, Dict, Optional, Tuple, List, Callable
+from typing import TypeVar, Generic, Dict, Optional, Tuple, List, Callable, Generator
 from gevent.thread import allocate_lock
 
-P = TypeVar('P')
-T = TypeVar('T')
+P = TypeVar("P")
+T = TypeVar("T")
 
 
 class MemDb(Generic[P, T]):
     def __init__(self, expired_minutes: int = 15):
-        assert expired_minutes > 0, f'{expired_minutes} must be greater than 0'
+        assert expired_minutes > 0, f"'expired_minutes' must be greater than 0"
 
         self._db_lock = allocate_lock()
         self._db: Dict[P, T] = dict()
@@ -17,8 +17,9 @@ class MemDb(Generic[P, T]):
         self._expired_minutes = expired_minutes
 
     def _calc_exp(self) -> datetime.datetime:
-        date = datetime.datetime.utcnow() + \
-               datetime.timedelta(minutes=self._expired_minutes)
+        date = datetime.datetime.utcnow() + datetime.timedelta(
+            minutes=self._expired_minutes
+        )
         return date
 
     def lock(self):
@@ -29,8 +30,10 @@ class MemDb(Generic[P, T]):
 
     def items(self) -> List[Tuple[P, T]]:
         items = list()
-        for item_id in self._db:
-            items.append((item_id, self.get(item_id)))
+        self.lock()
+        for item_id, item in self._db.items():
+            items.append((item_id, item))
+        self.release()
         return items
 
     def add(self, key: P, value: T) -> T:
@@ -88,3 +91,19 @@ class MemDb(Generic[P, T]):
         self._expired.pop(key)
         self.release()
         return item
+
+    def pop_expired(self) -> Generator[T, None, None]:
+        items = self.items()
+        for key, item in items:
+            self.lock()
+            expired_in = self._expired.get(key)
+            self.release()
+
+            if datetime.datetime.utcnow() > expired_in:
+                self.lock()
+                result_time = self._expired.pop(key, None)
+                result_item = self._db.pop(key, None)
+                self.release()
+
+                if result_item:
+                    yield result_item
