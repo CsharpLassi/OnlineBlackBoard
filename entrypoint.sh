@@ -1,4 +1,4 @@
 #!/bin/sh
 
-chown -R sip:sip /app/migrations
-exec runuser -u sip "$@"
+chown -R sid:sid /app/migrations
+exec runuser -u sid "$@"
