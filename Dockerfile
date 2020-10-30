@@ -29,6 +29,7 @@ COPY src/wsgi.py .
 FROM python:${INSTALL_PYTHON_VERSION}-slim-buster as production
 
 WORKDIR /app
+RUN mkdir migrations
 
 RUN useradd -m sid
 RUN chown -R sid:sid /app
