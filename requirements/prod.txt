@@ -19,6 +19,7 @@ email-validator==1.1.1
 # Datasbase
 flask-sqlalchemy==2.4.4
 flask-migrate==2.5.3
+psycopg2-binary==2.8.6
 
 # Socket IO
 flask-socketio==4.3.1

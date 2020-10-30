@@ -51,6 +51,8 @@ ENV HOST=0.0.0.0
 ENV PREFERRED_URL_SCHEME=http
 ENV SECRET_KEY=you-will-never-guess
 ENV DATABASE_URL="sqlite:////app/app.db"
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 
 ENTRYPOINT ["/bin/bash"]
 CMD ["-c","./run.sh"]
