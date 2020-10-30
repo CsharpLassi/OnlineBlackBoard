@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export PATH="/home/sid/.local/bin:${PATH}"
+
 #Migration
 [[ ! -d "migrations" ]] && flask db init
 [[ ! -f "migrations/alembic.ini" ]] && flask db init

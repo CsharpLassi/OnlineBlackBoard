@@ -35,7 +35,6 @@ RUN mkdir /app/migrations
 
 RUN useradd -m sid
 RUN chown -R sid:sid /app
-ENV PATH="/home/sid/.local/bin:${PATH}"
 
 COPY requirements requirements
 RUN pip install --no-cache --user -r requirements/prod.txt
