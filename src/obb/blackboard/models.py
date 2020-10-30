@@ -6,7 +6,6 @@ from typing import Optional, Iterator, List
 
 from dataclasses_json import dataclass_json, LetterCase
 from flask_login import current_user
-from sqlalchemy.sql import func
 
 from .wrapper import BlackboardRoomWrapper, LectureWrapper
 from ..ext import db
@@ -263,10 +262,7 @@ class LectureSession(db.Model):
     room = db.relationship("BlackboardRoom", cascade="all, delete")
 
     start_time = db.Column(
-        db.DATETIME(timezone=False),
-        nullable=False,
-        default=datetime.datetime.utcnow,
-        server_default=func.utcnow(),
+        db.TIMESTAMP, nullable=False, default=datetime.datetime.utcnow
     )
 
     duration = db.Column(db.Integer, nullable=False, default=120, server_default="120")
