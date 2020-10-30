@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import datetime
 from dataclasses import dataclass, field
-from operator import or_
 from typing import Optional, Iterator, List
 
 from dataclasses_json import dataclass_json, LetterCase
@@ -10,7 +9,6 @@ from flask_login import current_user
 from sqlalchemy.sql import func
 
 from .wrapper import BlackboardRoomWrapper, LectureWrapper
-
 from ..ext import db
 
 default_draw_height = 256
@@ -265,7 +263,7 @@ class LectureSession(db.Model):
     room = db.relationship("BlackboardRoom", cascade="all, delete")
 
     start_time = db.Column(
-        db.TIMESTAMP,
+        db.DATETIME(timezone=False),
         nullable=False,
         default=datetime.datetime.utcnow,
         server_default=func.utcnow(),
