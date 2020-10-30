@@ -1,55 +1,51 @@
 import os
 import shutil
 import tempfile
-from typing import Optional, TypeVar, Tuple, Dict, Any
+from typing import Tuple, Dict, Any, Optional, TypeVar, Iterator
 
 # noinspection PyTypeChecker
-from flask import current_app
+from flask_login import current_user
 
-BS = TypeVar("BS", bound="BlackboardRoom")
-# noinspection PyTypeChecker
 L = TypeVar("L", bound="Lecture")
-# noinspection PyTypeChecker
-LS = TypeVar("LS", bound="LectureSession")
 # noinspection PyTypeChecker
 LP = TypeVar("LP", bound="LecturePage")
 
 
-class BlackboardRoomWrapper:
-    def get_current_lecture_session(self: BS) -> Optional[LS]:
-        """
-        :rtype: Optional[LectureSession]
-        """
-        from .models import LectureSession
-
-        lecture: LectureSession
-        for lecture in self.sessions:
-            if lecture.is_open():
-                return lecture
-
-        return None
-
-
-class LecturePageWrapper:
-    def export_to(self: LP, path: str):
-        full_path = os.path.join(path, "page.json")
-        os.makedirs(path, exist_ok=True)
-
-        data = self.get_data()
-        with open(full_path, "w") as fs:
-            fs.write(data.to_json())
-
-        # Todo:
-        base_dir = current_app.config["BLACKBOARD_DATA_PATH"]
-        base_path = os.path.join(base_dir, "pages", str(self.id))
-
-        for file in os.listdir(base_path):
-            shutil.copy(os.path.join(base_path, file), os.path.join(path, file))
-
-        return
-
-
 class LectureWrapper:
+    @staticmethod
+    def get_lectures(user=None) -> Iterator[L]:
+        from ..lecture import Lecture
+
+        if not user and current_user and current_user.is_authenticated:
+            user = current_user
+
+        query = Lecture.query
+        if user:
+            query = query.filter_by(creator_id=user.id)
+
+        return query
+
+    @staticmethod
+    def get_by_name(name: str, user=None) -> Optional[L]:
+        from ..lecture import Lecture
+
+        if not user and current_user and current_user.is_authenticated:
+            user = current_user
+
+        if not user:
+            return None
+
+        query = Lecture.query
+
+        query = query.filter_by(creator_id=user.id)
+
+        query = query.filter_by(name=name)
+
+        if query.count() != 1:
+            return None
+
+        return query.first()
+
     def create_export_file(self: L) -> Tuple[str, str]:
         fname = f"lecture_{self.name}"
         export_fname = os.path.join("/tmp", "blackboard", fname)
@@ -78,7 +74,7 @@ class LectureWrapper:
 
     @property
     def start_page(self: L) -> Optional[LP]:
-        from .models import LecturePage
+        from ..lecture_page import LecturePage
 
         query = LecturePage.query.filter_by(lecture_id=self.id).order_by(LecturePage.id)
 
@@ -86,7 +82,7 @@ class LectureWrapper:
 
     @property
     def current_page(self: L) -> Optional[LP]:
-        from .models import LecturePage
+        from ..lecture_page import LecturePage
 
         query = LecturePage.query.filter_by(lecture_id=self.id).order_by(
             LecturePage.id.desc()
