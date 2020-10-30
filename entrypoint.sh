@@ -1,5 +1,4 @@
 #!/bin/sh
 
 chown -R sid:sid /app/migrations
-su sid
-exec "$@"
+exec runuser -u sid "$@"
