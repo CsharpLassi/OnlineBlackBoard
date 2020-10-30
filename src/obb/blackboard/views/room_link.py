@@ -1,39 +1,18 @@
-from flask import flash, redirect, url_for, render_template, request, session
+from flask import flash, redirect, url_for, render_template, request
 from flask_login import current_user, login_required
 
 from . import bp
+from .functions import get_mem_user_session
 from ..forms.room import RoomSettingsForm
 from ..models import BlackboardRoom
-from ..memory import user_session_memory, MemorySessionUser, MemoryUser, user_memory
 from ...api import ApiToken
 from ...ext import db
-from ...tools import id_generator
-from ...users.models import User
-
-
-def get_mem_user_session(room: BlackboardRoom):
-    mem_user: MemoryUser = user_memory.get(session.get("user_id", None))
-    if not mem_user:
-        mem_user = MemoryUser()
-        user_memory.add(mem_user.id, mem_user)
-        session["user_id"] = mem_user.id
-
-    mem_user_session_id = mem_user.sessions.get(room.id)
-    mem_user_session = user_session_memory.get(mem_user_session_id)
-
-    sid = mem_user_session_id or id_generator(24)
-    if not mem_user_session:
-        mem_user_session = MemorySessionUser(sid, User.get_current_id())
-        user_session_memory.add(sid, mem_user_session)
-        mem_user.sessions[room.id] = sid
-
-    return mem_user_session
 
 
 @bp.route("/link/", methods=["GET", "POST"])
 @bp.route("/link/blackboard", methods=["GET", "POST"])
 def link_blackboard():
-    room_id = request.args.get("r")
+    room_id = request.args.get("r") or request.args.get("room_id")
 
     room = BlackboardRoom.get(room_id)
     if not room:

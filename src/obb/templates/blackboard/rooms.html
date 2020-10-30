@@ -59,6 +59,7 @@
                         <tr>
                             <th scope="col">#</th>
                             <th scope="col">Name</th>
+                            <th scope="col"></th>
                         </tr>
                         </thead>
                         <tbody>
@@ -70,6 +71,11 @@
                                             onclick="$('#CreateLecture #lecture_name').val('{{ lecture.name }}')">
                                         {{ lecture.name }}
                                     </button>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('blackboard.lecture_edit',lecture_id=lecture.id) }}">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
                                 </td>
                             </tr>
                         {% endfor %}
