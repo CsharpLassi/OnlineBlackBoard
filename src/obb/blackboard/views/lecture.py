@@ -1,4 +1,4 @@
-from flask import flash, redirect, url_for, render_template
+from flask import flash, redirect, url_for, render_template, send_file
 from flask_login import login_required, current_user
 
 from . import bp
@@ -75,3 +75,16 @@ def lecture_show(lecture_id):
     memory_user.allow_new_page = True
 
     return render(lecture, token)
+
+
+@bp.route("/lecture/<lecture_id>/download", methods=["GET", "POSt"])
+@login_required
+def lecture_download(lecture_id: int):
+    lecture = Lecture.get(lecture_id)
+    if current_user != lecture.creator:
+        return
+
+    fname, fpath = lecture.create_export_file()
+    return send_file(
+        fpath, attachment_filename=fname, as_attachment=True, mimetype="application/zip"
+    )

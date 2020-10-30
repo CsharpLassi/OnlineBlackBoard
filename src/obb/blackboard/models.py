@@ -7,8 +7,9 @@ from typing import Optional, Iterator, List
 from dataclasses_json import dataclass_json, LetterCase
 from flask_login import current_user
 
-from .wrapper import BlackboardRoomWrapper, LectureWrapper
+from .wrapper import BlackboardRoomWrapper, LectureWrapper, LecturePageWrapper
 from ..ext import db
+from ..tools.models.BaseModel import BaseModel
 
 default_draw_height = 256
 default_draw_width = 1024
@@ -34,7 +35,7 @@ class BlackBoardRoomData:
     draw_width: int
 
 
-class BlackboardRoom(db.Model, BlackboardRoomWrapper):
+class BlackboardRoom(db.Model, BaseModel, BlackboardRoomWrapper):
     id = db.Column(db.String, primary_key=True, default=create_default_id)
     name = db.Column(db.String, nullable=False, index=True)
 
@@ -98,10 +99,6 @@ class BlackboardRoom(db.Model, BlackboardRoomWrapper):
         return False
 
     @staticmethod
-    def get(id) -> Optional[BlackboardRoom]:
-        return BlackboardRoom.query.get(id)
-
-    @staticmethod
     def get_by_name(name: str, user=None) -> Optional[BlackboardRoom]:
         if not user and current_user and current_user.is_authenticated:
             user = current_user
@@ -141,7 +138,14 @@ class BlackboardRoom(db.Model, BlackboardRoomWrapper):
         return f_query.all()
 
 
-class Lecture(db.Model, LectureWrapper):
+@dataclass_json(letter_case=LetterCase.CAMEL)
+@dataclass
+class LectureData:
+    id: int
+    name: str
+
+
+class Lecture(db.Model, BaseModel, LectureWrapper):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
 
@@ -154,6 +158,9 @@ class Lecture(db.Model, LectureWrapper):
     edit_room = db.relationship("BlackboardRoom", foreign_keys=[edit_room_id])
 
     pages = db.relationship("LecturePage", lazy=True)
+
+    def get_data(self) -> LectureData:
+        return LectureData(id=self.id, name=self.name)
 
     @staticmethod
     def get_lectures(user=None) -> Iterator[Lecture]:
@@ -185,10 +192,6 @@ class Lecture(db.Model, LectureWrapper):
 
         return query.first()
 
-    @staticmethod
-    def get(lecture_id) -> Optional[Lecture]:
-        return Lecture.query.get(lecture_id)
-
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
 @dataclass
@@ -202,7 +205,7 @@ class LecturePageData:
     next_pages: List[int] = field(default_factory=list)
 
 
-class LecturePage(db.Model):
+class LecturePage(db.Model, BaseModel, LecturePageWrapper):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)  # Todo Change to string
 
@@ -241,14 +244,8 @@ class LecturePage(db.Model):
 
         return new_page
 
-    @staticmethod
-    def get(id) -> Optional[LecturePage]:
-        if id is None:
-            return None
-        return LecturePage.query.get(id)
 
-
-class LectureSession(db.Model):
+class LectureSession(db.Model, BaseModel):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
 

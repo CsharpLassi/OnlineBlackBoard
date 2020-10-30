@@ -25,8 +25,15 @@
     <div class="row justify-content-center mt-3">
         <div class="col-4">
             <div class="card">
-                <div class="card-header">Room Settings</div>
+                <div class="card-header">Room</div>
                 <div class="card-body">
+                    <div>
+                        <a href="{{ url_for('blackboard.lecture_download',lecture_id=l_session.lecture.id) }}"
+                           target="_blank">
+                            <i class="fas fa-download"></i>
+                        </a>
+                    </div>
+                    <hr/>
                     {{ show_form(edit_form,id='roomEdit') }}
                 </div>
             </div>
