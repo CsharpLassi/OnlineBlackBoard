@@ -70,6 +70,7 @@ def lecture_edit(lecture_id):
     if not current_session:
         current_session = LectureSession()
         current_session.name = f"Edit Session for {lecture.name}"
+        current_session.visibility = "creator_only"
         current_session.room = room
         current_session.lecture = lecture
         current_session.maintainer = current_user

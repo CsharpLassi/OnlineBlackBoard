@@ -2,6 +2,7 @@ import datetime
 
 from obb.ext import db
 from obb.tools.models.BaseModel import BaseModel
+from .defaults import default_lecture_session_visibility
 from .wrappers.lecture_session import LectureSessionWrapper
 
 
@@ -17,6 +18,13 @@ class LectureSession(db.Model, BaseModel, LectureSessionWrapper):
 
     room_id = db.Column(db.String, db.ForeignKey("blackboard_room.id"), nullable=False)
     room = db.relationship("BlackboardRoom", cascade="all, delete")
+
+    visibility = db.Column(
+        db.String,
+        nullable=False,
+        server_default=default_lecture_session_visibility,
+        default=default_lecture_session_visibility,
+    )
 
     start_time = db.Column(
         db.TIMESTAMP, nullable=False, default=datetime.datetime.utcnow

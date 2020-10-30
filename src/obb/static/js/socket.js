@@ -66,6 +66,9 @@ var obbSocket = {
             obbSocket.connected = true;
 
             let roomId = getUrlParameter('r');
+            if (!roomId)
+                roomId = getUrlParameter('room_id');
+
             if (roomId)
                 obbSocket.emit('room:join', {
                     roomId: roomId
@@ -86,7 +89,7 @@ var obbSocket = {
 
             $('#status').html($('<span />', {
                 title: obbSocket.user.sessionId,
-                text: obbSocket.room.base.name + ':' + obbSocket.user.sessionId.slice(0,6)
+                text: obbSocket.room.base.name + ':' + obbSocket.user.sessionId.slice(0, 6)
             }).attr({'data-toggle': 'tooltip', 'data-placement': 'bottom'}));
         });
 

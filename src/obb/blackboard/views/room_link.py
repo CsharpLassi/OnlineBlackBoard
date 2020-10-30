@@ -36,7 +36,7 @@ def link_blackboard():
 @bp.route("/link/user", methods=["GET", "POST"])
 @login_required
 def link_user():
-    room_id = request.args.get("r")
+    room_id = request.args.get("r") or request.args.get("room_id")
     room = BlackboardRoom.get(room_id)
 
     if room is None:

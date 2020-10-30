@@ -1,11 +1,9 @@
-from typing import Optional
-
-from flask import flash, redirect, url_for, render_template, request
+from flask import flash, redirect, url_for, render_template
 from flask_login import login_required, current_user
 
 from . import bp
 from ..forms.session import CreateSessionForm
-from ..models import BlackboardRoom, LectureSession, Lecture, LecturePage
+from ..models import BlackboardRoom, LectureSession, Lecture
 from ...ext import db
 
 
@@ -45,6 +43,7 @@ def session_create():
 
         lecture_session.lecture = lecture
         lecture_session.room = room
+        lecture_session.visibility = "public"
 
         db.session.add(lecture_session)
 
