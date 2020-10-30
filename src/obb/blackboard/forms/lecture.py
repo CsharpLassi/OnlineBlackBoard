@@ -6,10 +6,10 @@ from obb.tools.forms import BaseDataForm
 
 
 class ShortCreateLectureForm(FlaskForm, BaseDataForm):
-    lecture_name = StringField("Lecture", validators=[DataRequired(), Length(max=16)])
+    lecture_name = StringField("Lecture", validators=[DataRequired(), Length(max=128)])
     submit = SubmitField("Create")
 
 
 class CreateLectureForm(FlaskForm, BaseDataForm):
-    lecture_name = StringField("Lecture", validators=[DataRequired(), Length(max=16)])
+    lecture_name = StringField("Lecture", validators=[DataRequired(), Length(max=128)])
     submit = SubmitField("Create")
