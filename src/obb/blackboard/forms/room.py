@@ -7,12 +7,12 @@ from obb.tools.forms import BaseDataForm
 
 
 class ShortCreateRoomForm(FlaskForm, BaseDataForm):
-    room_name = StringField("Room", validators=[DataRequired(), Length(max=16)])
+    room_name = StringField("Room", validators=[DataRequired(), Length(max=128)])
     submit = SubmitField("Create")
 
 
 class CreateRoomForm(FlaskForm, BaseDataForm):
-    room_name = StringField("Room", validators=[DataRequired(), Length(max=16)])
+    room_name = StringField("Room", validators=[DataRequired(), Length(max=128)])
     visibility = SelectField(
         "Visibility",
         default=default_visibility,
