@@ -30,11 +30,13 @@ FROM python:${INSTALL_PYTHON_VERSION}-slim-buster as production
 
 WORKDIR /app
 
-#Volumes
+COPY entrypoint.sh /entrypoint.sh
 RUN mkdir /app/migrations
 
 RUN useradd -m sid
 RUN chown -R sid:sid /app
+USER sid
+ENV PATH="/home/sid/.local/bin:${PATH}"
 
 COPY requirements requirements
 RUN pip install --no-cache --user -r requirements/prod.txt
@@ -55,7 +57,7 @@ ENV DATABASE_URL="sqlite:////app/app.db"
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-COPY entrypoint.sh /entrypoint.sh
 
+USER root
 ENTRYPOINT ["/bin/sh","/entrypoint.sh"]
 CMD ["./run.sh"]
