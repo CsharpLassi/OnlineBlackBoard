@@ -57,7 +57,6 @@ ENV DATABASE_URL="sqlite:////app/app.db"
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-
 USER root
 ENTRYPOINT ["/bin/sh","/entrypoint.sh"]
 CMD ["./run.sh"]

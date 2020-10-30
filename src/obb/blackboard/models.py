@@ -153,7 +153,7 @@ class Lecture(db.Model, LectureWrapper):
 
     constraint_creator_name = db.UniqueConstraint(creator_id, name)
 
-    edit_room_id = db.Column(db.Integer, db.ForeignKey("blackboard_room.id"))
+    edit_room_id = db.Column(db.String, db.ForeignKey("blackboard_room.id"))
     edit_room = db.relationship("BlackboardRoom", foreign_keys=[edit_room_id])
 
     pages = db.relationship("LecturePage", lazy=True)
