@@ -58,5 +58,5 @@ ENV PYTHONUNBUFFERED 1
 
 COPY entrypoint.sh /entrypoint.sh
 
-ENTRYPOINT ["/bin/sh","entrypoint.sh"]
+ENTRYPOINT ["/bin/sh","/entrypoint.sh"]
 CMD ["-c","./run.sh"]
