@@ -250,7 +250,7 @@ class LecturePage(db.Model):
 
 class LectureSession(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Integer, nullable=False)
+    name = db.Column(db.String, nullable=False)
 
     maintainer_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     maintainer = db.relationship("User")
