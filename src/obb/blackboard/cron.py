@@ -37,9 +37,9 @@ def work_room_memory():
 @bp.before_app_first_request
 def create_scheduler():
     scheduler = BackgroundScheduler()
-    scheduler.add_job(work_user_session_memory, "interval", minutes=1)
-    scheduler.add_job(work_session_memory, "interval", minutes=1)
-    scheduler.add_job(work_lecture_page_memory, "interval", minutes=1)
-    scheduler.add_job(work_room_memory, "interval", minutes=1)
+    scheduler.add_job(work_user_session_memory, "interval", minutes=15)
+    scheduler.add_job(work_session_memory, "interval", minutes=15)
+    scheduler.add_job(work_lecture_page_memory, "interval", minutes=15)
+    scheduler.add_job(work_room_memory, "interval", minutes=15)
     scheduler.start()
     atexit.register(lambda: scheduler.shutdown())
