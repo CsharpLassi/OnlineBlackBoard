@@ -43,6 +43,12 @@ var obbSketchToolboxButton = {
             this.setOff()
     },
 
+    setState(state, call = true) {
+        if (state)
+            this.setOn(call)
+        else
+            this.setOff(call)
+    },
     setOn: function (call = true) {
         if (call) {
             if (!this.checkOnClick())
@@ -137,6 +143,25 @@ var obbToolBox = {
             });
             cmdMoveToLeftPage.disable();
 
+
+            let cmdSetCurrentPage = obbSketchToolboxButton.init({
+                onClick: function () {
+                    obbSocket.emit('room:setCurrent:page', {
+                        pageId: cmdCreateRightPage.value,
+                        roomId: obbSocket.room.base.id,
+                    })
+                },
+                offClick: function () {
+                    obbSocket.emit('room:setCurrent:page', {
+                        pageId: 0,
+                        roomId: obbSocket.room.base.id,
+                    })
+                },
+                default: 0,
+                cmd: $('<button />', {
+                    class: 'btn sketchToolboxControl',
+                }).append('<i class="fab fa-ethereum"></i>').appendTo(rightDiv),
+            });
 
             let cmdCreateRightPage = obbSketchToolboxButton.init({
                 onClick: function () {
@@ -270,6 +295,9 @@ var obbToolBox = {
 
                 cmdChangeMode.setEnable(msg.user.allowDraw);
 
+                cmdSetCurrentPage.setEnable(msg.user.allowNewPage)
+                cmdSetCurrentPage.value = obbSocket.user.currentPage
+
                 obbSocket.emit('room:get:page', {
                     pageId: obbSocket.user.currentPage
                 });
@@ -280,6 +308,10 @@ var obbToolBox = {
                 cmdCreateRightPage.value = obbSocket.user.currentPage
 
                 cmdChangeMode.setEnable(msg.user.allowDraw);
+
+                cmdSetCurrentPage.setEnable(msg.user.allowNewPage)
+                cmdSetCurrentPage.value = obbSocket.user.currentPage
+
 
                 obbSocket.emit('room:get:page', {
                     pageId: obbSocket.user.currentPage
@@ -299,6 +331,10 @@ var obbToolBox = {
 
                 cmdMoveToLeftPage.setEnable(cmdMoveToLeftPage.value != null);
                 cmdMoveToRightPage.setEnable(cmdMoveToRightPage.value != null);
+
+
+                cmdSetCurrentPage.setState(page.base.isCurrentPage, false);
+                cmdSetCurrentPage.value = page.base.id;
             });
 
             obbSocket.on('room:update:page', function (msg) {
@@ -317,6 +353,9 @@ var obbToolBox = {
 
                 cmdMoveToLeftPage.setEnable(cmdMoveToLeftPage.value != null);
                 cmdMoveToRightPage.setEnable(cmdMoveToRightPage.value != null);
+
+                cmdSetCurrentPage.setState(page.base.isCurrentPage, false);
+                cmdSetCurrentPage.value = page.base.id;
             });
 
         });

@@ -84,6 +84,9 @@ class LectureWrapper:
     def current_page(self: L) -> Optional[LP]:
         from ..lecture_page import LecturePage
 
+        if self.current_page_id:
+            return LecturePage.get(self.current_page_id)
+
         query = LecturePage.query.filter_by(lecture_id=self.id).order_by(
             LecturePage.id.desc()
         )

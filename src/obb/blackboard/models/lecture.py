@@ -26,7 +26,7 @@ class Lecture(db.Model, BaseModel, LectureWrapper):
     edit_room_id = db.Column(db.String, db.ForeignKey("blackboard_room.id"))
     edit_room = db.relationship("BlackboardRoom", foreign_keys=[edit_room_id])
 
-    pages = db.relationship("LecturePage", lazy=True)
+    current_page_id = db.Column(db.Integer, db.ForeignKey("lecture_page.id"))
 
     def get_data(self) -> LectureData:
         return LectureData(id=self.id, name=self.name)

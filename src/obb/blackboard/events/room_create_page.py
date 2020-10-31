@@ -51,6 +51,8 @@ def room_create_page(
 
     page = mem_parent_page.model
 
+    next_pages = list(page.next_pages)
+
     new_page = LecturePage.create(page.lecture)
     new_page.draw_width = room.model.draw_width
     new_page.draw_height = room.model.draw_height
@@ -60,7 +62,7 @@ def room_create_page(
 
     update_list.append(page.id)
 
-    if len(page.next_pages) > 0:
+    if len(next_pages) > 0:
         next_page: LecturePage = page.next_pages[0]
         next_page.prev_page = new_page
         update_list.append(next_page.id)

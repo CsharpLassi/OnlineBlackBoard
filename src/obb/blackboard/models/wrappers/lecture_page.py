@@ -1,6 +1,6 @@
 import os
 import shutil
-from typing import TypeVar
+from typing import TypeVar, Iterator
 
 # noinspection PyTypeChecker
 from flask import current_app
@@ -39,3 +39,11 @@ class LecturePageWrapper:
             shutil.copy(os.path.join(base_path, file), os.path.join(path, file))
 
         return
+
+    @property
+    def next_pages(self: LP) -> Iterator[LP]:
+        query = self.query
+
+        query = query.filter_by(prev_page_id=self.id)
+
+        return query.all()
