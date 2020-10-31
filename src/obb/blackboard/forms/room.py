@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SelectField, SubmitField, IntegerField
 from wtforms.validators import DataRequired, Length
 
-from obb.blackboard.models.defaults import visibilities, default_blackboard_visibility
+from obb.blackboard.models.defaults import Visibility, default_blackboard_visibility
 from obb.tools.forms import BaseDataForm
 
 
@@ -16,7 +16,7 @@ class CreateRoomForm(FlaskForm, BaseDataForm):
     visibility = SelectField(
         "Visibility",
         default=default_blackboard_visibility,
-        choices=visibilities,
+        choices=Visibility.list(),
         validators=[DataRequired()],
     )
     submit = SubmitField("Create")
@@ -28,7 +28,7 @@ class RoomSettingsForm(FlaskForm, BaseDataForm):
     visibility = SelectField(
         "Visibility",
         default=default_blackboard_visibility,
-        choices=visibilities,
+        choices=Visibility.list(),
         validators=[DataRequired()],
     )
     submit = SubmitField("Update")

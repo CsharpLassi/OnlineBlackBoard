@@ -4,6 +4,7 @@ from flask_login import login_required, current_user
 from . import bp
 from ..forms.session import CreateSessionForm
 from ..models import BlackboardRoom, LectureSession, Lecture
+from ..models.defaults import Visibility
 from ...ext import db
 
 
@@ -43,7 +44,7 @@ def session_create():
 
         lecture_session.lecture = lecture
         lecture_session.room = room
-        lecture_session.visibility = "public"
+        lecture_session.visibility = Visibility.PUBLIC.value
 
         db.session.add(lecture_session)
 

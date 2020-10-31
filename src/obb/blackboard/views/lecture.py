@@ -4,6 +4,7 @@ from flask_login import login_required, current_user
 from . import bp
 from ..forms.lecture import CreateLectureForm
 from ..models import Lecture, BlackboardRoom, LecturePage, LectureSession
+from ..models.defaults import Visibility
 from ...ext import db
 
 
@@ -70,7 +71,7 @@ def lecture_edit(lecture_id):
     if not current_session:
         current_session = LectureSession()
         current_session.name = f"Edit Session for {lecture.name}"
-        current_session.visibility = "creator_only"
+        current_session.visibility = Visibility.CREATOR_ONLY.value
         current_session.room = room
         current_session.lecture = lecture
         current_session.maintainer = current_user
