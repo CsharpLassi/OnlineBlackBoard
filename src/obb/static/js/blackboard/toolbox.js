@@ -162,6 +162,22 @@ var obbToolBox = {
                     class: 'btn sketchToolboxControl',
                 }).append('<i class="fab fa-ethereum"></i>').appendTo(rightDiv),
             });
+            cmdSetCurrentPage.disable()
+
+            let cmdRemoveCurrentPage = obbSketchToolboxButton.init({
+                onClick: function () {
+                    obbSocket.emit('room:remove:page', {
+                        pageId: cmdCreateRightPage.value,
+                        roomId: obbSocket.room.base.id,
+                    })
+                },
+                onlyOn: true,
+                default: true,
+                cmd: $('<button />', {
+                    class: 'btn sketchToolboxControl',
+                }).append('<i class="fas fa-trash"></i>').appendTo(rightDiv),
+            });
+            cmdRemoveCurrentPage.disable();
 
             let cmdCreateRightPage = obbSketchToolboxButton.init({
                 onClick: function () {
@@ -176,7 +192,7 @@ var obbToolBox = {
                     class: 'btn sketchToolboxControl',
                 }).append('<i class="fas fa-plus"></i>').appendTo(rightDiv),
             });
-            cmdCreateRightPage.disable()
+            cmdCreateRightPage.disable();
 
             let cmdMoveToRightPage = obbSketchToolboxButton.init({
                 onClick: function () {
@@ -335,6 +351,9 @@ var obbToolBox = {
 
                 cmdSetCurrentPage.setState(page.base.isCurrentPage, false);
                 cmdSetCurrentPage.value = page.base.id;
+
+                cmdRemoveCurrentPage.setEnable(obbSocket.user.allowNewPage && page.base.prevPageId)
+                cmdRemoveCurrentPage.value = page.base.id;
             });
 
             obbSocket.on('room:update:page', function (msg) {
@@ -356,6 +375,9 @@ var obbToolBox = {
 
                 cmdSetCurrentPage.setState(page.base.isCurrentPage, false);
                 cmdSetCurrentPage.value = page.base.id;
+
+                cmdRemoveCurrentPage.setEnable(obbSocket.user.allowNewPage && page.base.prevPageId)
+                cmdRemoveCurrentPage.value = page.base.id;
             });
 
         });

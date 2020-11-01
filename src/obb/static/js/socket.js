@@ -97,6 +97,10 @@ var obbSocket = {
             if (!obbSocket.user.currentPage)
                 obbSocket.emit('room:moveTo:page', {pageId: msg.page.base.id})
         });
+        obbSocket.on('room:remove:page', function (msg) {
+            if (msg.pageId === obbSocket.user.currentPage)
+                obbSocket.emit('room:moveTo:page', {pageId: msg.moveTo})
+        });
 
         obbSocket.on('self:update', function (msg) {
             obbSocket.user = obbUser.init(msg.user);
