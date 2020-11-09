@@ -185,18 +185,20 @@ var obbContentSketchCanvas = {
             let last_point = {}
 
             for (let i = 0; i < stroke.points.length; i++) {
-                let newX = Math.round(stroke.points[i].x / atrament.width * 100) / 100;
-                let newY = Math.round(stroke.points[i].y / atrament.height * 100) / 100;
+                let x = stroke.points[i].x / atrament.width ;
+                let y = stroke.points[i].y / atrament.height;
+                //let x = Math.round( x/ atrament.width * 100) / 100;
+                //let y = Math.round(y/ atrament.height * 100) / 100;
 
-                if (last_point && last_point.x === newX && last_point.y === newY)
+                if (last_point && last_point.x === x && last_point.y === y)
                     continue
 
-                last_point['x'] = newX;
-                last_point['y'] = newY;
+                last_point['x'] = x;
+                last_point['y'] = y;
 
                 points.push({
-                    x: newX,
-                    y: newY,
+                    x: x,
+                    y: y,
                 });
             }
 
