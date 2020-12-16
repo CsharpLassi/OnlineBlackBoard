@@ -11,6 +11,11 @@ def home():
     return render_template("public/home.html")
 
 
+@bp.route("/impressum", methods=["GET", "POST"])
+def impressum():
+    return render_template("impressum.html")
+
+
 @bp.route("/login", methods=["GET", "POST"])
 def login():
     from ..users.forms import LoginForm
