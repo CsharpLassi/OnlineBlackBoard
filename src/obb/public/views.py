@@ -16,6 +16,11 @@ def impressum():
     return render_template("impressum.html")
 
 
+@bp.route("/datenschutz", methods=["GET", "POST"])
+def datenschutz():
+    return render_template("datenschutz.html")
+
+
 @bp.route("/login", methods=["GET", "POST"])
 def login():
     from ..users.forms import LoginForm
